@@ -25,10 +25,6 @@ class indice extends clsDetalhe
 
 	function Gerar()
 	{
-		@session_start();
-		$this->pessoa_logada = $_SESSION['id_pessoa'];
-		session_write_close();
-
 		$this->titulo = "#nome_pagina# - Detalhe";
 		$this->addBanner( "/intranet/imagens/nvp_top_intranet.jpg", "/intranet/imagens/nvp_vert_intranet.jpg", "Intranet" );
 
