@@ -81,11 +81,6 @@ class indice extends clsCadastro
     {
         $retorno = "Novo";
         
-        @session_start();
-         $this->pessoa_logada = $_SESSION['id_pessoa'];
-        
-        @session_write_close();
-        
         $this->cod_acao_governo = $_GET['cod_acao_governo'];
         
         $obj = new clsPmiacoesAcaoGoverno($this->cod_acao_governo,null,null,null,null,null,null,null,null,null,1);
@@ -172,10 +167,6 @@ class indice extends clsCadastro
 
     function Novo() 
     {
-        @session_start();
-         $this->pessoa_logada = $_SESSION['id_pessoa'];
-        @session_write_close();
-
         /*$obj_funcionario = new clsFuncionario($this->pessoa_logada);
         $detalhe_func = $obj_funcionario->detalhe();
         $setor_funcionario = $detalhe_func["ref_cod_setor_new"];
@@ -206,10 +197,6 @@ class indice extends clsCadastro
 
     function Editar() 
     {
-        @session_start();
-         $this->pessoa_logada = $_SESSION['id_pessoa'];
-        @session_write_close();
-        
         /*$obj_funcionario = new clsFuncionario($this->pessoa_logada);
         $detalhe_func = $obj_funcionario->detalhe();
         $setor_funcionario = $detalhe_func["ref_cod_setor_new"];
@@ -233,11 +220,7 @@ class indice extends clsCadastro
 
     function Excluir()
     {
-        @session_start();
-         $this->pessoa_logada = $_SESSION['id_pessoa'];
-        @session_write_close();
-        
-    /*  $obj_funcionario = new clsFuncionario($this->pessoa_logada);
+        /*  $obj_funcionario = new clsFuncionario($this->pessoa_logada);
         $detalhe_func = $obj_funcionario->detalhe();
         $setor_funcionario = $detalhe_func["ref_cod_setor_new"];
         

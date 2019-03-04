@@ -62,10 +62,6 @@ class indice extends clsCadastro
     function Inicializar()
     {
         $retorno = "Novo";
-        @session_start();
-        $this->pessoa_logada = $_SESSION['id_pessoa'];
-        @session_write_close();
-
         $this->idesco=$_GET["idesco"];
 
         $obj_permissoes = new clsPermissoes();
@@ -118,10 +114,6 @@ class indice extends clsCadastro
 
     function Novo()
     {
-        @session_start();
-         $this->pessoa_logada = $_SESSION['id_pessoa'];
-        @session_write_close();
-
         $obj = new clsCadastroEscolaridade( null, $this->descricao, $this->escolaridade );
         $cadastrou = $obj->cadastra();
         if( $cadastrou )

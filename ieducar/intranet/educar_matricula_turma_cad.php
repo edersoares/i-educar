@@ -39,10 +39,6 @@ class indice extends clsCadastro
   function Inicializar()
   {
     $retorno = "Novo";
-    @session_start();
-    $this->pessoa_logada = $_SESSION['id_pessoa'];
-    @session_write_close();
-
     if (! $_POST) {
       header('Location: educar_matricula_lst.php');
       die;

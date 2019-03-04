@@ -65,10 +65,6 @@ class indice extends clsCadastro
     function Inicializar()
     {
         $retorno = "Novo";
-        @session_start();
-        $this->pessoa_logada = $_SESSION['id_pessoa'];
-        @session_write_close();
-
         $this->cod_exemplar_tipo=$_GET["cod_exemplar_tipo"];
 
         $obj_permissoes = new clsPermissoes();
@@ -199,10 +195,6 @@ class indice extends clsCadastro
 
     function Novo()
     {
-        @session_start();
-         $this->pessoa_logada = $_SESSION['id_pessoa'];
-        @session_write_close();
-
         $obj_permissoes = new clsPermissoes();
         $obj_permissoes->permissao_cadastra( 597, $this->pessoa_logada, 11,  "educar_exemplar_tipo_lst.php" );
 
@@ -254,10 +246,6 @@ class indice extends clsCadastro
 
     function Editar()
     {
-        @session_start();
-         $this->pessoa_logada = $_SESSION['id_pessoa'];
-        @session_write_close();
-
         $obj_permissoes = new clsPermissoes();
         $obj_permissoes->permissao_cadastra( 597, $this->pessoa_logada, 11,  "educar_exemplar_tipo_lst.php" );
 
@@ -309,10 +297,6 @@ class indice extends clsCadastro
 
     function Excluir()
     {
-        @session_start();
-         $this->pessoa_logada = $_SESSION['id_pessoa'];
-        @session_write_close();
-
         $obj_permissoes = new clsPermissoes();
         $obj_permissoes->permissao_excluir( 597, $this->pessoa_logada, 11,  "educar_exemplar_tipo_lst.php" );
 

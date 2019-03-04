@@ -103,10 +103,6 @@ class indice extends clsCadastro
 
     function Inicializar()
     {
-        @session_start();
-            $this->pessoa_logada = $_SESSION['id_pessoa'];
-        @session_write_close();
-
         $this->ref_cod_turma      = $_GET["ref_cod_turma"];
         $this->ref_ref_cod_escola = $_GET["ref_ref_cod_escola"];
         $this->ref_ref_cod_serie  = $_GET["ref_ref_cod_serie"];
@@ -1071,10 +1067,6 @@ class indice extends clsCadastro
 
     function Novo()
     {
-        @session_start();
-         $this->pessoa_logada = $_SESSION['id_pessoa'];
-        @session_write_close();
-
         $obj_permissoes = new clsPermissoes();
         $obj_permissoes->permissao_cadastra( 650, $this->pessoa_logada, 7,  "educar_turma_mvto_det.php" );
 

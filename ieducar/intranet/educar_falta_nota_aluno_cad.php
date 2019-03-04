@@ -84,10 +84,6 @@ class indice extends clsCadastro
 
     function Inicializar()
     {
-        @session_start();
-            $this->pessoa_logada = $_SESSION['id_pessoa'];
-        @session_write_close();
-
         $this->ref_cod_matricula=$_GET["ref_cod_matricula"];
         $this->ref_cod_turma=$_GET["ref_cod_turma"];
         $this->ref_sequencial_matricula_turma=$_GET["ref_sequencial_matricula_turma"];
@@ -828,10 +824,6 @@ class indice extends clsCadastro
 
     function Novo()
     {
-        @session_start();
-         $this->pessoa_logada = $_SESSION['id_pessoa'];
-        @session_write_close();
-
         $obj_permissoes = new clsPermissoes();
         $obj_permissoes->permissao_cadastra( 642, $this->pessoa_logada, 7,  "educar_falta_nota_aluno_lst.php" );
     //************************************* CADASTRA - MATRICULADO NUMA SERIE *************************************//
@@ -1622,10 +1614,6 @@ class indice extends clsCadastro
 
     function Editar()
     {
-        @session_start();
-         $this->pessoa_logada = $_SESSION['id_pessoa'];
-        @session_write_close();
-
         $obj_permissoes = new clsPermissoes();
         $obj_permissoes->permissao_cadastra( 642, $this->pessoa_logada, 7,  "educar_falta_nota_aluno_lst.php" );
 

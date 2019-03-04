@@ -79,10 +79,6 @@ class indice extends clsCadastro
     function Inicializar()
     {
         $retorno = "Novo";
-        @session_start();
-        $this->pessoa_logada = $_SESSION['id_pessoa'];
-        @session_write_close();
-
         $this->ref_pessoa = $_POST["ref_pessoa"];
         if( $_GET["ref_pessoa"] )
         {
@@ -407,10 +403,6 @@ class indice extends clsCadastro
 
     function Novo()
     {
-        @session_start();
-         $this->pessoa_logada = $_SESSION['id_pessoa'];
-        @session_write_close();
-
         if ($this->email && !filter_var($this->email, FILTER_VALIDATE_EMAIL)) {
           $this->mensagem = "Formato do e-mail inválido.";
           return false;
@@ -480,10 +472,6 @@ class indice extends clsCadastro
 
     function Editar()
     {
-        @session_start();
-         $this->pessoa_logada = $_SESSION['id_pessoa'];
-        @session_write_close();
-
         if ($this->email && !filter_var($this->email, FILTER_VALIDATE_EMAIL)) {
           $this->mensagem = "Formato do e-mail inválido.";
           return false;
@@ -595,11 +583,7 @@ class indice extends clsCadastro
 
     function Excluir()
     {
-        @session_start();
-         $this->pessoa_logada = $_SESSION['id_pessoa'];
-        @session_write_close();
-
-    $obj_funcionario = new clsPortalFuncionario($this->ref_pessoa);
+        $obj_funcionario = new clsPortalFuncionario($this->ref_pessoa);
         $detalhe = $obj_funcionario->detalhe();
         if($obj_funcionario->excluir())
         {

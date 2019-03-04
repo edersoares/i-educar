@@ -58,10 +58,6 @@ class indice extends clsCadastro
     function Inicializar()
     {
         $retorno = "Novo";
-        @session_start();
-        $this->pessoa_logada = $_SESSION['id_pessoa'];
-        @session_write_close();
-
         $this->cod_acesso=$_GET["cod_acesso"];
 
 
@@ -113,12 +109,6 @@ class indice extends clsCadastro
 
     function Novo()
     {
-        @session_start();
-         $this->pessoa_logada = $_SESSION['id_pessoa'];
-        @session_write_close();
-
-
-
         $obj = new clsPortalAcesso( $this->cod_acesso, $this->data_hora, $this->ip_externo, $this->ip_interno, $this->cod_pessoa, $this->obs, $this->sucesso );
         $cadastrou = $obj->cadastra();
         if( $cadastrou )
@@ -136,12 +126,6 @@ class indice extends clsCadastro
 
     function Editar()
     {
-        @session_start();
-         $this->pessoa_logada = $_SESSION['id_pessoa'];
-        @session_write_close();
-
-
-
         $obj = new clsPortalAcesso($this->cod_acesso, $this->data_hora, $this->ip_externo, $this->ip_interno, $this->cod_pessoa, $this->obs, $this->sucesso);
         $editou = $obj->edita();
         if( $editou )
@@ -159,12 +143,6 @@ class indice extends clsCadastro
 
     function Excluir()
     {
-        @session_start();
-         $this->pessoa_logada = $_SESSION['id_pessoa'];
-        @session_write_close();
-
-
-
         $obj = new clsPortalAcesso($this->cod_acesso, $this->data_hora, $this->ip_externo, $this->ip_interno, $this->cod_pessoa, $this->obs, $this->sucesso);
         $excluiu = $obj->excluir();
         if( $excluiu )

@@ -65,10 +65,6 @@ class indice extends clsCadastro
     function Inicializar()
     {
         $retorno = "Novo";
-        @session_start();
-        $this->pessoa_logada = $_SESSION['id_pessoa'];
-        @session_write_close();
-
         $this->cod_tipo_ocorrencia_disciplinar=$_GET["cod_tipo_ocorrencia_disciplinar"];
 
         $obj_permissoes = new clsPermissoes();
@@ -119,10 +115,6 @@ class indice extends clsCadastro
 
     function Novo()
     {
-        @session_start();
-         $this->pessoa_logada = $_SESSION['id_pessoa'];
-        @session_write_close();
-
         $obj = new clsPmieducarTipoOcorrenciaDisciplinar( null, null, $this->pessoa_logada, $this->nm_tipo, $this->descricao, $this->max_ocorrencias, null, null, 1, $this->ref_cod_instituicao );
         $cadastrou = $obj->cadastra();
         if( $cadastrou )
@@ -146,10 +138,6 @@ class indice extends clsCadastro
 
     function Editar()
     {
-        @session_start();
-         $this->pessoa_logada = $_SESSION['id_pessoa'];
-        @session_write_close();
-
         $tipoOcorrenciaDisciplinarDetalhe = new clsPmieducarTipoOcorrenciaDisciplinar($this->cod_tipo_ocorrencia_disciplinar);
         $tipoOcorrenciaDisciplinarDetalheAntes = $tipoOcorrenciaDisciplinarDetalhe->detalhe();
 
@@ -174,10 +162,6 @@ class indice extends clsCadastro
 
     function Excluir()
     {
-        @session_start();
-         $this->pessoa_logada = $_SESSION['id_pessoa'];
-        @session_write_close();
-
         $obj = new clsPmieducarTipoOcorrenciaDisciplinar($this->cod_tipo_ocorrencia_disciplinar, $this->pessoa_logada, null, null, null, null, null, null, 0);
         $tipoOcorrenciaDisciplinar = $obj->detalhe();
         $excluiu = $obj->excluir();

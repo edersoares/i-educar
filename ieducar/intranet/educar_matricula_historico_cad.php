@@ -56,10 +56,6 @@ class indice extends clsCadastro
   function Inicializar()
   {
     $retorno = "Editar";
-    @session_start();
-    $this->pessoa_logada = $_SESSION['id_pessoa'];
-    @session_write_close();
-
     $this->ref_cod_matricula=$_GET["ref_cod_matricula"];
     $this->ref_cod_turma=$_GET["ref_cod_turma"];
     $this->sequencial=$_GET["sequencial"];
@@ -148,10 +144,6 @@ class indice extends clsCadastro
 
   function Editar()
   {
-    @session_start();
-     $this->pessoa_logada = $_SESSION['id_pessoa'];
-    @session_write_close();
-
     $enturmacao = new clsPmieducarMatriculaTurma();
     $enturmacao->ref_cod_matricula = $this->ref_cod_matricula;
     $enturmacao->ref_cod_turma = $this->ref_cod_turma;
@@ -224,10 +216,6 @@ class indice extends clsCadastro
 
   function Excluir()
   {
-    @session_start();
-     $this->pessoa_logada = $_SESSION['id_pessoa'];
-    @session_write_close();
-
     $enturmacao = new clsPmieducarMatriculaTurma();
     $enturmacao->ref_cod_matricula = $this->ref_cod_matricula;
     $enturmacao->ref_cod_turma = $this->ref_cod_turma;

@@ -114,10 +114,6 @@ class indice extends clsCadastro
     {
         $retorno = 'Novo';
 
-        @session_start();
-        $this->pessoa_logada = $_SESSION['id_pessoa'];
-        @session_write_close();
-
         $this->ref_cod_serie = $_GET['ref_cod_serie'];
         $this->ref_cod_escola = $_GET['ref_cod_escola'];
 
@@ -417,10 +413,6 @@ class indice extends clsCadastro
 
     function Novo()
     {
-        @session_start();
-        $this->pessoa_logada = $_SESSION['id_pessoa'];
-        @session_write_close();
-
         /*
          * Se houve erro na primeira tentativa de cadastro, irá considerar apenas
          * os valores enviados de forma oculta.
@@ -504,10 +496,6 @@ class indice extends clsCadastro
 
     function Editar()
     {
-        @session_start();
-        $this->pessoa_logada = $_SESSION['id_pessoa'];
-        @session_write_close();
-
         /*
          * Atribui valor para atributos usados em Gerar(), senão o formulário volta
          * a liberar os campos Instituição, Escola e Curso que devem ser read-only
@@ -610,10 +598,6 @@ class indice extends clsCadastro
 
     function Excluir()
     {
-        @session_start();
-        $this->pessoa_logada = $_SESSION['id_pessoa'];
-        @session_write_close();
-
         $obj = new clsPmieducarEscolaSerie(
             $this->ref_cod_escola_,
             $this->ref_cod_serie_,

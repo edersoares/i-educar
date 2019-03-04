@@ -48,10 +48,6 @@ class indice extends clsCadastro
     function Inicializar()
     {
         $retorno = "Novo";
-        @session_start();
-            $this->pessoa_logada = $_SESSION['id_pessoa'];
-        @session_write_close();
-
         $this->cod_rota=$_GET["cod_rota"];
 
         $obj_permissoes = new clsPermissoes();

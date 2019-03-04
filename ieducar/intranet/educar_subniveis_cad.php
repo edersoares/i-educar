@@ -75,10 +75,6 @@ class indice extends clsCadastro
     function Inicializar()
     {
         $retorno = "Novo";
-        @session_start();
-        $this->pessoa_logada = $_SESSION['id_pessoa'];
-        @session_write_close();
-
         $this->ref_cod_categoria = $_GET["ref_cod_categoria"];
         $this->ref_cod_nivel = $_GET["ref_cod_nivel"];
 
@@ -164,10 +160,6 @@ class indice extends clsCadastro
 
     function Novo()
     {
-        @session_start();
-         $this->pessoa_logada = $_SESSION['id_pessoa'];
-        @session_write_close();
-
         $obj_permissoes = new clsPermissoes();
         $permite_cadastrar = $obj_permissoes->permissao_cadastra( 829, $this->pessoa_logada, 3,  "",true );
 
@@ -217,10 +209,6 @@ class indice extends clsCadastro
 
     function Excluir()
     {
-        @session_start();
-         $this->pessoa_logada = $_SESSION['id_pessoa'];
-        @session_write_close();
-
         $obj_permissoes = new clsPermissoes();
         $permite_excluir= $obj_permissoes->permissao_excluir( 829, $this->pessoa_logada, 3,  "", true );
 

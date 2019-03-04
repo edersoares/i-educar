@@ -83,10 +83,6 @@ class indice extends clsCadastro
   {
     $retorno = 'Novo';
 
-    @session_start();
-    $this->pessoa_logada = $_SESSION['id_pessoa'];
-    @session_write_close();
-
     $this->ref_cod_turma       = $_GET['ref_cod_turma'];
     $this->ref_cod_serie       = $_GET['ref_cod_serie'];
     $this->ref_cod_curso       = $_GET['ref_cod_curso'];
@@ -151,10 +147,6 @@ class indice extends clsCadastro
 
   function Novo()
   {
-    @session_start();
-    $this->pessoa_logada = $_SESSION['id_pessoa'];
-    @session_write_close();
-
     $obj_permissoes = new clsPermissoes();
     $obj_permissoes->permissao_cadastra(641, $this->pessoa_logada, 7,
       "educar_quadro_horario_lst.php?ref_cod_turma={$this->ref_cod_turma}&ref_cod_serie={$this->ref_cod_serie}&ref_cod_curso={$this->ref_cod_curso}&ref_cod_escola={$this->ref_cod_escola}&ref_cod_instituicao={$this->ref_cod_instituicao}&ano={$this->ano}");
@@ -194,10 +186,6 @@ class indice extends clsCadastro
 
   function Excluir()
   {
-    @session_start();
-    $this->pessoa_logada = $_SESSION['id_pessoa'];
-    @session_write_close();
-
     $obj_permissoes = new clsPermissoes();
     $obj_permissoes->permissao_excluir(641, $this->pessoa_logada, 7,
       "educar_quadro_horario_lst.php?ref_cod_turma={$this->ref_cod_turma}&ref_cod_serie={$this->ref_cod_serie}&ref_cod_curso={$this->ref_cod_curso}&ref_cod_escola={$this->ref_cod_escola}&ref_cod_instituicao={$this->ref_cod_instituicao}&ano={$this->ano}");

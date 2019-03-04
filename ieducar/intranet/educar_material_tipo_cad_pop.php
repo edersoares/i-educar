@@ -64,10 +64,6 @@ class indice extends clsCadastro
     function Inicializar()
     {
         $retorno = "Novo";
-        @session_start();
-        $this->pessoa_logada = $_SESSION['id_pessoa'];
-        @session_write_close();
-
         //** Verificacao de permissao para cadastro
         $obj_permissao = new clsPermissoes();
 
@@ -152,10 +148,6 @@ class indice extends clsCadastro
 
     function Novo()
     {
-        @session_start();
-         $this->pessoa_logada = $_SESSION['id_pessoa'];
-        @session_write_close();
-
         $obj = new clsPmieducarMaterialTipo( null,$this->pessoa_logada,null,$this->nm_tipo,$this->desc_tipo,null,null,1,$this->ref_cod_instituicao );
         $cadastrou = $obj->cadastra();
         if( $cadastrou )
@@ -181,11 +173,7 @@ class indice extends clsCadastro
 
     function Editar()
     {
-        /*@session_start();
-         $this->pessoa_logada = $_SESSION['id_pessoa'];
-        @session_write_close();
-
-        $obj = new clsPmieducarMaterialTipo( $this->cod_material_tipo,null,$this->pessoa_logada,$this->nm_tipo,$this->desc_tipo,null,null,1,$this->ref_cod_instituicao );
+        /*$obj = new clsPmieducarMaterialTipo( $this->cod_material_tipo,null,$this->pessoa_logada,$this->nm_tipo,$this->desc_tipo,null,null,1,$this->ref_cod_instituicao );
         $editou = $obj->edita();
         if( $editou )
         {
@@ -202,11 +190,7 @@ class indice extends clsCadastro
 
     function Excluir()
     {
-        /*@session_start();
-         $this->pessoa_logada = $_SESSION['id_pessoa'];
-        @session_write_close();
-
-        $obj = new clsPmieducarMaterialTipo( $this->cod_material_tipo,null,$this->pessoa_logada,null,null,null,null,0 );
+        /*$obj = new clsPmieducarMaterialTipo( $this->cod_material_tipo,null,$this->pessoa_logada,null,null,null,null,0 );
         $excluiu = $obj->excluir();
         if( $excluiu )
         {

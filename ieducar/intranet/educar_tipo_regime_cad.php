@@ -62,12 +62,6 @@ class indice extends clsCadastro
     function Inicializar()
     {
         $retorno = "Novo";
-        @session_start();
-        $this->pessoa_logada = $_SESSION['id_pessoa'];
-        @session_write_close();
-
-
-
         $this->cod_tipo_regime=$_GET["cod_tipo_regime"];
 
         $obj_permissoes = new clsPermissoes();
@@ -124,10 +118,6 @@ class indice extends clsCadastro
 
     function Novo()
     {
-        @session_start();
-         $this->pessoa_logada = $_SESSION['id_pessoa'];
-        @session_write_close();
-
         $obj = new clsPmieducarTipoRegime( $this->cod_tipo_regime, $this->pessoa_logada, $this->pessoa_logada, $this->nm_tipo, $this->data_cadastro, $this->data_exclusao, $this->ativo, $this->ref_cod_instituicao );
         $cadastrou = $obj->cadastra();
         if( $cadastrou )
@@ -151,10 +141,6 @@ class indice extends clsCadastro
 
     function Editar()
     {
-        @session_start();
-         $this->pessoa_logada = $_SESSION['id_pessoa'];
-        @session_write_close();
-
         $tipoRegimeDetalhe = new clsPmieducarTipoRegime($this->cod_tipo_regime);
         $tipoRegimeDetalheAntes = $tipoRegimeDetalhe->detalhe();
 
@@ -179,10 +165,6 @@ class indice extends clsCadastro
 
     function Excluir()
     {
-        @session_start();
-         $this->pessoa_logada = $_SESSION['id_pessoa'];
-        @session_write_close();
-
         $obj = new clsPmieducarTipoRegime($this->cod_tipo_regime, $this->pessoa_logada, $this->pessoa_logada, $this->nm_tipo, $this->data_cadastro, $this->data_exclusao, 0, $this->ref_cod_instituicao);
         $tipoRegime = $obj->detalhe();
         $excluiu = $obj->excluir();

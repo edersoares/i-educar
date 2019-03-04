@@ -50,10 +50,6 @@ class indice extends clsCadastro
     public function Inicializar()
     {
         //$retorno = 'Novo';
-        @session_start();
-        $this->pessoa_logada = $_SESSION['id_pessoa'];
-        @session_write_close();
-
         $this->ref_cod_turma_copiar_enturmacoes = $this->getQueryString('ref_cod_turma_copiar_enturmacoes');
         $this->cod_matricula = $this->getQueryString('cod_matricula');
         $this->ref_cod_aluno = $this->getQueryString('ref_cod_aluno');
@@ -354,10 +350,6 @@ class indice extends clsCadastro
 
         $this->url_cancelar = 'educar_aluno_det.php?cod_aluno=' . $this->ref_cod_aluno;
         $this->nome_url_cancelar = 'Cancelar';
-
-        @session_start();
-        $this->pessoa_logada = $_SESSION['id_pessoa'];
-        @session_write_close();
 
         $obj_permissoes = new clsPermissoes();
 
@@ -1147,10 +1139,6 @@ class indice extends clsCadastro
 
     public function Excluir()
     {
-        @session_start();
-        $this->pessoa_logada = $_SESSION['id_pessoa'];
-        @session_write_close();
-
         $obj_permissoes = new clsPermissoes();
 
         $obj_permissoes->permissao_excluir(

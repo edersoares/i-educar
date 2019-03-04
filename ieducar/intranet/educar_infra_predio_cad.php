@@ -63,10 +63,6 @@ class indice extends clsCadastro
     function Inicializar()
     {
         $retorno = "Novo";
-        @session_start();
-        $this->pessoa_logada = $_SESSION['id_pessoa'];
-        @session_write_close();
-
         $this->cod_infra_predio=$_GET["cod_infra_predio"];
 
         $obj_permissoes = new clsPermissoes();
@@ -112,9 +108,6 @@ class indice extends clsCadastro
 
     function Gerar()
     {
-        @session_start();
-        $this->pessoa_logada = $_SESSION['id_pessoa'];
-        @session_write_close();
         // primary keys
         $this->campoOculto( "cod_infra_predio", $this->cod_infra_predio );
 
@@ -128,10 +121,6 @@ class indice extends clsCadastro
 
     function Novo()
     {
-        @session_start();
-         $this->pessoa_logada = $_SESSION['id_pessoa'];
-        @session_write_close();
-
         $obj = new clsPmieducarInfraPredio( $this->cod_infra_predio, $this->pessoa_logada, $this->pessoa_logada, $this->ref_cod_escola, $this->nm_predio, $this->desc_predio, $this->endereco, null, null, 1 );
         $cadastrou = $obj->cadastra();
         if( $cadastrou )
@@ -155,10 +144,6 @@ class indice extends clsCadastro
 
     function Editar()
     {
-        @session_start();
-         $this->pessoa_logada = $_SESSION['id_pessoa'];
-        @session_write_close();
-
         $infraPredioDetalhe = new clsPmieducarInfraPredio($this->cod_infra_predio);
         $infraPredioDetalheAntes = $infraPredioDetalhe->detalhe();
 
@@ -183,10 +168,6 @@ class indice extends clsCadastro
 
     function Excluir()
     {
-        @session_start();
-         $this->pessoa_logada = $_SESSION['id_pessoa'];
-        @session_write_close();
-
         $obj = new clsPmieducarInfraPredio($this->cod_infra_predio, $this->pessoa_logada, $this->pessoa_logada, $this->ref_cod_escola, $this->nm_predio, $this->desc_predio, $this->endereco, $this->data_cadastro, $this->data_exclusao, 0);
         $infraPredio = $obj->detalhe();
         $excluiu = $obj->excluir();

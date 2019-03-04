@@ -62,10 +62,6 @@ class indice extends clsCadastro
     function Inicializar()
     {
         $retorno = "Novo";
-        @session_start();
-        $this->pessoa_logada = $_SESSION['id_pessoa'];
-        @session_write_close();
-
         $this->cod_software_alteracao=$_GET["cod_software_alteracao"];
 
 
@@ -130,12 +126,6 @@ class indice extends clsCadastro
 
     function Novo()
     {
-        @session_start();
-         $this->pessoa_logada = $_SESSION['id_pessoa'];
-        @session_write_close();
-
-
-
         $obj = new clsPmicontrolesisSoftwareAlteracao( $this->cod_software_alteracao, $this->pessoa_logada, $this->pessoa_logada, $this->ref_cod_software, $this->motivo, $this->tipo, $this->descricao, $this->data_cadastro, $this->data_exclusao, $this->ativo, $this->script_banco );
         $cadastrou = $obj->cadastra();
         if( $cadastrou )
@@ -153,12 +143,6 @@ class indice extends clsCadastro
 
     function Editar()
     {
-        @session_start();
-         $this->pessoa_logada = $_SESSION['id_pessoa'];
-        @session_write_close();
-
-
-
         $obj = new clsPmicontrolesisSoftwareAlteracao($this->cod_software_alteracao, $this->pessoa_logada, $this->pessoa_logada, $this->ref_cod_software, $this->motivo, $this->tipo, $this->descricao, $this->data_cadastro, $this->data_exclusao, $this->ativo, $this->script_banco);
         $editou = $obj->edita();
         if( $editou )
@@ -176,12 +160,6 @@ class indice extends clsCadastro
 
     function Excluir()
     {
-        @session_start();
-         $this->pessoa_logada = $_SESSION['id_pessoa'];
-        @session_write_close();
-
-
-
         $obj = new clsPmicontrolesisSoftwareAlteracao($this->cod_software_alteracao, $this->pessoa_logada, $this->pessoa_logada, $this->ref_cod_software, $this->motivo, $this->tipo, $this->descricao, $this->data_cadastro, $this->data_exclusao, 0, $this->script_banco);
         $excluiu = $obj->excluir();
         if( $excluiu )

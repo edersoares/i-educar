@@ -210,10 +210,7 @@ class indice extends clsCadastro
 
     function Novo() 
     {
-        @session_start();
-         $this->pessoa_logada = $_SESSION['id_pessoa'];
-        @session_write_close();
-    //  echo 
+        //  echo
 
         if( $_POST["inc"] == 1)
         {

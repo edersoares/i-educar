@@ -49,10 +49,6 @@ class indice extends clsCadastro
     function Inicializar()
     {
         $retorno = "Novo";
-        @session_start();
-         $this->pessoa_logada = $_SESSION['id_pessoa'];
-        @session_write_close();
-        
         $this->cod_categoria = $_GET['cod_categoria'];
         
         if($this->cod_categoria)
@@ -84,9 +80,6 @@ class indice extends clsCadastro
  
     function Novo() 
     {
-        @session_start();
-         $this->pessoa_logada = $_SESSION['id_pessoa'];
-        @session_write_close();
         $obj = new clsPmiacoesCategoria(null, null, $this->pessoa_logada, $this->nm_categoria, null, null, 1);
         if($obj->cadastra())
         {
@@ -97,9 +90,6 @@ class indice extends clsCadastro
 
     function Editar() 
     {
-        @session_start();
-         $this->pessoa_logada = $_SESSION['id_pessoa'];
-        @session_write_close();
         $obj = new clsPmiacoesCategoria($this->cod_categoria, $this->pessoa_logada, null, $this->nm_categoria, null, null, 1);
         if($obj->edita())
         {
@@ -110,10 +100,6 @@ class indice extends clsCadastro
 
     function Excluir()
     {
-        @session_start();
-         $this->pessoa_logada = $_SESSION['id_pessoa'];
-        @session_write_close();
-        
         $obj_acao = new clsPmiacoesAcaoGovernoCategoria();
         $lista = $obj_acao->lista($this->cod_categoria);
         if($lista)   

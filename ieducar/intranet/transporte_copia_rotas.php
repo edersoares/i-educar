@@ -38,11 +38,6 @@ class indice extends clsCadastro {
     function Inicializar(){
 
         $retorno = "Novo";
-        @session_start();
-        $this->pessoa_logada = $_SESSION['id_pessoa'];
-        @session_write_close();
-
-
         $obj_permissoes = new clsPermissoes();
         $obj_permissoes->permissao_cadastra( 950, $this->pessoa_logada, 7);
 
@@ -96,10 +91,6 @@ class indice extends clsCadastro {
     }
 
     function Novo(){
-
-        @session_start();
-         $this->pessoa_logada = $_SESSION['id_pessoa'];
-        @session_write_close();
 
         if (!$this->ano_orig or !$this->ref_cod_empresa_transporte_escolar or !$this->ano_dest){
             $this->mensagem = "Preencha os dados corretamente.<br>";

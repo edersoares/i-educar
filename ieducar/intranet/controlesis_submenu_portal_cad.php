@@ -63,10 +63,6 @@ class indice extends clsCadastro
     function Inicializar()
     {
         $retorno = "Novo";
-        @session_start();
-        $this->pessoa_logada = $_SESSION['id_pessoa'];
-        @session_write_close();
-
         $this->cod_submenu_portal=$_GET["cod_submenu_portal"];
 
         if( is_numeric( $this->cod_submenu_portal ) )
@@ -132,10 +128,6 @@ class indice extends clsCadastro
 
     function Novo()
     {
-        @session_start();
-         $this->pessoa_logada = $_SESSION['id_pessoa'];
-        @session_write_close();
-
         $obj = new clsPmicontrolesisSubmenuPortal( $this->cod_submenu_portal, $this->pessoa_logada, null, $this->ref_cod_menu_portal, $this->nm_submenu, $this->arquivo, $this->_target, $this->title, $this->ordem,null, null,1 );
         $cadastrou = $obj->cadastra();
         if( $cadastrou )
@@ -153,10 +145,6 @@ class indice extends clsCadastro
 
     function Editar()
     {
-        @session_start();
-         $this->pessoa_logada = $_SESSION['id_pessoa'];
-        @session_write_close();
-
         $obj = new clsPmicontrolesisSubmenuPortal($this->cod_submenu_portal, null, $this->pessoa_logada, $this->ref_cod_menu_portal, $this->nm_submenu, $this->arquivo, $this->_target, $this->title, $this->ordem, $this->data_cadastro, 'NOW()', 1);
         $editou = $obj->edita();
         if( $editou )
@@ -174,10 +162,6 @@ class indice extends clsCadastro
 
     function Excluir()
     {
-        @session_start();
-         $this->pessoa_logada = $_SESSION['id_pessoa'];
-        @session_write_close();
-
         $obj = new clsPmicontrolesisSubmenuPortal($this->cod_submenu_portal,null, $this->pessoa_logada, $this->ref_cod_menu_portal, $this->nm_submenu, $this->arquivo, $this->_target, $this->title, $this->ordem, null, 'NOW()', 0);
         $excluiu = $obj->excluir();
         if( $excluiu )

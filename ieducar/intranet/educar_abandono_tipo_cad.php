@@ -61,10 +61,6 @@ class indice extends clsCadastro
     function Inicializar()
     {
         $retorno = "Novo";
-        @session_start();
-        $this->pessoa_logada = $_SESSION['id_pessoa'];
-        @session_write_close();
-
         $this->cod_abandono_tipo=$_GET["cod_abandono_tipo"];
 
         $obj_permissoes = new clsPermissoes();
@@ -113,9 +109,6 @@ class indice extends clsCadastro
 
     function Novo()
     {
-        @session_start();
-         $this->pessoa_logada = $_SESSION['id_pessoa'];
-        @session_write_close();
         $obj = new clsPmiEducarAbandonoTipo( null,
                                              null,
                                              $this->pessoa_logada,
@@ -146,10 +139,6 @@ class indice extends clsCadastro
 
     function Editar()
     {
-        @session_start();
-         $this->pessoa_logada = $_SESSION['id_pessoa'];
-        @session_write_close();
-
         $abandonoTipoDetalhe = new clsPmiEducarAbandonoTipo($this->cod_abandono_tipo);
         $abandonoTipoDetalheAntes = $abandonoTipoDetalhe->detalhe();
 
@@ -174,10 +163,6 @@ class indice extends clsCadastro
 
     function Excluir()
     {
-        @session_start();
-         $this->pessoa_logada = $_SESSION['id_pessoa'];
-        @session_write_close();
-
         $obj = new clsPmiEducarAbandonoTipo( $this->cod_abandono_tipo, $this->pessoa_logada, null, null, null, null, null, 0);
         $abandonoTipo = $obj->detalhe();
         $excluiu = $obj->excluir();

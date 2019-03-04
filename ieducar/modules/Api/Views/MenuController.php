@@ -9,10 +9,6 @@ class MenuController extends ApiCoreController
 
     private function getCurrentUser()
     {
-        @session_start();
-        $this->pessoa_logada = $_SESSION['id_pessoa'];
-        @session_write_close();
-
         return $this->pessoa_logada;
     }
 

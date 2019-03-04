@@ -67,10 +67,6 @@ class indice extends clsCadastro
     function Inicializar()
     {
         $retorno = "Novo";
-        @session_start();
-        $this->pessoa_logada = $_SESSION['id_pessoa'];
-        @session_write_close();
-
         $this->cod_infra_predio_comodo=$_GET["cod_infra_predio_comodo"];
 
         $obj_permissoes = new clsPermissoes();
@@ -201,9 +197,6 @@ class indice extends clsCadastro
 
     function Novo()
     {
-        @session_start();
-         $this->pessoa_logada = $_SESSION['id_pessoa'];
-        @session_write_close();
         $this->area = str_replace(".","",$this->area);
         $this->area = str_replace(",",".",$this->area);
         $obj = new clsPmieducarInfraPredioComodo( null, null, $this->pessoa_logada, $this->ref_cod_infra_comodo_funcao, $this->ref_cod_infra_predio, $this->nm_comodo, $this->desc_comodo, $this->area, null, null, 1 );
@@ -227,10 +220,6 @@ class indice extends clsCadastro
 
     function Editar()
     {
-        @session_start();
-         $this->pessoa_logada = $_SESSION['id_pessoa'];
-        @session_write_close();
-
         $this->area = str_replace(".","",$this->area);
         $this->area = str_replace(",",".",$this->area);
 
@@ -255,10 +244,6 @@ class indice extends clsCadastro
 
     function Excluir()
     {
-        @session_start();
-         $this->pessoa_logada = $_SESSION['id_pessoa'];
-        @session_write_close();
-
         $obj = new clsPmieducarInfraPredioComodo( $this->cod_infra_predio_comodo, $this->pessoa_logada, null,null,null,null,null,null,null,null, 0);
     $detalhe = $obj->detalhe();
         $excluiu = $obj->excluir();

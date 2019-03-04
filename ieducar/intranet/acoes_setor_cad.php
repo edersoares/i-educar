@@ -48,10 +48,6 @@ class indice extends clsCadastro
     function Inicializar()
     {
         $retorno = "Novo";
-        @session_start();
-         $this->pessoa_logada = $_SESSION['id_pessoa'];
-        @session_write_close();
-        
         $this->setor = $_GET['cod_setor'];
         
         $obj = new clsPmiacoesSecretariaResponsavel($this->setor);
@@ -143,12 +139,6 @@ class indice extends clsCadastro
  
     function Novo() 
     {
-        @session_start();
-         $this->pessoa_logada = $_SESSION['id_pessoa'];
-        @session_write_close();
-        @session_start();
-         $this->pessoa_logada = $_SESSION['id_pessoa'];
-        @session_write_close();
         $obj = new clsPmiacoesSecretariaResponsavel($this->setor, $this->pessoa_logada);
         if($obj->cadastra())
         {
@@ -173,9 +163,6 @@ class indice extends clsCadastro
         $obj = new clsPmiacoesSecretariaResponsavel($this->cod_setor_old);
         $obj->excluir();
         
-        @session_start();
-         $this->pessoa_logada = $_SESSION['id_pessoa'];
-        @session_write_close();
         $obj = new clsPmiacoesSecretariaResponsavel($this->setor, $this->pessoa_logada);
         if($obj->cadastra())
         {

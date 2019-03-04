@@ -26,11 +26,7 @@ class indice extends clsCadastro
 	function Inicializar()
 	{
 		$retorno = "Novo";
-		@session_start();
-		$this->pessoa_logada = $_SESSION['id_pessoa'];
-		@session_write_close();
-
-#get_pk_from_get#
+		#get_pk_from_get#
 #verificacao_especial_cad#
 		#check_pk_start#
 #check_pk_tabulacao#		$obj = new #nome_classe#( #pk_obj_params# );
@@ -69,11 +65,7 @@ class indice extends clsCadastro
 
 	function Novo()
 	{
-		@session_start();
-		 $this->pessoa_logada = $_SESSION['id_pessoa'];
-		@session_write_close();
-
-#verificacao_especial_cad#
+		#verificacao_especial_cad#
 
 		$obj = new #nome_classe#( #cadastra_variaveis# );
 		$cadastrou = $obj->cadastra();
@@ -92,11 +84,7 @@ class indice extends clsCadastro
 
 	function Editar()
 	{
-		@session_start();
-		 $this->pessoa_logada = $_SESSION['id_pessoa'];
-		@session_write_close();
-
-#verificacao_especial_cad#
+		#verificacao_especial_cad#
 
 		$obj = new #nome_classe#(#cadastra_variaveis#);
 		$editou = $obj->edita();
@@ -115,11 +103,7 @@ class indice extends clsCadastro
 
 	function Excluir()
 	{
-		@session_start();
-		 $this->pessoa_logada = $_SESSION['id_pessoa'];
-		@session_write_close();
-
-#verificacao_especial_exc#
+		#verificacao_especial_exc#
 
 		$obj = new #nome_classe#(#exclui_variaveis#);
 		$excluiu = $obj->excluir();

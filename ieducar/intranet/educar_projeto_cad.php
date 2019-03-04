@@ -56,10 +56,6 @@ class indice extends clsCadastro
     function Inicializar()
     {
         $retorno = "Novo";
-        @session_start();
-        $this->pessoa_logada = $_SESSION['id_pessoa'];
-        @session_write_close();
-
         $this->cod_projeto=$_GET["cod_projeto"];
 
         $obj_permissoes = new clsPermissoes();
@@ -115,10 +111,6 @@ class indice extends clsCadastro
 
     function Novo()
     {
-        @session_start();
-         $this->pessoa_logada = $_SESSION['id_pessoa'];
-        @session_write_close();
-
         $obj = new clsPmieducarProjeto( null, $this->nome, $this->observacao);
         $cadastrou = $obj->cadastra();
         if( $cadastrou )
@@ -142,10 +134,6 @@ class indice extends clsCadastro
 
     function Editar()
     {
-        @session_start();
-         $this->pessoa_logada = $_SESSION['id_pessoa'];
-        @session_write_close();
-
         $projetoDetalhe = new clsPmieducarProjeto($this->cod_projeto);
         $projetoDetalheAntes = $projetoDetalhe->detalhe();
 
@@ -170,10 +158,6 @@ class indice extends clsCadastro
 
     function Excluir()
     {
-        @session_start();
-         $this->pessoa_logada = $_SESSION['id_pessoa'];
-        @session_write_close();
-
         $obj = new clsPmieducarProjeto($this->cod_projeto);
         $projeto = $obj->detalhe();
         $excluiu = $obj->excluir();

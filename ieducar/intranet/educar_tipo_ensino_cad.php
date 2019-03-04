@@ -63,10 +63,6 @@ class indice extends clsCadastro
     function Inicializar()
     {
         $retorno = "Novo";
-        @session_start();
-        $this->pessoa_logada = $_SESSION['id_pessoa'];
-        @session_write_close();
-
         //** Verificacao de permissao para exclusao
         $obj_permissao = new clsPermissoes();
 
@@ -134,10 +130,6 @@ class indice extends clsCadastro
 
     function Novo()
     {
-        @session_start();
-         $this->pessoa_logada = $_SESSION['id_pessoa'];
-        @session_write_close();
-
         $this->atividade_complementar = is_null($this->atividade_complementar) ? FALSE : TRUE;
 
         $obj = new clsPmieducarTipoEnsino();
@@ -168,10 +160,6 @@ class indice extends clsCadastro
 
     function Editar()
     {
-        @session_start();
-         $this->pessoa_logada = $_SESSION['id_pessoa'];
-        @session_write_close();
-
         $this->atividade_complementar = is_null($this->atividade_complementar) ? FALSE : TRUE;
 
         $tipoEnsinoDetalhe = new clsPmieducarTipoEnsino($this->cod_tipo_ensino);
@@ -205,10 +193,6 @@ class indice extends clsCadastro
 
     function Excluir()
     {
-        @session_start();
-         $this->pessoa_logada = $_SESSION['id_pessoa'];
-        @session_write_close();
-
         $obj = new clsPmieducarTipoEnsino($this->cod_tipo_ensino, $this->pessoa_logada, null, $this->nm_tipo, null, null, 0);
         $tipoEnsino = $obj->detalhe();
         $excluiu = $obj->excluir();
