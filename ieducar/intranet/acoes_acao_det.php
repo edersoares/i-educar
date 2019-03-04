@@ -41,19 +41,16 @@ class clsIndex extends clsBase
 
 class indice extends clsDetalhe
 {
-
-
     function Gerar()
     {
         $cod_acao_governo = @$_GET['cod_acao_governo'];
-        @session_start();
-         $this->pessoa_logada = session('id_pessoa');
-         $_SESSION["display"] =   $_GET["display"] ?  $_GET["display"] : $_SESSION["display"];
-        $_SESSION['acao_det'] = $cod_acao_governo ;
-        @session_write_close();
+
+        session([
+            'display' => $_GET["display"] ?? session('display'),
+            'acao_det' => $cod_acao_governo,
+        ]);
 
         $this->titulo = "Detalhe de a&ccedil;&otilde;es do Governo";
-
 
         if(!(int)$cod_acao_governo)
             header("Location: acoes_acao_lst.php");
@@ -75,7 +72,7 @@ class indice extends clsDetalhe
         $this->addDetalhe( array("Destaque",$det_acao_governo['destaque'] == 0 ? "N&atilde;o" : "Sim"));
         $this->addDetalhe( array("Status",$det_acao_governo['status_acao'] == 0 ? "Pendente" : "Confirmado"));
 
-        $display = $_SESSION["display"] == "inline" ? "inline" : "none";
+        $display = session('display') == "inline" ? "inline" : "none";
 
         $det_acoes = $this->detAcoes($cod_acao_governo);
         if($det_acoes){

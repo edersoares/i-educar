@@ -59,10 +59,8 @@ class indice extends clsDetalhe
 
     function Gerar()
     {
-        @session_start();
-            $this->pessoa_logada = session('id_pessoa');
-            unset($_SESSION['reload']);
-        session_write_close();
+        $this->pessoa_logada = session('id_pessoa');
+        session()->forget('reload');
 
         $this->titulo = "Exemplar Devolu&ccedil;&atilde;o - Detalhe";
 

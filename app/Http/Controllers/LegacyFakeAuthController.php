@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use Throwable;
-
 class LegacyFakeAuthController
 {
     /**
@@ -13,20 +11,14 @@ class LegacyFakeAuthController
      */
     public function doFakeLogin()
     {
-        try {
-            session_start();
-        } catch (Throwable $throwable) {
-
-        }
-
-        $_SESSION['itj_controle'] = 'logado';
-        $_SESSION['id_pessoa'] = '1';
-        $_SESSION['pessoa_setor'] = null;
-        $_SESSION['menu_opt'] = false;
-        $_SESSION['tipo_menu'] = '1';
-        $_SESSION['nivel'] = '1';
-
-        session_write_close();
+        session([
+            'itj_controle' => 'logado',
+            'id_pessoa' => '1',
+            'pessoa_setor' => null,
+            'menu_opt' => false,
+            'tipo_menu' => '1',
+            'nivel' => '1',
+        ]);
     }
 
     /**
@@ -36,14 +28,6 @@ class LegacyFakeAuthController
      */
     public function doFakeLogout()
     {
-        try {
-            session_start();
-        } catch (Throwable $throwable) {
-
-        }
-
-        $_SESSION = [];
-
-        session_destroy();
+        return; // TODO remover
     }
 }

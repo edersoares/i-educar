@@ -61,9 +61,11 @@ class indice extends clsCadastro
         {
             if(isset($_GET['limpa']))
             {
-                unset($_SESSION["acoes"]);
-                unset($_SESSION["acoes"]["inserido"]);
-                unset($_SESSION["acoes"]["removidos"]);
+                session()->forget([
+                    'acoes',
+                    'acoes.inserido',
+                    'acoes.removidos',
+                ]);
             }
         
             if(isset($_GET['remover_arquivo']) && is_numeric($_GET['remover_arquivo']))
@@ -111,9 +113,11 @@ class indice extends clsCadastro
     
             if(isset($_GET["excluir_arquivo"]) && $_GET["passo"] != 2)
             {
-            
-                $_SESSION["acoes"]["removidos"][$_GET["excluir_arquivo"]] = $_GET["excluir_arquivo"];
-                unset( $_SESSION["acoes"]["inserido"][$_GET["excluir_arquivo"]]);   
+                session([
+                    'acoes.removidos.' . $_GET['excluir_arquivo'] => $_GET['excluir_arquivo'],
+                ]);
+
+                session()->forget('acoes.inserido.' . $_GET["excluir_arquivo"]);
 
                 header("Location: acoes_arquivo.php?cod_acao_governo={$this->cod_acao_governo}&passo=2");
                 

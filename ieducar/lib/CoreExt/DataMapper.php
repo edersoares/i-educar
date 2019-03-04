@@ -620,9 +620,7 @@ abstract class CoreExt_DataMapper
             }
         }
 
-        @session_start();
-        $pessoa_logada = $_SESSION['id_pessoa'];
-        @session_write_close();
+        $pessoa_logada = session('id_pessoa');
 
         if ($instance->isNew()) {
             $returning = ' RETURNING ' . implode(',', array_values($this->_primaryKey));
@@ -695,9 +693,7 @@ abstract class CoreExt_DataMapper
         $return = $this->_getDbAdapter()->Consulta($this->_getDeleteStatment($pkToDelete));
 
         if (count($info)) {
-            @session_start();
-            $pessoa_logada = $_SESSION['id_pessoa'];
-            @session_write_close();
+            $pessoa_logada = session('id_pessoa');
 
             $auditoria = new clsModulesAuditoriaGeral($this->_tableName, $pessoa_logada, array_shift(array_values($instance)));
             $auditoria->exclusao($info);
