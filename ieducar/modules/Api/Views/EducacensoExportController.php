@@ -24,9 +24,6 @@ require_once __DIR__ . '/../../../lib/App/Model/Servidor.php';
  */
 class EducacensoExportController extends ApiCoreController
 {
-
-    var $pessoa_logada;
-
     var $ref_cod_escola;
     var $ref_cod_escola_;
     var $ref_cod_serie;

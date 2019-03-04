@@ -43,6 +43,10 @@ class ApiCoreController extends Core_Controller_Page_EditController
         $this->messenger = new Portabilis_Messenger();
         $this->validator = new Portabilis_Validator($this->messenger);
         $this->response = [];
+
+        @session_start();
+        $this->pessoa_logada = $_SESSION['id_pessoa'];
+        @session_write_close();
     }
 
     protected function currentUser()
