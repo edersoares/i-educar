@@ -60,7 +60,7 @@ class indice extends clsDetalhe
     function Gerar()
     {
         @session_start();
-            $this->pessoa_logada = $_SESSION['id_pessoa'];
+            $this->pessoa_logada = session('id_pessoa');
             unset($_SESSION['reload']);
         session_write_close();
 

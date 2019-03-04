@@ -120,9 +120,7 @@ abstract class Core_Controller_Page_Abstract extends CoreExt_Controller_Abstract
         $this->pessoa_logada = $this->getSession()->id_pessoa ?? null;
 
         if (empty($this->pessoa_logada)) {
-            @session_start();
-            $this->pessoa_logada = $_SESSION['id_pessoa'];
-            @session_write_close();
+            $this->pessoa_logada = session('id_pessoa');
         }
     }
 

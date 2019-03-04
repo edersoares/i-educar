@@ -1689,11 +1689,8 @@ class DiarioApiController extends ApiCoreController
 
     public function canPostSituacaoAndNota()
     {
-
-        @session_start();
-        $this->pessoa_logada = $_SESSION['id_pessoa'];
         $acesso = new clsPermissoes();
-        session_write_close();
+
         return $acesso->permissao_cadastra(630, $this->pessoa_logada, 7, null, true);
 
     }

@@ -124,11 +124,6 @@ class indice extends clsCadastro
 
     function Gerar()
     {
-        
-        @session_start();
-         $this->pessoa_logada = $_SESSION['id_pessoa'];
-        @session_write_close();     
-        
         $this->form_enctype = " enctype='multipart/form-data'"; 
         $this->cod_acao_governo ? $this->campoOculto("cod_acao_governo",$this->cod_acao_governo) : null;
         

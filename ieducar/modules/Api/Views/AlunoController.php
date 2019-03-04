@@ -1693,20 +1693,14 @@ class AlunoController extends ApiCoreController
 
     protected function loadAcessoDataEntradaSaida()
     {
-        @session_start();
-        $this->pessoa_logada = $_SESSION['id_pessoa'];
         $acesso = new clsPermissoes();
-        session_write_close();
 
         return $acesso->permissao_cadastra(626, $this->pessoa_logada, 7, null, true);
     }
 
     protected function isUsuarioAdmin()
     {
-        @session_start();
-        $this->pessoa_logada = $_SESSION['id_pessoa'];
         $isAdmin = ($this->pessoa_logada == 1);
-        session_write_close();
 
         return $isAdmin;
     }

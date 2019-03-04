@@ -449,7 +449,7 @@ class indice extends clsDetalhe
   function permissao_cancelar(){
     @session_start();
 
-    $this->pessoa_logada = $_SESSION['id_pessoa'];
+    $this->pessoa_logada = session('id_pessoa');
     $acesso = new clsPermissoes();
 
     session_write_close();

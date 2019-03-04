@@ -89,9 +89,7 @@ class indice extends clsConfig
 
   function renderHTML()
   {
-    @session_start();
-    $this->pessoa_logada = $_SESSION['id_pessoa'];
-    session_write_close();
+    $this->pessoa_logada = session('id_pessoa');
 
     $obj_permissoes = new clsPermissoes();
 

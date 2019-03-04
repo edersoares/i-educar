@@ -109,7 +109,7 @@ class clsModulesEmpresaTransporteEscolar
     $db = new clsBanco();
     $this->_schema = "modules.";
     $this->_tabela = "{$this->_schema}empresa_transporte_escolar";
-    $this->pessoa_logada = $_SESSION['id_pessoa'];
+    $this->pessoa_logada = session('id_pessoa');
 
     $this->_campos_lista = $this->_todos_campos = " cod_empresa_transporte_escolar, ref_idpes, ref_resp_idpes, observacao ";
 

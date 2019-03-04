@@ -605,7 +605,7 @@ class clsPessoaFisica extends clsPessoaFj
     public function excluir()
     {
         if ($this->idpes) {
-            $this->pessoa_logada = $_SESSION['id_pessoa'];
+            $this->pessoa_logada = session('id_pessoa');
             $db  = new clsBanco();
             $detalheAntigo = $this->detalheSimples();
             $excluir = $db->Consulta('UPDATE cadastro.fisica SET ativo = 0 WHERE idpes = ' . $this->idpes);

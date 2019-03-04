@@ -116,9 +116,7 @@ class clsPmieducarReservas
         $this->_schema = "pmieducar.";
         $this->_tabela = "{$this->_schema}reservas";
 
-    @session_start();
-    $this->pessoa_logada = $_SESSION['id_pessoa'];
-    session_write_close();
+        $this->pessoa_logada = session('id_pessoa');
 
         $this->_campos_lista = $this->_todos_campos = "r.cod_reserva, r.ref_usuario_libera, r.ref_usuario_cad, r.ref_cod_cliente, r.data_reserva, r.data_prevista_disponivel, r.data_retirada, r.ref_cod_exemplar, r.ativo";
 

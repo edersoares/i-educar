@@ -52,7 +52,7 @@ class indice extends clsCadastro
         
         $retorno = "Novo";
         @session_start();
-        $this->pessoa_logada = $_SESSION['id_pessoa'];
+        $this->pessoa_logada = session('id_pessoa');
         
         $this->cod_acao_governo = $_GET['cod_acao_governo'];
         if(isset($_GET['cod_acao_governo']) && isset($_GET['destaque']))
