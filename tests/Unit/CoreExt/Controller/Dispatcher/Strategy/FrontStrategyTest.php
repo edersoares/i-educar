@@ -50,10 +50,16 @@ class CoreExt_Controller_Dispatcher_Strategy_FrontStrategyTest extends PHPUnit\F
   protected $_frontController = NULL;
   protected $_pageStrategy = NULL;
 
+  /**
+   * @var string
+   */
+  private $requestUri;
+
   public function __construct($name = null, array $data = [], $dataName = '')
   {
       parent::__construct($name, $data, $dataName);
-    $this->_path = realpath(dirname(__FILE__) . '/../../_stub');
+      $this->_path = realpath(dirname(__FILE__) . '/../../_stub');
+      $this->requestUri = $_SERVER['REQUEST_URI'] ?? null;
   }
 
   protected function setUp(): void

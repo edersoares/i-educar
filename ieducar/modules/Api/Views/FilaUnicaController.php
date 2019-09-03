@@ -1,5 +1,7 @@
 <?php
 
+use Illuminate\Support\Facades\Session;
+
 require_once 'lib/Portabilis/Controller/ApiCoreController.php';
 require_once 'lib/Portabilis/Array/Utils.php';
 require_once 'lib/Portabilis/String/Utils.php';
@@ -8,7 +10,6 @@ require_once 'include/funcoes.inc.php';
 
 class FilaUnicaController extends ApiCoreController
 {
-
     protected function getDadosAluno()
     {
         $tipoCertidao = $this->getRequest()->tipo_certidao;
@@ -268,8 +269,7 @@ class FilaUnicaController extends ApiCoreController
     protected function getMontaSelectEscolasCandidato()
     {
         $cod_candidato_fila_unica = $this->getRequest()->cod_candidato_fila_unica;
-        $user = $this->currentUser();
-        $userId = $user['id'];
+        $userId = Session::get('id_pessoa');
         $nivelAcesso = $this->getNivelAcesso();
         $acessoEscolar = $nivelAcesso == 4;
 

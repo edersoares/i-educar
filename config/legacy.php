@@ -50,7 +50,8 @@ return [
 
     'migrations' => [
         database_path('migrations/extras'),
-        database_path('migrations/legacy')
+        database_path('migrations/legacy'),
+        base_path('ieducar/modules/Reports/database/migrations'),
     ],
 
     'env' => env('LEGACY_ENV', 'local'),
@@ -65,7 +66,7 @@ return [
     ],
 
     'app' => [
-        'name' => env('APP_NAME'),
+        'name' => env('APP_NAME', 'i-Educar'),
         'diario' => [
             'nomenclatura_exame' => '0',
         ],
@@ -77,7 +78,7 @@ return [
             'password' => env('DB_PASSWORD'),
         ],
         'administrative_pending' => [
-            'exist' => 'false',
+            'exist' => '',
             'msg' => '',
         ],
         'aws' => [
@@ -87,7 +88,7 @@ return [
         ],
         'template' => [
             'vars' => [
-                'instituicao' => 'i-Educar',
+                'instituicao' => 'Prefeitura Municipal',
             ],
             'pdf' => [
                 'titulo' => 'Relatório i-Educar',
@@ -136,8 +137,8 @@ return [
         ],
         'alunos' => [
             'laudo_medico_obrigatorio' => '1',
-            'nao_apresentar_campo_alfabetizado' => '1',
-            'codigo_sistema' => '"Código sistema"',
+            'nao_apresentar_campo_alfabetizado' => '0',
+            'codigo_sistema' => 'Código sistema',
             'mostrar_codigo_sistema' => '1',
         ],
         'faltas_notas' => [
@@ -154,13 +155,13 @@ return [
                 'password' => env('MAIL_PASSWORD'),
                 'encryption' => env('MAIL_ENCRYPTION', 'tls'),
             ],
-            'debug' => 'false',
+            'debug' => false,
         ],
         'recaptcha' => [
             'public_key' => '',
             'private_key' => '',
             'options' => [
-                'secure' => 'true',
+                'secure' => true,
                 'lang' => 'pt',
                 'theme' => 'white',
             ],
@@ -170,10 +171,10 @@ return [
     'modules' => [
         'error' => [
             'link_to_support' => 'https://forum.ieducar.org/',
-            'send_notification_email' => 'true',
-            'notification_email' => '',
-            'show_details' => 'true',
-            'track' => 'false',
+            'send_notification_email' => true,
+            'notification_email' => '1',
+            'show_details' => true,
+            'track' => false,
             'tracker_name' => 'EMAIL',
             'honeybadger_key' => '',
             'email_recipient' => '',
@@ -189,14 +190,15 @@ return [
         'modelo_ficha_individual' => 'todos',
         'mostrar_relatorios' => '',
         'logo_file_name' => 'brasil.png',
-        'show_error_details' => 'true',
-        'default_factory' => 'Portabilis_Report_ReportFactoryPHPJasper',
-        'source_path' => '/var/www/ieducar/ieducar/modules/Reports/ReportSources/',
+        'show_error_details' => true,
+        'default_factory' => env('REPORTS_FACTORY', 'Portabilis_Report_ReportFactoryPHPJasper'),
+        'source_path' => env('REPORTS_SOURCE_PATH', base_path('ieducar/modules/Reports/ReportSources/')),
         'diario_classe' => [
             'dias_temporarios' => '30',
         ],
         'remote_factory' => [
-            'url' => '',
+            'url' => env('REPORTS_URL'),
+            'token' => env('REPORTS_TOKEN'),
             'this_app_name' => '',
             'username' => '',
             'password' => '',

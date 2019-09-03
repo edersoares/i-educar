@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\LegacyRegistration;
+use App\Services\PromotionService;
 use App\Services\SchoolClass\AvailableTimeService;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\RedirectResponse;
@@ -354,6 +356,7 @@ class indice extends clsCadastro
 
     public function Novo()
     {
+
         $dependencia = $this->dependencia == 'on';
 
         if ($dependencia && !$this->verificaQtdeDependenciasPermitida()) {
@@ -373,7 +376,7 @@ class indice extends clsCadastro
         $db = new clsBanco();
         $somente_do_bairro = $db->CampoUnico("SELECT matricula_apenas_bairro_escola FROM pmieducar.instituicao where cod_instituicao = {$this->ref_cod_instituicao}");
 
-        if ($somente_do_bairro == 't') {
+        if ($somente_do_bairro) {
             $db = new clsBanco();
             $bairro_escola = $db->CampoUnico("select Upper(bairro) from cadastro.endereco_externo where idpes = (select idpes from cadastro.juridica where idpes = (select ref_idpes from pmieducar.escola where cod_escola = {$this->ref_cod_escola}))");
 
@@ -519,8 +522,8 @@ class indice extends clsCadastro
             $serie = new clsPmieducarSerie($this->ref_cod_serie);
             $detSerie = $serie->detalhe();
 
-            $alertaFaixaEtaria = $detSerie['alerta_faixa_etaria'] == 't';
-            $bloquearMatriculaFaixaEtaria = $detSerie['bloquear_matricula_faixa_etaria'] == 't';
+            $alertaFaixaEtaria = $detSerie['alerta_faixa_etaria'];
+            $bloquearMatriculaFaixaEtaria = $detSerie['bloquear_matricula_faixa_etaria'];
 
             $verificarDataCorte = $alertaFaixaEtaria || $bloquearMatriculaFaixaEtaria;
 
@@ -571,7 +574,7 @@ class indice extends clsCadastro
             $alunoInep = $objAluno->verificaInep($this->ref_cod_aluno);
             $objSerie = new clsPmieducarSerie($this->ref_cod_serie);
             $serieDet = $objSerie->detalhe();
-            $exigeInep = $serieDet['exigir_inep'] == 't';
+            $exigeInep = $serieDet['exigir_inep'];
 
             if (!$alunoInep && $exigeInep) {
                 $this->mensagem = 'N&atilde;o foi poss&iacute;vel realizar matr&iacute;cula, necess&aacute;rio inserir o INEP no cadastro do aluno.';
@@ -950,13 +953,22 @@ class indice extends clsCadastro
                 if ($countEscolasIguais > 0) {
                     $obj_crv = new clsPmieducarCandidatoReservaVaga($this->ref_cod_candidato_reserva_vaga);
                     $obj_crv->vinculaMatricula($this->ref_cod_escola, $this->cod_matricula, $this->ref_cod_aluno);
-                } elseif ($this->ref_cod_candidato_fila_unica) {
+                }
+
+                if ($this->ref_cod_candidato_fila_unica) {
                     $obj_cfu = new clsPmieducarCandidatoFilaUnica($this->ref_cod_candidato_fila_unica);
                     $obj_cfu->vinculaMatricula($this->cod_matricula);
                 }
 
                 $this->enturmacaoMatricula($this->cod_matricula, $this->ref_cod_turma);
                 $this->verificaSolicitacaoTransferencia();
+
+                /** @var LegacyRegistration $registration */
+
+                $registration = LegacyRegistration::find($this->cod_matricula);
+
+                $promocao = new PromotionService($registration->enrollments()->first());
+                $promocao->fakeRequest();
 
                 $this->mensagem = 'Cadastro efetuado com sucesso.<br />';
 

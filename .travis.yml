@@ -2,62 +2,6 @@ matrix:
 
   include:
 
-    - language: generic
-
-      services:
-        - docker
-
-      cache:
-        directories:
-          - $HOME/.composer/cache
-
-      before_script:
-        - git clone https://github.com/portabilis/i-educar-reports-package.git -b 2.2 ieducar/modules/Reports
-
-      script:
-        - docker-compose up -d --build
-        - docker-compose exec php composer new-install
-        - docker-compose exec php artisan reports:install
-        - docker-compose exec php vendor/bin/phpunit
-
-    - language: php
-
-      php:
-        - '7.1'
-
-      sudo: required
-
-      dist: xenial
-
-      addons:
-        postgresql: '9.5'
-        chrome: stable
-
-      cache:
-        directories:
-          - $HOME/.composer/cache
-
-      before_script:
-        - composer new-install
-        - php artisan dusk:chrome-driver 74
-        - php artisan serve > /dev/null 2>&1 &
-
-      script:
-        - vendor/bin/phpunit
-        - php artisan dusk
-
-      env:
-        - APP_URL=http://localhost:8000
-        - APP_ENV=testing
-        - DB_CONNECTION=pgsql
-        - DB_HOST=localhost
-        - DB_PORT=5432
-        - DB_DATABASE=travis
-        - DB_USERNAME=postgres
-        - DB_PASSWORD=
-        - API_ACCESS_KEY=ieducar-access-key
-        - API_SECRET_KEY=ieducar-secret-key
-
     - language: php
 
       php:
@@ -77,7 +21,7 @@ matrix:
 
       before_script:
         - composer new-install
-        - php artisan dusk:chrome-driver 74
+        - php artisan dusk:chrome-driver
         - php artisan serve > /dev/null 2>&1 &
 
       script:
@@ -115,7 +59,7 @@ matrix:
 
       before_script:
         - composer new-install
-        - php artisan dusk:chrome-driver 74
+        - php artisan dusk:chrome-driver
         - php artisan serve > /dev/null 2>&1 &
 
       script:

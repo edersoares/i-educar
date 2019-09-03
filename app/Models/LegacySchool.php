@@ -40,6 +40,14 @@ class LegacySchool extends Model
     public $timestamps = false;
 
     /**
+     * @return int
+     */
+    public function getIdAttribute()
+    {
+        return $this->cod_escola;
+    }
+
+    /**
      * Relacionamento com a instituição.
      *
      * @return BelongsTo
@@ -55,5 +63,13 @@ class LegacySchool extends Model
     public function person()
     {
         return $this->belongsTo(LegacyPerson::class, 'ref_idpes');
+    }
+
+    /**
+     * @return BelongsTo
+     */
+    public function organization()
+    {
+        return $this->belongsTo(LegacyOrganization::class, 'ref_idpes');
     }
 }

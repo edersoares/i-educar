@@ -18,6 +18,7 @@ class CreatePmieducarHistoricoEscolarTable extends Migration
                 SET default_with_oids = true;
                 
                 CREATE TABLE pmieducar.historico_escolar (
+	                id serial NOT NULL,
                     ref_cod_aluno integer NOT NULL,
                     sequencial integer NOT NULL,
                     ref_usuario_exc integer,
@@ -53,7 +54,7 @@ class CreatePmieducarHistoricoEscolarTable extends Migration
                 );
                 
                 ALTER TABLE ONLY pmieducar.historico_escolar
-                    ADD CONSTRAINT historico_escolar_pkey PRIMARY KEY (ref_cod_aluno, sequencial);
+	                ADD CONSTRAINT historico_escolar_pkey PRIMARY KEY (id);
                     
                 CREATE INDEX historico_escolar_ano_idx ON pmieducar.historico_escolar USING btree (ano);
 
@@ -68,6 +69,8 @@ class CreatePmieducarHistoricoEscolarTable extends Migration
                 CREATE INDEX idx_historico_escolar_id2 ON pmieducar.historico_escolar USING btree (ref_cod_aluno, sequencial, ano);
 
                 CREATE INDEX idx_historico_escolar_id3 ON pmieducar.historico_escolar USING btree (ref_cod_aluno, ano);
+                
+                CREATE UNIQUE INDEX pmieducar_historico_escolar_ref_cod_aluno_sequencial_unique ON pmieducar.historico_escolar USING btree (ref_cod_aluno, sequencial);
             '
         );
     }
