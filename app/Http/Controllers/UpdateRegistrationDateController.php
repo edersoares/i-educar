@@ -3,15 +3,20 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\UpdateRegistrationDateRequest;
+use App\Jobs\UpdateRegistrationDateJob;
 use App\Models\LegacyRegistration;
 use App\Process;
 use App\Services\RegistrationService;
+use App\User;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class UpdateRegistrationDateController extends Controller
 {
+    private const ASYNC_THRESHOLD = 500;
+
     /**
      * @return View
      */
@@ -32,7 +37,7 @@ class UpdateRegistrationDateController extends Controller
      *
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function updateStatus(UpdateRegistrationDateRequest $request, RegistrationService $registrationService)
+    public function updateStatus(UpdateRegistrationDateRequest $request)
     {
         $query = LegacyRegistration::active();
 
@@ -46,13 +51,26 @@ class UpdateRegistrationDateController extends Controller
             return redirect()->route('update-registration-date.index')->withInput()->with('show-confirmation', ['count' => count($registrations)]);
         }
 
+        $newDateRegistration = \DateTime::createFromFormat('d/m/Y', $request->get('nova_data_entrada'));
+        $newDateEnrollment = $request->get('nova_data_enturmacao')
+            ? \DateTime::createFromFormat('d/m/Y', $request->get('nova_data_enturmacao'))
+            : null;
+        $remanejadas = !empty($request->get('remanejadas'));
+
+        if (count($registrations) <= self::ASYNC_THRESHOLD) {
+            return $this->processSync($registrations, $newDateRegistration, $newDateEnrollment, $remanejadas, $request->user());
+        }
+
+        return $this->processAsync($registrations, $newDateRegistration, $newDateEnrollment, $remanejadas, $request->user());
+    }
+
+    private function processSync(Collection $registrations, \DateTime $newDateRegistration, ?\DateTime $newDateEnrollment, bool $remanejadas, User $user)
+    {
+        $registrationService = new RegistrationService($user);
+
         DB::beginTransaction();
 
-        $newDateRegistration = \DateTime::createFromFormat('d/m/Y', $request->get('nova_data_entrada'));
-        $newDateEnrollment = \DateTime::createFromFormat('d/m/Y', $request->get('nova_data_enturmacao'));
-
         $result = [];
-        $remanejadas = !empty($request->get('remanejadas'));
         foreach ($registrations as $registration) {
             $result[] = $registrationService->updateRegistrationDate($registration, $newDateRegistration);
 
@@ -66,6 +84,21 @@ class UpdateRegistrationDateController extends Controller
         return redirect()->route('update-registration-date.index')
             ->with('success', count($registrations) . ' matrículas atualizadas com sucesso.')
             ->with('registrations', $result);
+    }
+
+    private function processAsync(Collection $registrations, \DateTime $newDateRegistration, ?\DateTime $newDateEnrollment, bool $remanejadas, User $user)
+    {
+        UpdateRegistrationDateJob::dispatch(
+            registrationIds: $registrations->pluck('cod_matricula')->toArray(),
+            newDateRegistration: $newDateRegistration->format('Y-m-d'),
+            newDateEnrollment: $newDateEnrollment?->format('Y-m-d'),
+            ignoreRelocation: $remanejadas,
+            databaseConnection: DB::getDefaultConnection(),
+            user: $user,
+        );
+
+        return redirect()->route('update-registration-date.index')
+            ->with('success', sprintf('Serão atualizadas %s matrículas. Você será notificado no final do processo', count($registrations)));
     }
 
     private function addFilters(UpdateRegistrationDateRequest $request, $query)
