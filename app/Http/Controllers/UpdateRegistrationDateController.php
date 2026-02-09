@@ -5,11 +5,15 @@ namespace App\Http\Controllers;
 use App\Http\Requests\UpdateRegistrationDateRequest;
 use App\Jobs\UpdateRegistrationDateJob;
 use App\Models\LegacyRegistration;
+use App\Models\NotificationType;
 use App\Process;
+use App\Services\NotificationService;
 use App\Services\RegistrationService;
 use App\User;
+use Illuminate\Bus\Batch;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
@@ -88,17 +92,32 @@ class UpdateRegistrationDateController extends Controller
 
     private function processAsync(Collection $registrations, \DateTime $newDateRegistration, ?\DateTime $newDateEnrollment, bool $remanejadas, User $user)
     {
-        UpdateRegistrationDateJob::dispatch(
-            registrationIds: $registrations->pluck('cod_matricula')->toArray(),
-            newDateRegistration: $newDateRegistration->format('Y-m-d'),
-            newDateEnrollment: $newDateEnrollment?->format('Y-m-d'),
-            ignoreRelocation: $remanejadas,
-            databaseConnection: DB::getDefaultConnection(),
-            user: $user,
-        );
+        $databaseConnection = DB::getDefaultConnection();
+        $userId = $user->id;
+
+        $jobs = $registrations->pluck('cod_matricula')
+            ->chunk(self::ASYNC_THRESHOLD)
+            ->map(fn ($chunk) => new UpdateRegistrationDateJob(
+                registrationIds: $chunk->values()->toArray(),
+                newDateRegistration: $newDateRegistration->format('Y-m-d'),
+                newDateEnrollment: $newDateEnrollment?->format('Y-m-d'),
+                ignoreRelocation: $remanejadas,
+                databaseConnection: $databaseConnection,
+                user: $user,
+            ))
+            ->toArray();
+
+        $total = count($registrations);
+
+        Bus::batch($jobs)
+            ->finally(function (Batch $batch) use ($userId, $total) {
+                $message = "Atualização de datas de matrícula concluída. {$total} matrículas atualizadas.";
+                (new NotificationService)->createByUser($userId, $message, '/atualiza-data-entrada', NotificationType::OTHER);
+            })
+            ->dispatch();
 
         return redirect()->route('update-registration-date.index')
-            ->with('success', sprintf('Serão atualizadas %s matrículas. Você será notificado no final do processo', count($registrations)));
+            ->with('success', sprintf('Serão atualizadas %s matrículas. Você será notificado no final do processo', $total));
     }
 
     private function addFilters(UpdateRegistrationDateRequest $request, $query)
