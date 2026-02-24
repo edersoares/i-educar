@@ -13,7 +13,7 @@ class LegacyRoleBuilder extends LegacyBuilder
     /** @deprecated */
     public function professor(): self
     {
-        return $this->isTeacher();
+        return $this->whereIsTeacher();
     }
 
     public function whereIsActive(): self
