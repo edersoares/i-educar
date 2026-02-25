@@ -26,7 +26,7 @@
         "ankurk91/laravel-eloquent-relationships": "^2.1",
         "aws/aws-sdk-php-laravel": "^3.7",
         "composer/semver": "^3.2",
-        "dex/composer-plug-and-play": "^0.24",
+        "dex/composer-plug-and-play": "^0.26",
         "dex/frontier": "^0.16.0",
         "google/recaptcha": "^1.2",
         "guzzlehttp/guzzle": "^7.3",

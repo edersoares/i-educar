@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "3b42418ee0719856b6c1d3a39147115a",
+    "content-hash": "75f660b6a7f6c718e5e208696129a786",
     "packages": [
         {
             "name": "ankurk91/laravel-eloquent-relationships",
@@ -575,27 +575,27 @@
         },
         {
             "name": "dex/composer-plug-and-play",
-            "version": "0.24.0",
+            "version": "0.26.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/edersoares/composer-plug-and-play.git",
-                "reference": "92193851920a63e484d62f211e7733ce2b858106"
+                "reference": "d12b3c7568e1c1cf8ebfa2e70f569301f9b57ffe"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/edersoares/composer-plug-and-play/zipball/92193851920a63e484d62f211e7733ce2b858106",
-                "reference": "92193851920a63e484d62f211e7733ce2b858106",
+                "url": "https://api.github.com/repos/edersoares/composer-plug-and-play/zipball/d12b3c7568e1c1cf8ebfa2e70f569301f9b57ffe",
+                "reference": "d12b3c7568e1c1cf8ebfa2e70f569301f9b57ffe",
                 "shasum": ""
             },
             "require": {
                 "composer-plugin-api": "^2.3",
                 "ext-json": "*",
-                "php": "^8.1"
+                "php": "^8.3"
             },
             "require-dev": {
                 "composer/composer": "^2.3.0",
                 "laravel/pint": "^1.7",
-                "pestphp/pest": "^2.34"
+                "pestphp/pest": "^4"
             },
             "type": "composer-plugin",
             "extra": {
@@ -620,9 +620,9 @@
             "description": "Plug and play packages for Composer",
             "support": {
                 "issues": "https://github.com/edersoares/composer-plug-and-play/issues",
-                "source": "https://github.com/edersoares/composer-plug-and-play/tree/0.24.0"
+                "source": "https://github.com/edersoares/composer-plug-and-play/tree/0.26.0"
             },
-            "time": "2024-10-03T11:43:18+00:00"
+            "time": "2026-02-25T14:58:13+00:00"
         },
         {
             "name": "dex/frontier",
