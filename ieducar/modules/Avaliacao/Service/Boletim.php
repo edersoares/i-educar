@@ -2329,9 +2329,11 @@ class Avaliacao_Service_Boletim implements CoreExt_Configurable
      *
      * @return mixed
      */
-    public function arredondaMedia($media)
+    public function arredondaMedia($media, $componenteId = null)
     {
-        $componenteId = $this->getCurrentComponenteCurricular();
+        if ($componenteId === null) {
+            $componenteId = $this->getCurrentComponenteCurricular();
+        }
 
         if ($media instanceof Avaliacao_Model_NotaComponenteMedia) {
             $media = $media->nota;
@@ -2834,7 +2836,7 @@ class Avaliacao_Service_Boletim implements CoreExt_Configurable
             ]);
 
             $notaComponenteCurricularMedia->media = $media;
-            $notaComponenteCurricularMedia->mediaArredondada = $this->arredondaMedia($media);
+            $notaComponenteCurricularMedia->mediaArredondada = $this->arredondaMedia($media, $componente);
             $notaComponenteCurricularMedia->bloqueada = $lock;
             $notaComponenteCurricularMedia->situacao = null;
 
@@ -2844,7 +2846,7 @@ class Avaliacao_Service_Boletim implements CoreExt_Configurable
                 'notaAluno' => $this->_getNotaAluno()->id,
                 'componenteCurricular' => $componente,
                 'media' => $media,
-                'mediaArredondada' => $this->arredondaMedia($media),
+                'mediaArredondada' => $this->arredondaMedia($media, $componente),
                 'etapa' => $etapa,
                 'bloqueada' => $lock,
             ]);
@@ -3025,7 +3027,7 @@ class Avaliacao_Service_Boletim implements CoreExt_Configurable
                         // desbloqueá-la antes.
                         if (!$locked) {
                             $notaComponenteCurricularMedia->media = $media;
-                            $notaComponenteCurricularMedia->mediaArredondada = $this->arredondaMedia($media);
+                            $notaComponenteCurricularMedia->mediaArredondada = $this->arredondaMedia($media, $id);
                         }
 
                         $notaComponenteCurricularMedia->etapa = $etapa;
@@ -3037,7 +3039,7 @@ class Avaliacao_Service_Boletim implements CoreExt_Configurable
                             'notaAluno' => $this->_getNotaAluno()->id,
                             'componenteCurricular' => $id,
                             'media' => $media,
-                            'mediaArredondada' => $this->arredondaMedia($media),
+                            'mediaArredondada' => $this->arredondaMedia($media, $id),
                             'etapa' => $etapa,
                             'bloqueada' => 'f',
                         ]);
