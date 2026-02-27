@@ -9,11 +9,11 @@ return new class extends Migration
 
     public function up(): void
     {
-        $this->createView('relatorio.view_situacao', '2020-04-06');
+        $this->createView('relatorio.view_situacao', '2026-02-24');
     }
 
     public function down(): void
     {
-        $this->createView('relatorio.view_situacao', '2026-02-24');
+        $this->createView('relatorio.view_situacao', '2020-04-06');
     }
 };
