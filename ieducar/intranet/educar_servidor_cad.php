@@ -918,8 +918,27 @@ JS;
             ->delete();
     }
 
+    /**
+     * Remove a referência de função em registros inativos de falta_atraso.
+     *
+     * A validação (validaExclusaoFuncoes) só verifica registros ativos (ativo = 1),
+     * mas a FK no banco verifica todos. Sem isso, o DELETE em servidor_funcao
+     * falha com FK violation por causa dos registros inativos.
+     */
+    public function limpaFuncaoFaltaAtrasoInativos($funcoesMantidasIds)
+    {
+        LegacyAbsenceDelay::query()
+            ->onlyTrashed()
+            ->whereEmployee($this->cod_servidor)
+            ->whereNotNull('ref_cod_servidor_funcao')
+            ->when(!empty($funcoesMantidasIds), fn ($q) => $q->whereNotIn('ref_cod_servidor_funcao', $funcoesMantidasIds))
+            ->update(['ref_cod_servidor_funcao' => null]);
+    }
+
     public function excluiFuncoesRemovidas($funcoes)
     {
+        $this->limpaFuncaoFaltaAtrasoInativos($funcoes);
+
         $obj_servidor_funcao = new clsPmieducarServidorFuncao($this->ref_cod_instituicao, $this->cod_servidor);
         $obj_servidor_funcao->excluirFuncoesRemovidas($funcoes);
     }

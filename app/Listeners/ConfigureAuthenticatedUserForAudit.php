@@ -40,6 +40,8 @@ class ConfigureAuthenticatedUserForAudit
             'user_id' => $id,
             'user_name' => $name,
             'origin' => $this->request->fullUrl(),
+            'ip' => $this->request->ip(),
+            'user_agent' => $this->request->userAgent(),
         ], JSON_HEX_APOS | JSON_HEX_QUOT);
 
         $pdo->exec("SET \"audit.enabled\" = {$enabled};");
