@@ -1,6 +1,6 @@
 <table class="tablelistagem" style="border: 0; padding: 0; border-collapse: collapse; width: 100%">
     <tr>
-        <td class="titulo-tabela-listagem" colspan="2">Registros no i-Educar</td>
+        <td class="titulo-tabela-listagem" colspan="2">{{ $title ?? 'Registros no i-Educar' }}</td>
     </tr>
     @if($totalIeducar === 0)
         <tr>

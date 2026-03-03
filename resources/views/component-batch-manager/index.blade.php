@@ -24,7 +24,16 @@
                     \App\Models\Enums\ComponentBatchStatus::WAITING,
                     \App\Models\Enums\ComponentBatchStatus::RUNNING,
                 ]) && $operation->created_at < now()->subMinutes(20);
-                $totalTime = $opData['execution_time']['total'] ?? null;
+                $totalSecs = $opData['execution_time']['total'] ?? null;
+                if ($totalSecs === null) {
+                    $totalTime = null;
+                } else {
+                    $s = (int) $totalSecs;
+                    if ($s < 1) $totalTime = '< 1s';
+                    elseif ($s < 60) $totalTime = $s . 's';
+                    elseif ($s < 3600) $totalTime = floor($s / 60) . 'm ' . ($s % 60) . 's';
+                    else $totalTime = floor($s / 3600) . 'h ' . floor(($s % 3600) / 60) . 'm ' . ($s % 60) . 's';
+                }
             @endphp
             <tr>
                 <td><a href="{{ route('component-batch-manager.show', $operation) }}">{{ $opData['year'] ?? '-' }}</a></td>
@@ -35,7 +44,7 @@
                         <span class="label label-{{ $status->color() }}">{{ $status->label() }}</span>
                     @endif
                 </td>
-                <td>{{ $totalTime !== null ? $totalTime . 's' : '-' }}</td>
+                <td>{{ $totalTime ?? '-' }}</td>
                 <td>{{ $operation->user?->name ?? 'Usuário #' . $operation->user_id }}</td>
                 <td>{{ $operation->created_at->format('d/m/Y H:i') }}</td>
             </tr>

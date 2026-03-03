@@ -12,7 +12,8 @@ return new class extends Migration
     {
         Schema::create('component_batch_operations', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('user_id');
+            $table->unsignedInteger('user_id');
+            $table->foreign('user_id')->references('cod_usuario')->on('pmieducar.usuario');
             $table->unsignedSmallInteger('status_id')->default(1);
             $table->jsonb('data');
             $table->text('error_message')->nullable();

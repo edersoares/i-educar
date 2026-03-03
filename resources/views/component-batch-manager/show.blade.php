@@ -30,12 +30,19 @@
         </tr>
         @if(isset($data['execution_time']))
             @php
+                $formatTime = function ($s) {
+                    $s = (int) $s;
+                    if ($s < 1) return '< 1s';
+                    if ($s < 60) return $s . 's';
+                    if ($s < 3600) return floor($s / 60) . 'm ' . ($s % 60) . 's';
+                    return floor($s / 3600) . 'h ' . floor(($s % 3600) / 60) . 'm ' . ($s % 60) . 's';
+                };
                 $time = $data['execution_time'];
                 $parts = [];
-                if (isset($time['idiario'])) $parts[] = "i-Diário: {$time['idiario']}s";
-                if (isset($time['ieducar'])) $parts[] = "i-Educar: {$time['ieducar']}s";
-                if (isset($time['verificacao'])) $parts[] = "Verificação: {$time['verificacao']}s";
-                $timeLabel = ($time['total'] ?? 0) . 's' . (count($parts) > 0 ? ' (' . implode(', ', $parts) . ')' : '');
+                $parts[] = isset($time['idiario']) ? "i-Diário: " . $formatTime($time['idiario']) : "i-Diário: não executado";
+                if (isset($time['ieducar'])) $parts[] = "i-Educar: " . $formatTime($time['ieducar']);
+                if (isset($time['verificacao'])) $parts[] = "Verificação: " . $formatTime($time['verificacao']);
+                $timeLabel = $formatTime($time['total'] ?? 0) . (count($parts) > 0 ? ' (' . implode(', ', $parts) . ')' : '');
             @endphp
             <tr>
                 <td class="formlttd" valign="top"><span class="form">Tempo de execução</span></td>
@@ -122,6 +129,7 @@
             'counts' => $previewCounts,
             'data' => $data,
             'totalIeducar' => $totalIeducar,
+            'title' => 'Registros encontrados no i-Educar',
         ])
     @endif
 
@@ -170,23 +178,15 @@
     </form>
 
     @if($showVerification)
-        @if($status === \App\Models\Enums\ComponentBatchStatus::COMPLETED)
-            @if($totalPostIeducar === 0 && $totalPostIdiario === 0 && empty($verificationWarnings))
-                <div style="background-color: #dff0d8; border: 1px solid #d6e9c6; padding: 10px; border-radius: 4px; margin-bottom: 10px;">
-                    <strong>Operação concluída com sucesso.</strong>
-                </div>
-            @else
-                <div style="background-color: #fcf8e3; border: 1px solid #faebcc; color: #8a6d3b; padding: 10px; border-radius: 4px; margin-bottom: 10px;">
-                    <strong>Operação concluída com observações.</strong>
-                    @if(!empty($verificationWarnings))
-                        <ul style="margin: 5px 0 0 0; padding-left: 20px;">
-                            @foreach($verificationWarnings as $warning)
-                                <li>{{ $warning }}</li>
-                            @endforeach
-                        </ul>
-                    @endif
-                </div>
-            @endif
+        @if($status === \App\Models\Enums\ComponentBatchStatus::COMPLETED && !empty($verificationWarnings))
+            <div style="background-color: #fcf8e3; border: 1px solid #faebcc; color: #8a6d3b; padding: 10px; border-radius: 4px; margin-bottom: 10px;">
+                <strong>Observações:</strong>
+                <ul style="margin: 5px 0 0 0; padding-left: 20px;">
+                    @foreach($verificationWarnings as $warning)
+                        <li>{{ $warning }}</li>
+                    @endforeach
+                </ul>
+            </div>
         @endif
 
         @if($postIdiario && ($data['remove_records'] ?? false))
@@ -201,6 +201,7 @@
                 'counts' => $postCounts,
                 'data' => $data,
                 'totalIeducar' => $totalPostIeducar,
+                'title' => 'Registros remanescentes no i-Educar',
                 'emptyMessage' => 'Nenhum registro remanescente.',
             ])
         @endif
@@ -213,6 +214,7 @@
     @endif
 
     <div style="text-align: center; margin-top: 20px; margin-bottom: 20px;">
+        <a href="{{ route('component-batch-manager.index') }}" class="btn" style="margin-right: 10px; text-decoration: none;">Voltar</a>
         <a href="{{ route('component-batch-manager.create') }}" class="btn-green" style="text-decoration: none;">Nova Operação</a>
     </div>
 @endsection
