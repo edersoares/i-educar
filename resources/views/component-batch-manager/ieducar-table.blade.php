@@ -24,6 +24,10 @@
             <tr><td class="{{ $rowClass }}">Pareceres</td><td class="{{ $rowClass }}">{{ number_format($counts['parecer'] ?? 0, 0, ',', '.') }}</td></tr>
             @php $rowClass = $rowClass === 'formlttd' ? 'formmdtd' : 'formlttd'; @endphp
         @endif
+        @if($data['remove_exemptions'] ?? false)
+            <tr><td class="{{ $rowClass }}">Dispensas</td><td class="{{ $rowClass }}">{{ number_format($counts['dispensa'] ?? 0, 0, ',', '.') }}</td></tr>
+            @php $rowClass = $rowClass === 'formlttd' ? 'formmdtd' : 'formlttd'; @endphp
+        @endif
         @if($data['unlink_class_components'] ?? false)
             <tr><td class="{{ $rowClass }}">Componentes da turma</td><td class="{{ $rowClass }}">{{ number_format($counts['componente_turma'] ?? 0, 0, ',', '.') }}</td></tr>
             @php $rowClass = $rowClass === 'formlttd' ? 'formmdtd' : 'formlttd'; @endphp

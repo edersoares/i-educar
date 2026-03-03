@@ -91,6 +91,9 @@
                     @if($data['remove_records'] ?? false)
                         <li>Remover lançamentos</li>
                     @endif
+                    @if($data['remove_exemptions'] ?? false)
+                        <li>Remover dispensas</li>
+                    @endif
                     @if($data['unlink_class_components'] ?? false)
                         <li>Remover componentes da turma</li>
                     @endif

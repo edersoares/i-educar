@@ -22,6 +22,7 @@ class ComponentBatchOperationRequest extends FormRequest
             'unlink_teacher_disciplines' => $this->has('unlink_teacher_disciplines'),
             'unlink_school_grade_disciplines' => $this->has('unlink_school_grade_disciplines'),
             'unlink_grade_components' => $this->has('unlink_grade_components'),
+            'remove_exemptions' => $this->has('remove_exemptions'),
         ]);
     }
 
@@ -43,6 +44,7 @@ class ComponentBatchOperationRequest extends FormRequest
             'unlink_teacher_disciplines' => ['nullable', 'boolean'],
             'unlink_school_grade_disciplines' => ['nullable', 'boolean'],
             'unlink_grade_components' => ['nullable', 'boolean'],
+            'remove_exemptions' => ['nullable', 'boolean'],
         ];
     }
 
@@ -54,7 +56,8 @@ class ComponentBatchOperationRequest extends FormRequest
                 || $this->input('unlink_class_components')
                 || $this->input('unlink_teacher_disciplines')
                 || $this->input('unlink_school_grade_disciplines')
-                || $this->input('unlink_grade_components');
+                || $this->input('unlink_grade_components')
+                || $this->input('remove_exemptions');
 
             if (!$hasPhase) {
                 $validator->errors()->add('operations', 'Selecione ao menos uma operação.');

@@ -7,6 +7,7 @@ use App\Models\Enums\ComponentBatchStatus;
 use App\Models\LegacyDisciplineAbsence;
 use App\Models\LegacyDisciplineAcademicYear;
 use App\Models\LegacyDisciplineDescriptiveOpinion;
+use App\Models\LegacyDisciplineExemption;
 use App\Models\LegacyDisciplineSchoolClass;
 use App\Models\LegacyDisciplineScore;
 use App\Models\LegacyDisciplineScoreAverage;
@@ -29,6 +30,7 @@ class ComponentBatchManagerService
         'professor_turma' => 'Vínculos professor/turma',
         'escola_serie_disciplina' => 'Componentes da série da escola',
         'componente_ano_escolar' => 'Componentes da série',
+        'dispensa' => 'Dispensas',
     ];
 
     private const RECORD_MODELS = [
@@ -86,6 +88,10 @@ class ComponentBatchManagerService
             $preview['componente_ano_escolar'] = $this->componenteAnoEscolarQuery($gradeIds, $disciplineIds)
                 ->whereRaw('ARRAY[?::smallint] <@ anos_letivos', [$year])
                 ->count();
+        }
+
+        if ($params['remove_exemptions'] ?? false) {
+            $preview['dispensa'] = $this->dispensaQuery($gradeIds, $disciplineIds, $year, $schoolIds)->count();
         }
 
         return $preview;
@@ -218,6 +224,10 @@ class ComponentBatchManagerService
                     disciplineIds: $disciplineIds,
                     year: $year,
                 );
+            }
+
+            if ($data['remove_exemptions'] ?? false) {
+                $counts['dispensa'] = $this->dispensaQuery($gradeIds, $disciplineIds, $year, $schoolIds)->delete();
             }
 
             return $counts;
@@ -356,6 +366,15 @@ class ComponentBatchManagerService
             ->whereIn('ref_ref_cod_serie', $gradeIds)
             ->whereIn('ref_cod_disciplina', $disciplineIds)
             ->when($schoolIds, fn ($q) => $q->whereIn('ref_ref_cod_escola', $schoolIds));
+    }
+
+    private function dispensaQuery(array $gradeIds, array $disciplineIds, int $year, ?array $schoolIds): Builder
+    {
+        return LegacyDisciplineExemption::query()
+            ->whereIn('ref_cod_disciplina', $disciplineIds)
+            ->whereIn('ref_cod_serie', $gradeIds)
+            ->when($schoolIds, fn ($q) => $q->whereIn('ref_cod_escola', $schoolIds))
+            ->whereHas('registration', fn ($q) => $q->where('ano', $year));
     }
 
     private function componenteAnoEscolarQuery(array $gradeIds, array $disciplineIds): Builder

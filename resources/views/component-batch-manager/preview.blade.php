@@ -17,6 +17,9 @@
                     @if($params['remove_records'] ?? false)
                         <li>Remover lançamentos</li>
                     @endif
+                    @if($params['remove_exemptions'] ?? false)
+                        <li>Remover dispensas</li>
+                    @endif
                     @if($params['unlink_class_components'] ?? false)
                         <li>Remover componentes da turma</li>
                     @endif

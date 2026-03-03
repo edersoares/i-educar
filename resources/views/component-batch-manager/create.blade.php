@@ -112,36 +112,45 @@
 
             <tr>
                 <td class="formlttd" valign="top">
-                    <span class="form">Remover componentes da turma</span>
+                    <span class="form">Remover dispensas</span>
                 </td>
                 <td class="formlttd" valign="top">
+                    <input type="checkbox" name="remove_exemptions" id="remove_exemptions" value="1" {{ old('remove_exemptions') ? 'checked' : '' }} class="operation-checkbox">
+                </td>
+            </tr>
+
+            <tr>
+                <td class="formmdtd" valign="top">
+                    <span class="form">Remover componentes da turma</span>
+                </td>
+                <td class="formmdtd" valign="top">
                     <input type="checkbox" name="unlink_class_components" id="unlink_class_components" value="1" {{ old('unlink_class_components', '1') ? 'checked' : '' }} class="operation-checkbox">
                 </td>
             </tr>
 
             <tr>
-                <td class="formmdtd" valign="top">
+                <td class="formlttd" valign="top">
                     <span class="form">Remover vínculos professor/turma e professor/disciplina</span>
                 </td>
-                <td class="formmdtd" valign="top">
+                <td class="formlttd" valign="top">
                     <input type="checkbox" name="unlink_teacher_disciplines" id="unlink_teacher_disciplines" value="1" {{ old('unlink_teacher_disciplines', '1') ? 'checked' : '' }} class="operation-checkbox">
                 </td>
             </tr>
 
             <tr>
-                <td class="formlttd" valign="top">
+                <td class="formmdtd" valign="top">
                     <span class="form">Remover componentes da série da escola</span>
                 </td>
-                <td class="formlttd" valign="top">
+                <td class="formmdtd" valign="top">
                     <input type="checkbox" name="unlink_school_grade_disciplines" id="unlink_school_grade_disciplines" value="1" {{ old('unlink_school_grade_disciplines', '1') ? 'checked' : '' }} class="operation-checkbox">
                 </td>
             </tr>
 
             <tr>
-                <td class="formmdtd" valign="top">
+                <td class="formlttd" valign="top">
                     <span class="form">Remover componentes da série</span>
                 </td>
-                <td class="formmdtd" valign="top">
+                <td class="formlttd" valign="top">
                     <input type="checkbox" name="unlink_grade_components" id="unlink_grade_components" value="1" {{ old('unlink_grade_components', '1') ? 'checked' : '' }} class="operation-checkbox">
                 </td>
             </tr>
@@ -295,6 +304,7 @@
             // Hierarquia de operações: desmarcar pai desmarca filhos, marcar filho marca pais
             var deps = {
                 'remove_records': [],
+                'remove_exemptions': [],
                 'unlink_class_components': ['remove_records'],
                 'unlink_teacher_disciplines': ['remove_records'],
                 'unlink_school_grade_disciplines': ['unlink_class_components', 'remove_records'],
@@ -303,6 +313,7 @@
 
             var children = {
                 'remove_records': ['unlink_class_components', 'unlink_teacher_disciplines', 'unlink_school_grade_disciplines', 'unlink_grade_components'],
+                'remove_exemptions': [],
                 'unlink_class_components': ['unlink_school_grade_disciplines', 'unlink_grade_components'],
                 'unlink_school_grade_disciplines': ['unlink_grade_components'],
                 'unlink_teacher_disciplines': [],
