@@ -136,6 +136,66 @@ class iDiarioService
         ]);
     }
 
+    /**
+     * @return mixed
+     */
+    protected function delete(string $path, array $query = [])
+    {
+        return $this->http->request('DELETE', $this->apiUrl . $path, [
+            'query' => $query,
+            'headers' => [
+                'token' => $this->apiToken,
+            ],
+        ]);
+    }
+
+    /**
+     * @return mixed
+     */
+    protected function post(string $path, array $json)
+    {
+        return $this->http->request('POST', $this->apiUrl . $path, [
+            'json' => $json,
+            'headers' => [
+                'token' => $this->apiToken,
+            ],
+        ]);
+    }
+
+    public function getDisciplineRecordsCount(array $params): array
+    {
+        try {
+            $response = $this->post('/api/v2/discipline_records/count', [
+                'year' => $params['year'],
+                'unities' => $params['school_ids'] ?? [],
+                'courses' => $params['course_ids'] ?? [],
+                'grades' => $params['grade_ids'] ?? [],
+                'disciplines' => $params['discipline_ids'] ?? [],
+            ]);
+
+            return (array) json_decode($response->getBody()->getContents(), true);
+        } catch (Exception $e) {
+            throw new RuntimeException('Erro ao consultar i-Diário: ' . $e->getMessage());
+        }
+    }
+
+    public function deleteDisciplineRecords(array $params): array
+    {
+        try {
+            $response = $this->post('/api/v2/discipline_records/destroy_batch', [
+                'year' => $params['year'],
+                'unities' => $params['school_ids'] ?? [],
+                'courses' => $params['course_ids'] ?? [],
+                'grades' => $params['grade_ids'] ?? [],
+                'disciplines' => $params['discipline_ids'] ?? [],
+            ]);
+
+            return (array) json_decode($response->getBody()->getContents(), true);
+        } catch (Exception $e) {
+            throw new RuntimeException('Erro ao excluir do i-Diário: ' . $e->getMessage());
+        }
+    }
+
     public static function hasIdiarioConfigurations()
     {
         return !empty(config('legacy.config.url_novo_educacao'))
