@@ -3,6 +3,9 @@
 use App\Models\LegacyEnrollment;
 use App\Models\RegistrationStatus;
 use App\Process;
+use App\Services\EnrollmentService;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 return new class extends clsCadastro
 {
@@ -127,20 +130,16 @@ return new class extends clsCadastro
 
     public function Editar()
     {
+        $enrollment = LegacyEnrollment::query()
+            ->where('ref_cod_matricula', $this->ref_cod_matricula)
+            ->whereSchoolClass($this->ref_cod_turma)
+            ->where('sequencial', $this->sequencial)
+            ->firstOrFail();
+
+        $dataEnturmacao = dataToBanco(data_original: $this->data_enturmacao);
+        $dataExclusao = dataToBanco(data_original: $this->data_exclusao);
+
         $enturmacao = new clsPmieducarMatriculaTurma;
-        $enturmacao->ref_cod_matricula = $this->ref_cod_matricula;
-        $enturmacao->ref_cod_turma = $this->ref_cod_turma;
-        $enturmacao->sequencial = $this->sequencial;
-        $enturmacao->ref_usuario_exc = $this->pessoa_logada;
-        $enturmacao->data_enturmacao = dataToBanco(data_original: $this->data_enturmacao);
-        $enturmacao->data_exclusao = dataToBanco(data_original: $this->data_exclusao);
-
-        $enturmacao->transferido = $this->matricula_situacao === 'transferido';
-        $enturmacao->remanejado = $this->matricula_situacao === 'remanejado';
-        $enturmacao->reclassificado = $this->matricula_situacao === 'reclassificado';
-        $enturmacao->abandono = $this->matricula_situacao === 'abandono';
-        $enturmacao->falecido = $this->matricula_situacao === 'falecido';
-
         $dataSaidaEnturmacaoAnterior = $enturmacao->getDataSaidaEnturmacaoAnterior(ref_matricula: $this->ref_cod_matricula, sequencial: $this->sequencial);
         $dataEntradaEnturmacaoSeguinte = $enturmacao->getDataEntradaEnturmacaoSeguinte(ref_matricula: $this->ref_cod_matricula, sequencial: $this->sequencial);
 
@@ -154,19 +153,19 @@ return new class extends clsCadastro
 
         $seqUltimaEnturmacao = $enturmacao->getUltimaEnturmacao(ref_matricula: $this->ref_cod_matricula);
 
-        if ($enturmacao->data_exclusao && ($enturmacao->data_exclusao < $enturmacao->data_enturmacao)) {
+        if ($dataExclusao && ($dataExclusao < $dataEnturmacao)) {
             $this->mensagem = 'Edição não realizada. A data de saída não pode ser anterior a data de enturmação.';
 
             return false;
         }
 
-        if ($enturmacao->data_exclusao && $dataEntradaEnturmacaoSeguinte && ($enturmacao->data_exclusao > $dataEntradaEnturmacaoSeguinte)) {
+        if ($dataExclusao && $dataEntradaEnturmacaoSeguinte && ($dataExclusao > $dataEntradaEnturmacaoSeguinte)) {
             $this->mensagem = 'Edição não realizada. A data de saída não pode ser posterior a data de entrada da enturmação seguinte.';
 
             return false;
         }
 
-        if ($dataSaidaEnturmacaoAnterior && ($enturmacao->data_enturmacao < $dataSaidaEnturmacaoAnterior)) {
+        if ($dataSaidaEnturmacaoAnterior && ($dataEnturmacao < $dataSaidaEnturmacaoAnterior)) {
             $this->mensagem = 'Edição não realizada. A data de enturmação não pode ser anterior a data de saída da enturmação antecessora.';
 
             return false;
@@ -174,7 +173,7 @@ return new class extends clsCadastro
 
         if (
             $dataSaidaMatricula
-            && ($enturmacao->data_exclusao > $dataSaidaMatricula)
+            && ($dataExclusao > $dataSaidaMatricula)
             && (
                 $matricula['aprovado'] == App_Model_MatriculaSituacao::TRANSFERIDO
                 || $matricula['aprovado'] == App_Model_MatriculaSituacao::ABANDONO
@@ -186,11 +185,47 @@ return new class extends clsCadastro
             return false;
         }
 
-        $editou = $enturmacao->edita();
+        if ($this->matricula_situacao && !$dataExclusao) {
+            $this->mensagem = 'Edição não realizada. É necessário informar a data de saída ao selecionar uma situação.';
 
-        if ($editou) {
-            if (is_null(value: $dataSaidaMatricula) || empty($dataSaidaMatricula)) {
-                $dataSaidaMatricula = $enturmacao->data_exclusao;
+            return false;
+        }
+
+        DB::beginTransaction();
+
+        try {
+            if ($enrollment->data_enturmacao?->format('Y-m-d') !== $dataEnturmacao) {
+                $enrollment->data_enturmacao = $dataEnturmacao;
+                $enrollment->save();
+            }
+
+            if ($this->matricula_situacao && $dataExclusao && $enrollment->ativo) {
+                $enrollmentService = new EnrollmentService(auth()->user());
+                $date = Carbon::parse($dataExclusao);
+
+                $cancelou = $enrollmentService->cancelEnrollment($enrollment, $date);
+
+                if (!$cancelou) {
+                    DB::rollBack();
+                    $this->mensagem = 'Edição não realizada. Erro ao desativar a enturmação.';
+
+                    return false;
+                }
+
+                $enrollmentService->markWithSituation($enrollment, $this->matricula_situacao);
+            } else {
+                $enrollment->data_exclusao = $dataExclusao ?: null;
+                $enrollment->ref_usuario_exc = $this->pessoa_logada;
+                $enrollment->transferido = $this->matricula_situacao === 'transferido';
+                $enrollment->remanejado = $this->matricula_situacao === 'remanejado';
+                $enrollment->reclassificado = $this->matricula_situacao === 'reclassificado';
+                $enrollment->abandono = $this->matricula_situacao === 'abandono';
+                $enrollment->falecido = $this->matricula_situacao === 'falecido';
+                $enrollment->save();
+            }
+
+            if (empty($dataSaidaMatricula)) {
+                $dataSaidaMatricula = $dataExclusao;
 
                 $matricula_get = new clsPmieducarMatricula(
                     cod_matricula: $this->ref_cod_matricula,
@@ -205,13 +240,16 @@ return new class extends clsCadastro
                 $matricula_get->edita();
             }
 
+            DB::commit();
+
             $this->mensagem = 'Edição efetuada com sucesso.';
             $this->simpleRedirect(url: "/enrollment-history/{$this->ref_cod_matricula}");
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            $this->mensagem = 'Edição não realizada. ' . $e->getMessage();
+
+            return false;
         }
-
-        $this->mensagem = 'Edição não realizada.';
-
-        return false;
     }
 
     private function enturmacaoRemanejadaMesmaTurma($sequencial)
