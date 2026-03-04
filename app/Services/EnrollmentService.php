@@ -315,13 +315,12 @@ class EnrollmentService
      */
     public function markWithSituation(LegacyEnrollment $enrollment, string $situation): void
     {
-        match ($situation) {
-            'transferido' => $this->markAsTransferred($enrollment),
-            'remanejado' => $this->markAsRelocated($enrollment),
-            'reclassificado' => $this->markAsReclassified($enrollment),
-            'abandono' => $this->markAsAbandoned($enrollment),
-            'falecido' => $this->markAsDeceased($enrollment),
-        };
+        $enrollment->transferido = $situation === 'transferido';
+        $enrollment->remanejado = $situation === 'remanejado';
+        $enrollment->reclassificado = $situation === 'reclassificado';
+        $enrollment->abandono = $situation === 'abandono';
+        $enrollment->falecido = $situation === 'falecido';
+        $enrollment->saveOrFail();
     }
 
     /**
