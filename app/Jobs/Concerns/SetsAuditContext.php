@@ -9,7 +9,7 @@ trait SetsAuditContext
 {
     protected function setAuditContextFromLaravelContext(): void
     {
-        if (! config('audit.enabled', true) || ! Context::has('audit_user_id')) {
+        if (!config('audit.enabled', true) || !Context::has('audit_user_id')) {
             return;
         }
 
