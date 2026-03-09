@@ -32,6 +32,21 @@ class ComponentBatchManagerController extends Controller
             ->orderByDesc('created_at')
             ->paginate(20);
 
+        $operations->getCollection()->transform(function ($operation) {
+            $status = $operation->status();
+            $isStale = in_array($status, [ComponentBatchStatus::WAITING, ComponentBatchStatus::RUNNING])
+                && $operation->created_at < now()->subMinutes(20);
+            $time = $operation->data['execution_time'] ?? null;
+
+            $operation->view_status = $status;
+            $operation->view_is_stale = $isStale;
+            $operation->view_time_label = isset($time['total'])
+                ? self::formatExecutionTime($time)
+                : null;
+
+            return $operation;
+        });
+
         return view('component-batch-manager.index', [
             'operations' => $operations,
         ]);

@@ -2,6 +2,9 @@
 
 namespace App\Http\Requests;
 
+use App\Models\LegacyGrade;
+use App\Models\LegacySchoolCourse;
+use App\Models\LegacySchoolGradeDiscipline;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\Validator;
@@ -63,13 +66,69 @@ class ComponentBatchOperationRequest extends FormRequest
             if (!$hasOperation) {
                 $validator->errors()->add('operations', 'Selecione ao menos uma operação.');
             }
+
+            if ($validator->errors()->isNotEmpty()) {
+                return;
+            }
+
+            $this->validateSelectHierarchy($validator);
         });
+    }
+
+    private function validateSelectHierarchy(Validator $validator): void
+    {
+        $schoolIds = $this->input('school_ids', []);
+        $courseIds = $this->input('course_ids', []);
+        $gradeIds = $this->input('grade_ids', []);
+        $disciplineIds = $this->input('discipline_ids', []);
+
+        $validCourseIds = LegacySchoolCourse::query()
+            ->where('ativo', 1)
+            ->whereIn('ref_cod_escola', $schoolIds)
+            ->whereIn('ref_cod_curso', $courseIds)
+            ->distinct()
+            ->pluck('ref_cod_curso')
+            ->toArray();
+
+        if (array_diff($courseIds, $validCourseIds)) {
+            $validator->errors()->add('course_ids', 'Cursos selecionados não pertencem às escolas informadas.');
+
+            return;
+        }
+
+        $validGradeIds = LegacyGrade::query()
+            ->active()
+            ->whereIn('serie.ref_cod_curso', $courseIds)
+            ->whereIn('serie.cod_serie', $gradeIds)
+            ->join('pmieducar.escola_serie as es', 'es.ref_cod_serie', 'serie.cod_serie')
+            ->where('es.ativo', 1)
+            ->whereIn('es.ref_cod_escola', $schoolIds)
+            ->distinct()
+            ->pluck('serie.cod_serie')
+            ->toArray();
+
+        if (array_diff($gradeIds, $validGradeIds)) {
+            $validator->errors()->add('grade_ids', 'Séries selecionadas não pertencem aos cursos/escolas informados.');
+
+            return;
+        }
+
+        $validDisciplineIds = LegacySchoolGradeDiscipline::query()
+            ->where('ativo', 1)
+            ->whereIn('ref_ref_cod_serie', $gradeIds)
+            ->whereIn('ref_ref_cod_escola', $schoolIds)
+            ->whereIn('ref_cod_disciplina', $disciplineIds)
+            ->distinct()
+            ->pluck('ref_cod_disciplina')
+            ->toArray();
+
+        if (array_diff($disciplineIds, $validDisciplineIds)) {
+            $validator->errors()->add('discipline_ids', 'Componentes selecionados não pertencem às séries/escolas informadas.');
+        }
     }
 
     private function enforceCheckboxHierarchy(): void
     {
-        // Propagar para cima: operação filha implica pais
-        // (ex: desvinc. componentes da série → força desvinc. escola/série → força desvinc. turma → força remover lançamentos)
         if ($this->input('unlink_grade_components')) {
             $this->merge(['unlink_school_grade_disciplines' => true]);
         }
@@ -80,7 +139,6 @@ class ComponentBatchOperationRequest extends FormRequest
             $this->merge(['remove_records' => true]);
         }
 
-        // Propagar para baixo: pai desmarcado desativa filhos
         if (!$this->input('remove_records')) {
             $this->merge([
                 'unlink_class_components' => false,

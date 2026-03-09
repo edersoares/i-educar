@@ -72,7 +72,7 @@
         </tr>
         <tr>
             <td class="formmdtd" colspan="2">
-                @include('component-batch-manager._operations-list', ['params' => $data])
+                @include('component-batch-manager.partials.operations-list', ['params' => $data])
             </td>
         </tr>
 
@@ -88,13 +88,13 @@
 
     @if(!empty($previewCounts))
         @if(($data['remove_records'] ?? false) && isset($previewCounts['idiario']))
-            @include('component-batch-manager.idiario-table', [
+            @include('component-batch-manager.partials.idiario-table', [
                 'idiarioData' => $previewCounts['idiario'],
                 'idiarioErrorMessage' => 'Não foi possível consultar o i-Diário.',
             ])
         @endif
 
-        @include('component-batch-manager.ieducar-table', [
+        @include('component-batch-manager.partials.ieducar-table', [
             'counts' => $previewCounts,
             'data' => $data,
             'totalIeducar' => $totalIeducar,
@@ -159,14 +159,14 @@
         @endif
 
         @if($postIdiario && ($data['remove_records'] ?? false))
-            @include('component-batch-manager.idiario-table', [
+            @include('component-batch-manager.partials.idiario-table', [
                 'idiarioData' => $postIdiario,
                 'idiarioErrorMessage' => 'Não foi possível verificar o i-Diário após a execução.',
             ])
         @endif
 
         @if($postCounts)
-            @include('component-batch-manager.ieducar-table', [
+            @include('component-batch-manager.partials.ieducar-table', [
                 'counts' => $postCounts,
                 'data' => $data,
                 'totalIeducar' => $totalPostIeducar,

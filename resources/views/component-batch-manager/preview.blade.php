@@ -13,7 +13,7 @@
         </tr>
         <tr>
             <td class="formmdtd" colspan="2">
-                @include('component-batch-manager._operations-list', ['params' => $params])
+                @include('component-batch-manager.partials.operations-list', ['params' => $params])
             </td>
         </tr>
 
@@ -68,14 +68,14 @@
                 i-Diário não configurado. Apenas registros locais serão afetados.
             </div>
         @else
-            @include('component-batch-manager.idiario-table', [
+            @include('component-batch-manager.partials.idiario-table', [
                 'idiarioData' => $preview['idiario'],
                 'idiarioErrorMessage' => 'Não foi possível consultar o i-Diário. Verifique se o endpoint está disponível.',
             ])
         @endif
     @endif
 
-    @include('component-batch-manager.ieducar-table', [
+    @include('component-batch-manager.partials.ieducar-table', [
         'counts' => $preview,
         'data' => $params,
         'totalIeducar' => $totalIeducar,

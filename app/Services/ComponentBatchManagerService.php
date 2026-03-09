@@ -18,16 +18,6 @@ use App\Models\LegacySchoolGradeDiscipline;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 
-/**
- * Serviço de gerenciamento em lote de componentes curriculares.
- *
- * Executa exclusão de lançamentos, vínculos e registros relacionados
- * a componentes curriculares, com backup automático em JSONB.
- *
- * Para restaurar um backup: php artisan batch:restore {id} [--force]
- *
- * @see \App\Console\Commands\ComponentBatchRestoreCommand
- */
 class ComponentBatchManagerService
 {
     private const PREVIEW_KEY_TO_TABLE = [
@@ -109,8 +99,6 @@ class ComponentBatchManagerService
         'modules.parecer_componente_curricular',
         'modules.nota_componente_curricular_media',
     ];
-
-    // ─── Pré-visualização ────────────────────────────────────
 
     public function calculatePreview(array $params): array
     {
@@ -311,8 +299,6 @@ class ComponentBatchManagerService
         return $total;
     }
 
-    // ─── Execução ────────────────────────────────────────────
-
     public function execute(ComponentBatchOperation $operation): array
     {
         $startedAt = now();
@@ -471,7 +457,7 @@ class ComponentBatchManagerService
                     $backup['deleted'][$table] = ['pk' => self::TABLE_PKS[$table], 'rows' => $rows];
                 }
 
-                // Hard delete para acionar trigger _excluidos
+                // DB::table para deletar de fato e disparar a trigger (Model faria soft delete e as queries no sistema não filtram por ativo)
                 $counts['dispensa'] = DB::table($table)
                     ->whereIn('cod_dispensa', collect($rows)->pluck('cod_dispensa'))
                     ->delete();
@@ -510,13 +496,11 @@ class ComponentBatchManagerService
 
         $keyExtractor = $this->buildKeyExtractor($pkCols);
 
-        // Determina quais linhas ficaram vazias a partir do snapshot
         $deletedKeys = collect($allRows)
             ->filter(fn ($row) => empty(array_diff($row['anos_letivos'] ?? [], [$year])))
             ->map($keyExtractor)
             ->toArray();
 
-        // Particiona uma vez — reusar para backup e delete
         [$deletedRows, $updatedRows] = collect($allRows)
             ->partition(fn ($r) => in_array($keyExtractor($r), $deletedKeys));
 
@@ -555,8 +539,6 @@ class ComponentBatchManagerService
 
         return $warnings;
     }
-
-    // ─── Restauração ─────────────────────────────────────────
 
     public function restore(ComponentBatchOperation $operation, bool $forceBackup = false): array
     {
@@ -715,8 +697,6 @@ class ComponentBatchManagerService
         return $count;
     }
 
-    // ─── Apresentação ────────────────────────────────────────
-
     public function buildWarnings(array $params, array $preview): array
     {
         $warnings = [];
@@ -775,8 +755,6 @@ class ComponentBatchManagerService
         return $summary;
     }
 
-    // ─── Consultas ──────────────────────────────────────────
-
     private function getAffectedTurmaIds(int $year, array $gradeIds, ?array $schoolIds): array
     {
         return LegacySchoolClass::query()
@@ -796,7 +774,6 @@ class ComponentBatchManagerService
         }
     }
 
-    /** @param class-string $modelClass */
     private function registrationScopedQuery(
         string $modelClass,
         string $parentRelation,
@@ -891,12 +868,6 @@ class ComponentBatchManagerService
         return $query;
     }
 
-    // ─── Utilitários ────────────────────────────────────────
-
-    /**
-     * Captura snapshot bruto dos registros (sem casts do Eloquent).
-     * $intArrayColumns: colunas PostgreSQL integer[] convertidas para array PHP.
-     */
     private function snapshotRows(Builder $query, array $intArrayColumns = []): array
     {
         $rows = (clone $query)->toBase()->get()->map(fn ($r) => (array) $r)->values()->toArray();

@@ -11,7 +11,7 @@ class ComponentBatchRestoreCommand extends Command
 {
     protected $signature = 'batch:restore {id : ID da operação} {--force : Sobrescrever dados existentes com os do backup}';
 
-    protected $description = 'Restaura o backup de uma operação do gerenciamento em lote de componentes (notas, faltas, pareceres, médias, vínculos turma/professor, dispensas). Os registros são excluídos pelo ComponentBatchManagerService e salvos em JSONB na coluna backup.';
+    protected $description = 'Restaura o backup de uma operação do gerenciamento em lote de componentes';
 
     public function handle(ComponentBatchManagerService $service): int
     {
@@ -37,15 +37,18 @@ class ComponentBatchRestoreCommand extends Command
 
         $forceBackup = $this->option('force');
 
+        $data = $operation->data;
         $this->info("Operação #{$operation->id} — criada em {$operation->created_at->format('d/m/Y H:i')}");
+        $this->line("  Ano: {$data['year']}");
+        $this->line('  Escolas: ' . count($data['school_ids'] ?? []) . ' | Séries: ' . count($data['grade_ids'] ?? []) . ' | Componentes: ' . count($data['discipline_ids'] ?? []));
         $this->newLine();
 
         $this->displayBackupSummary($operation->backup);
 
         if ($forceBackup) {
-            $this->warn('Modo --force: dados existentes serão sobrescritos pelos do backup.');
+            $this->warn('Modo --force: dados existentes serão sobrescritos pelos valores do backup.');
         } else {
-            $this->info('Modo padrão: dados existentes serão mantidos (backup só insere o que não existe).');
+            $this->info('Modo padrão: registros existentes serão mantidos, anos letivos serão mesclados.');
         }
 
         $this->newLine();
