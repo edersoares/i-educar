@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\LegacyInstitution;
 use Exception;
 use GuzzleHttp\Client;
+use Illuminate\Support\Facades\Context;
 use RuntimeException;
 
 class iDiarioService
@@ -171,6 +172,7 @@ class iDiarioService
                 'courses' => $params['course_ids'] ?? [],
                 'grades' => $params['grade_ids'] ?? [],
                 'disciplines' => $params['discipline_ids'] ?? [],
+                'user' => auth()->id() ?? Context::get('audit_user_id'),
             ]);
 
             return (array) json_decode($response->getBody()->getContents(), true);
@@ -188,6 +190,7 @@ class iDiarioService
                 'courses' => $params['course_ids'] ?? [],
                 'grades' => $params['grade_ids'] ?? [],
                 'disciplines' => $params['discipline_ids'] ?? [],
+                'user' => auth()->id() ?? Context::get('audit_user_id'),
             ]);
 
             return (array) json_decode($response->getBody()->getContents(), true);

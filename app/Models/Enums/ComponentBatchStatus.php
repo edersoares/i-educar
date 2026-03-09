@@ -8,6 +8,7 @@ enum ComponentBatchStatus: int
     case RUNNING = 2;
     case COMPLETED = 3;
     case FAILED = 4;
+    case RESTORED = 5;
 
     public function label(): string
     {
@@ -16,6 +17,7 @@ enum ComponentBatchStatus: int
             self::RUNNING => 'Em execução',
             self::COMPLETED => 'Concluído',
             self::FAILED => 'Falhou',
+            self::RESTORED => 'Restaurado',
         };
     }
 
@@ -26,6 +28,7 @@ enum ComponentBatchStatus: int
             self::RUNNING => 'warning',
             self::COMPLETED => 'success',
             self::FAILED => 'danger',
+            self::RESTORED => 'info',
         };
     }
 }

@@ -18,19 +18,28 @@ use App\Models\LegacySchoolGradeDiscipline;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * Serviço de gerenciamento em lote de componentes curriculares.
+ *
+ * Executa exclusão de lançamentos, vínculos e registros relacionados
+ * a componentes curriculares, com backup automático em JSONB.
+ *
+ * Para restaurar um backup: php artisan batch:restore {id} [--force]
+ *
+ * @see \App\Console\Commands\ComponentBatchRestoreCommand
+ */
 class ComponentBatchManagerService
 {
-    private const RECORD_TYPE_LABELS = [
-        'nota_media' => 'Médias',
-        'nota' => 'Notas',
-        'falta' => 'Faltas',
-        'parecer' => 'Pareceres',
-        'componente_turma' => 'Componentes da turma',
-        'professor_disciplina' => 'Vínculos professor/disciplina',
-        'professor_turma' => 'Vínculos professor/turma',
-        'escola_serie_disciplina' => 'Componentes da série da escola',
-        'componente_ano_escolar' => 'Componentes da série',
-        'dispensa' => 'Dispensas',
+    private const PREVIEW_KEY_TO_TABLE = [
+        'nota_media' => 'modules.nota_componente_curricular_media',
+        'nota' => 'modules.nota_componente_curricular',
+        'falta' => 'modules.falta_componente_curricular',
+        'parecer' => 'modules.parecer_componente_curricular',
+        'componente_turma' => 'modules.componente_curricular_turma',
+        'professor_disciplina' => 'modules.professor_turma_disciplina',
+        'escola_serie_disciplina' => 'pmieducar.escola_serie_disciplina',
+        'componente_ano_escolar' => 'modules.componente_curricular_ano_escolar',
+        'dispensa' => 'pmieducar.dispensa_disciplina',
     ];
 
     private const RECORD_MODELS = [
@@ -39,6 +48,69 @@ class ComponentBatchManagerService
         'falta' => [LegacyDisciplineAbsence::class, 'studentAbsence'],
         'parecer' => [LegacyDisciplineDescriptiveOpinion::class, 'studentDescriptiveOpinion'],
     ];
+
+    private const TABLE_PKS = [
+        'modules.nota_componente_curricular' => ['nota_aluno_id', 'componente_curricular_id', 'etapa'],
+        'modules.nota_componente_curricular_media' => ['nota_aluno_id', 'componente_curricular_id'],
+        'modules.falta_componente_curricular' => ['falta_aluno_id', 'componente_curricular_id', 'etapa'],
+        'modules.parecer_componente_curricular' => ['parecer_aluno_id', 'componente_curricular_id', 'etapa'],
+        'modules.componente_curricular_turma' => ['componente_curricular_id', 'turma_id'],
+        'modules.professor_turma_disciplina' => ['professor_turma_id', 'componente_curricular_id'],
+        'pmieducar.escola_serie_disciplina' => ['id'],
+        'modules.componente_curricular_ano_escolar' => ['componente_curricular_id', 'ano_escolar_id'],
+        'pmieducar.dispensa_disciplina' => ['cod_dispensa'],
+    ];
+
+    private const ESCOLA_SERIE_UNIQUE = ['ref_ref_cod_serie', 'ref_ref_cod_escola', 'ref_cod_disciplina'];
+
+    private const AUTO_INCREMENT_COLUMNS = [
+        'pmieducar.escola_serie_disciplina' => 'id',
+    ];
+
+    private const EXCLUIDOS_TABLES = [
+        'modules.componente_curricular_turma' => [
+            'excluidos' => 'modules.componente_curricular_turma_excluidos',
+            'match_columns' => ['componente_curricular_id', 'turma_id'],
+        ],
+        'pmieducar.escola_serie_disciplina' => [
+            'excluidos' => 'pmieducar.escola_serie_disciplina_excluidos',
+            'match_columns' => ['ref_ref_cod_serie', 'ref_ref_cod_escola', 'ref_cod_disciplina'],
+        ],
+        'modules.componente_curricular_ano_escolar' => [
+            'excluidos' => 'modules.componente_curricular_ano_escolar_excluidos',
+            'match_columns' => ['componente_curricular_id', 'ano_escolar_id'],
+        ],
+        'pmieducar.dispensa_disciplina' => [
+            'excluidos' => 'pmieducar.dispensa_disciplina_excluidos',
+            'match_columns' => ['cod_dispensa'],
+        ],
+    ];
+
+    public const TABLE_LABELS = [
+        'modules.nota_componente_curricular' => 'Notas',
+        'modules.nota_componente_curricular_media' => 'Médias',
+        'modules.falta_componente_curricular' => 'Faltas',
+        'modules.parecer_componente_curricular' => 'Pareceres',
+        'modules.componente_curricular_turma' => 'Componentes da turma',
+        'modules.professor_turma_disciplina' => 'Vínculos professor/disciplina',
+        'pmieducar.escola_serie_disciplina' => 'Componentes da série da escola',
+        'modules.componente_curricular_ano_escolar' => 'Componentes da série',
+        'pmieducar.dispensa_disciplina' => 'Dispensas',
+    ];
+
+    private const INSERT_ORDER = [
+        'modules.componente_curricular_ano_escolar',
+        'pmieducar.escola_serie_disciplina',
+        'modules.componente_curricular_turma',
+        'modules.professor_turma_disciplina',
+        'pmieducar.dispensa_disciplina',
+        'modules.nota_componente_curricular',
+        'modules.falta_componente_curricular',
+        'modules.parecer_componente_curricular',
+        'modules.nota_componente_curricular_media',
+    ];
+
+    // ─── Pré-visualização ────────────────────────────────────
 
     public function calculatePreview(array $params): array
     {
@@ -79,15 +151,33 @@ class ComponentBatchManagerService
         }
 
         if ($unlinkSchoolGradeDisciplines) {
-            $preview['escola_serie_disciplina'] = $this->escolaSerieDisciplinaQuery($gradeIds, $disciplineIds, $schoolIds)
+            $safeCount = $this->escolaSerieDisciplinaQuery($gradeIds, $disciplineIds, $schoolIds, $year)
                 ->whereRaw('ARRAY[?::smallint] <@ anos_letivos', [$year])
                 ->count();
+            $totalCount = $this->escolaSerieDisciplinaQuery($gradeIds, $disciplineIds, $schoolIds)
+                ->whereRaw('ARRAY[?::smallint] <@ anos_letivos', [$year])
+                ->count();
+
+            $preview['escola_serie_disciplina'] = $safeCount;
+
+            if ($totalCount > $safeCount) {
+                $preview['escola_serie_disciplina_skipped'] = $totalCount - $safeCount;
+            }
         }
 
         if ($unlinkGradeComponents) {
-            $preview['componente_ano_escolar'] = $this->componenteAnoEscolarQuery($gradeIds, $disciplineIds)
+            $safeCount = $this->componenteAnoEscolarQuery($gradeIds, $disciplineIds, $year, $schoolIds)
                 ->whereRaw('ARRAY[?::smallint] <@ anos_letivos', [$year])
                 ->count();
+            $totalCount = $this->componenteAnoEscolarQuery($gradeIds, $disciplineIds)
+                ->whereRaw('ARRAY[?::smallint] <@ anos_letivos', [$year])
+                ->count();
+
+            $preview['componente_ano_escolar'] = $safeCount;
+
+            if ($totalCount > $safeCount) {
+                $preview['componente_ano_escolar_skipped'] = $totalCount - $safeCount;
+            }
         }
 
         if ($params['remove_exemptions'] ?? false) {
@@ -96,6 +186,132 @@ class ComponentBatchManagerService
 
         return $preview;
     }
+
+    public function getProtectionDetails(array $params, array $preview): array
+    {
+        $year = $params['year'];
+        $gradeIds = $params['grade_ids'];
+        $schoolIds = $params['school_ids'] ?? null;
+        $disciplineIds = $params['discipline_ids'];
+
+        $details = [];
+
+        if (($preview['componente_ano_escolar_skipped'] ?? 0) > 0) {
+            $blocked = $this->componenteAnoEscolarQuery($gradeIds, $disciplineIds)
+                ->whereRaw('ARRAY[?::smallint] <@ anos_letivos', [$year])
+                ->whereExists(function ($sub) use ($year, $schoolIds) {
+                    $sub->selectRaw('1')
+                        ->from('pmieducar.escola_serie_disciplina as esd')
+                        ->whereColumn('esd.ref_cod_disciplina', 'componente_curricular_ano_escolar.componente_curricular_id')
+                        ->whereColumn('esd.ref_ref_cod_serie', 'componente_curricular_ano_escolar.ano_escolar_id')
+                        ->whereRaw('ARRAY[?::smallint] <@ esd.anos_letivos', [$year])
+                        ->when($schoolIds, fn ($q) => $q->whereNotIn('esd.ref_ref_cod_escola', $schoolIds));
+                })
+                ->with(['discipline', 'grade'])
+                ->get();
+
+            $items = [];
+
+            foreach ($blocked as $record) {
+                $blockingSchools = LegacySchoolGradeDiscipline::query()
+                    ->where('ref_cod_disciplina', $record->componente_curricular_id)
+                    ->where('ref_ref_cod_serie', $record->ano_escolar_id)
+                    ->whereRaw('ARRAY[?::smallint] <@ anos_letivos', [$year])
+                    ->when($schoolIds, fn ($q) => $q->whereNotIn('ref_ref_cod_escola', $schoolIds))
+                    ->with('school')
+                    ->get()
+                    ->map(fn ($esd) => $esd->school->name ?? "Escola {$esd->ref_ref_cod_escola}")
+                    ->toArray();
+
+                $items[] = [
+                    'componente' => $record->discipline->name ?? "ID {$record->componente_curricular_id}",
+                    'serie' => $record->grade->nm_serie ?? "ID {$record->ano_escolar_id}",
+                    'escolas' => $blockingSchools,
+                ];
+            }
+
+            if ($items) {
+                $details['componente_ano_escolar'] = $items;
+            }
+        }
+
+        if (($preview['escola_serie_disciplina_skipped'] ?? 0) > 0) {
+            $blocked = $this->escolaSerieDisciplinaQuery($gradeIds, $disciplineIds, $schoolIds)
+                ->whereRaw('ARRAY[?::smallint] <@ anos_letivos', [$year])
+                ->whereRaw('array_length(anos_letivos, 1) = 1')
+                ->whereExists(function ($sub) use ($year) {
+                    $sub->selectRaw('1')
+                        ->from('modules.componente_curricular_turma as cct')
+                        ->join('pmieducar.turma as t', 't.cod_turma', 'cct.turma_id')
+                        ->whereColumn('cct.componente_curricular_id', 'escola_serie_disciplina.ref_cod_disciplina')
+                        ->whereColumn('cct.escola_id', 'escola_serie_disciplina.ref_ref_cod_escola')
+                        ->whereColumn('cct.ano_escolar_id', 'escola_serie_disciplina.ref_ref_cod_serie')
+                        ->where('t.ano', '!=', $year);
+                })
+                ->with(['discipline', 'school', 'grade'])
+                ->get();
+
+            $items = [];
+
+            foreach ($blocked as $record) {
+                $blockingYears = DB::table('modules.componente_curricular_turma as cct')
+                    ->join('pmieducar.turma as t', 't.cod_turma', 'cct.turma_id')
+                    ->where('cct.componente_curricular_id', $record->ref_cod_disciplina)
+                    ->where('cct.escola_id', $record->ref_ref_cod_escola)
+                    ->where('cct.ano_escolar_id', $record->ref_ref_cod_serie)
+                    ->where('t.ano', '!=', $year)
+                    ->distinct()
+                    ->pluck('t.ano')
+                    ->sort()
+                    ->values()
+                    ->toArray();
+
+                $items[] = [
+                    'componente' => $record->discipline->name ?? "ID {$record->ref_cod_disciplina}",
+                    'escola' => $record->school->name ?? "Escola {$record->ref_ref_cod_escola}",
+                    'serie' => $record->grade->nm_serie ?? "ID {$record->ref_ref_cod_serie}",
+                    'anos_bloqueando' => $blockingYears,
+                ];
+            }
+
+            if ($items) {
+                $details['escola_serie_disciplina'] = $items;
+            }
+        }
+
+        return $details;
+    }
+
+    public static function sumPreviewCounts(array $preview): array
+    {
+        $totalIeducar = 0;
+        foreach ($preview as $key => $value) {
+            if (is_int($value) && $key !== 'turma_count' && !str_ends_with($key, '_skipped')) {
+                $totalIeducar += $value;
+            }
+        }
+
+        $totalIdiario = self::sumIdiarioCounts($preview['idiario'] ?? null);
+
+        return ['totalIeducar' => $totalIeducar, 'totalIdiario' => $totalIdiario];
+    }
+
+    public static function sumIdiarioCounts(?array $idiarioData): int
+    {
+        $total = 0;
+
+        if ($idiarioData && !isset($idiarioData['error'])) {
+            foreach ($idiarioData as $item) {
+                if (is_array($item) && isset($item['count'])) {
+                    $total += (int) $item['count'];
+                }
+            }
+        }
+
+        return $total;
+    }
+
+    // ─── Execução ────────────────────────────────────────────
 
     public function execute(ComponentBatchOperation $operation): array
     {
@@ -117,9 +333,11 @@ class ComponentBatchManagerService
             $timings['idiario'] = $t->diffInSeconds(now());
         }
 
+        $backup = [];
+
         if ($totalIeducar > 0) {
             $t = now();
-            $counts = $this->executeIeducarDeletion($data);
+            [$counts, $backup] = $this->executeIeducarDeletion($data);
             $timings['ieducar'] = $t->diffInSeconds(now());
         } else {
             $counts = [];
@@ -141,9 +359,29 @@ class ComponentBatchManagerService
         $operation->update([
             'status_id' => ComponentBatchStatus::COMPLETED->value,
             'data' => $data,
+            'backup' => $backup ?: null,
         ]);
 
         return $counts;
+    }
+
+    public function failed(ComponentBatchOperation $operation, string $error): void
+    {
+        $operation->refresh();
+
+        $friendlyMessage = str_starts_with($error, 'Exclusão do i-Diário')
+            || str_starts_with($error, 'Não foi possível')
+            ? $error
+            : 'Ocorreu um erro inesperado durante a execução. Contate o administrador.';
+
+        $data = $operation->data ?? [];
+        $data['error_detail'] = $error;
+
+        $operation->update([
+            'status_id' => ComponentBatchStatus::FAILED->value,
+            'error_message' => $friendlyMessage,
+            'data' => $data,
+        ]);
     }
 
     private function executeIdiarioDeletion(array &$data, array $previewCounts, ComponentBatchOperation $operation): array
@@ -189,10 +427,12 @@ class ComponentBatchManagerService
 
         return DB::transaction(function () use ($data, $year, $gradeIds, $schoolIds, $disciplineIds) {
             $counts = [];
+            $backup = [];
 
             if ($data['remove_records'] ?? false) {
                 foreach (self::RECORD_MODELS as $key => [$model, $relation]) {
-                    $counts[$key] = $this->registrationScopedQuery($model, $relation, $gradeIds, $disciplineIds, $year, $schoolIds)->delete();
+                    $query = $this->registrationScopedQuery($model, $relation, $gradeIds, $disciplineIds, $year, $schoolIds);
+                    $counts[$key] = $this->snapshotDeleteAndBackup($query, (new $model)->getTable(), $backup);
                 }
             }
 
@@ -201,37 +441,101 @@ class ComponentBatchManagerService
                 : [];
 
             if (($data['unlink_class_components'] ?? false) && count($turmaIds) > 0) {
-                $counts['componente_turma'] = $this->componentesTurmaQuery($turmaIds, $disciplineIds)->delete();
+                $query = $this->componentesTurmaQuery($turmaIds, $disciplineIds);
+                $counts['componente_turma'] = $this->snapshotDeleteAndBackup($query, (new LegacyDisciplineSchoolClass)->getTable(), $backup);
             }
 
             if (($data['unlink_teacher_disciplines'] ?? false) && count($turmaIds) > 0) {
-                $counts['professor_disciplina'] = $this->professorDisciplinaQuery($turmaIds, $disciplineIds)->delete();
+                $query = $this->professorDisciplinaQuery($turmaIds, $disciplineIds);
+                $counts['professor_disciplina'] = $this->snapshotDeleteAndBackup($query, (new LegacySchoolClassTeacherDiscipline)->getTable(), $backup);
                 $counts['professor_turma'] = $this->professorTurmaQuery($turmaIds)->update(['updated_at' => now()]);
+                $backup['touched']['modules.professor_turma'] = ['turma_ids' => $turmaIds];
             }
 
             if ($data['unlink_school_grade_disciplines'] ?? false) {
-                $counts['escola_serie_disciplina'] = $this->unlinkEscolaSerieDisciplina(
-                    gradeIds: $gradeIds,
-                    disciplineIds: $disciplineIds,
-                    year: $year,
-                    schoolIds: $schoolIds,
-                );
+                $base = $this->escolaSerieDisciplinaQuery($gradeIds, $disciplineIds, $schoolIds, $year);
+                $counts['escola_serie_disciplina'] = $this->unlinkByRemovingYear($base, 'pmieducar.escola_serie_disciplina', $year, $backup, uniqueOverride: self::ESCOLA_SERIE_UNIQUE);
             }
 
             if ($data['unlink_grade_components'] ?? false) {
-                $counts['componente_ano_escolar'] = $this->unlinkComponenteAnoEscolar(
-                    gradeIds: $gradeIds,
-                    disciplineIds: $disciplineIds,
-                    year: $year,
-                );
+                $base = $this->componenteAnoEscolarQuery($gradeIds, $disciplineIds, $year);
+                $counts['componente_ano_escolar'] = $this->unlinkByRemovingYear($base, 'modules.componente_curricular_ano_escolar', $year, $backup);
             }
 
             if ($data['remove_exemptions'] ?? false) {
-                $counts['dispensa'] = $this->dispensaQuery($gradeIds, $disciplineIds, $year, $schoolIds)->delete();
+                $query = $this->dispensaQuery($gradeIds, $disciplineIds, $year, $schoolIds);
+                $table = (new LegacyDisciplineExemption)->getTable();
+                $rows = $this->snapshotRows($query);
+
+                if ($rows) {
+                    $backup['deleted'][$table] = ['pk' => self::TABLE_PKS[$table], 'rows' => $rows];
+                }
+
+                // Hard delete para acionar trigger _excluidos
+                $counts['dispensa'] = DB::table($table)
+                    ->whereIn('cod_dispensa', collect($rows)->pluck('cod_dispensa'))
+                    ->delete();
             }
 
-            return $counts;
+            return [$counts, $backup];
         });
+    }
+
+    private function snapshotDeleteAndBackup(Builder $query, string $table, array &$backup): int
+    {
+        $rows = $this->snapshotRows($query);
+
+        if ($rows) {
+            $backup['deleted'][$table] = ['pk' => self::TABLE_PKS[$table], 'rows' => $rows];
+        }
+
+        return $query->delete();
+    }
+
+    private function unlinkByRemovingYear(Builder $baseQuery, string $table, int $year, array &$backup, ?array $uniqueOverride = null): int
+    {
+        $pkCols = self::TABLE_PKS[$table];
+        $withYear = fn (Builder $q) => (clone $q)->whereRaw('ARRAY[?::smallint] <@ anos_letivos', [$year]);
+
+        $allRows = $this->snapshotRows($withYear($baseQuery), intArrayColumns: ['anos_letivos']);
+
+        $updated = $withYear($baseQuery)->update([
+            'anos_letivos' => DB::raw("array_remove(anos_letivos, {$year}::smallint)"),
+            'updated_at' => now(),
+        ]);
+
+        if (empty($allRows)) {
+            return $updated;
+        }
+
+        $keyExtractor = $this->buildKeyExtractor($pkCols);
+
+        // Determina quais linhas ficaram vazias a partir do snapshot
+        $deletedKeys = collect($allRows)
+            ->filter(fn ($row) => empty(array_diff($row['anos_letivos'] ?? [], [$year])))
+            ->map($keyExtractor)
+            ->toArray();
+
+        // Particiona uma vez — reusar para backup e delete
+        [$deletedRows, $updatedRows] = collect($allRows)
+            ->partition(fn ($r) => in_array($keyExtractor($r), $deletedKeys));
+
+        $meta = ['pk' => $pkCols];
+        if ($uniqueOverride) {
+            $meta['unique'] = $uniqueOverride;
+        }
+
+        if ($deletedRows->isNotEmpty()) {
+            $deletedRowsArray = $deletedRows->values()->toArray();
+            $backup['deleted'][$table] = $meta + ['rows' => $deletedRowsArray];
+            $this->deleteByColumns($table, $pkCols, $deletedRowsArray);
+        }
+
+        if ($updatedRows->isNotEmpty()) {
+            $backup['updated'][$table] = $meta + ['rows' => $updatedRows->values()->toArray()];
+        }
+
+        return $updated;
     }
 
     private function buildVerificationWarnings(array $postCounts): array
@@ -241,8 +545,9 @@ class ComponentBatchManagerService
 
         if ($remainingIeducar > 0) {
             foreach ($postCounts as $key => $value) {
-                if (is_int($value) && $key !== 'turma_count' && $value > 0) {
-                    $label = self::RECORD_TYPE_LABELS[$key] ?? $key;
+                if (is_int($value) && $key !== 'turma_count' && !str_ends_with($key, '_skipped') && $value > 0) {
+                    $table = self::PREVIEW_KEY_TO_TABLE[$key] ?? null;
+                    $label = $table ? (self::TABLE_LABELS[$table] ?? $key) : $key;
                     $warnings[] = "{$label}: {$value} registros remanescentes após exclusão.";
                 }
             }
@@ -251,53 +556,226 @@ class ComponentBatchManagerService
         return $warnings;
     }
 
-    public static function sumIdiarioCounts(?array $idiarioData): int
-    {
-        $total = 0;
+    // ─── Restauração ─────────────────────────────────────────
 
-        if ($idiarioData && !isset($idiarioData['error'])) {
-            foreach ($idiarioData as $item) {
-                if (is_array($item) && isset($item['count'])) {
-                    $total += (int) $item['count'];
+    public function restore(ComponentBatchOperation $operation, bool $forceBackup = false): array
+    {
+        $backup = $operation->backup;
+
+        if (empty($backup)) {
+            throw new \RuntimeException('Operação não possui backup para restaurar.');
+        }
+
+        $summary = [];
+
+        DB::transaction(function () use ($backup, $forceBackup, &$summary) {
+            foreach ($backup['updated'] ?? [] as $table => $meta) {
+                $count = $this->restoreUpdatedTable($table, $meta, $forceBackup);
+                $summary[$table] = ['action' => 'atualizados', 'count' => $count];
+            }
+
+            $deleted = $backup['deleted'] ?? [];
+
+            foreach (self::INSERT_ORDER as $table) {
+                if (!isset($deleted[$table])) {
+                    continue;
+                }
+
+                $count = $this->restoreDeletedTable($table, $deleted[$table], $forceBackup);
+                $summary[$table] = ['action' => 'reinseridos', 'count' => $count];
+            }
+        });
+
+        $operation->update(['status_id' => ComponentBatchStatus::RESTORED->value]);
+
+        return $summary;
+    }
+
+    private function restoreDeletedTable(string $table, array $meta, bool $forceBackup): int
+    {
+        $rows = $meta['rows'] ?? [];
+
+        if (empty($rows)) {
+            return 0;
+        }
+
+        if (isset(self::EXCLUIDOS_TABLES[$table])) {
+            $config = self::EXCLUIDOS_TABLES[$table];
+            $this->deleteByColumns($config['excluidos'], $config['match_columns'], $rows);
+        }
+
+        $rows = $this->prepareRowsForInsert($table, $rows);
+        $conflictCols = $meta['unique'] ?? $meta['pk'] ?? self::TABLE_PKS[$table] ?? [];
+        $columns = array_keys($rows[0]);
+
+        foreach (array_chunk($rows, 500) as $chunk) {
+            [$sql, $bindings] = $this->buildUpsertSql($table, $columns, $conflictCols, $chunk, $forceBackup);
+            DB::statement($sql, $bindings);
+        }
+
+        // Retorna total do backup (pode ser maior que o real se houver conflitos)
+        return count($meta['rows']);
+    }
+
+    private function prepareRowsForInsert(string $table, array $rows): array
+    {
+        $autoCol = self::AUTO_INCREMENT_COLUMNS[$table] ?? null;
+
+        return array_map(function ($row) use ($autoCol) {
+            if ($autoCol) {
+                unset($row[$autoCol]);
+            }
+
+            if (isset($row['anos_letivos']) && is_array($row['anos_letivos'])) {
+                $row['anos_letivos'] = $this->formatPgSmallintArray($row['anos_letivos']);
+            }
+
+            return $row;
+        }, $rows);
+    }
+
+    private function buildUpsertSql(string $table, array $columns, array $conflictCols, array $chunk, bool $forceBackup): array
+    {
+        $bindings = [];
+        $placeholders = [];
+
+        foreach ($chunk as $row) {
+            $rowPlaceholders = [];
+            foreach ($columns as $col) {
+                $value = $row[$col] ?? null;
+                if ($col === 'anos_letivos' && is_string($value) && str_starts_with($value, "'{")) {
+                    $rowPlaceholders[] = $value . '::smallint[]';
+                } else {
+                    $rowPlaceholders[] = '?';
+                    $bindings[] = $value;
                 }
             }
+            $placeholders[] = '(' . implode(', ', $rowPlaceholders) . ')';
         }
 
-        return $total;
+        $colList = '"' . implode('", "', $columns) . '"';
+        $conflictList = '"' . implode('", "', $conflictCols) . '"';
+        $valuesClause = implode(', ', $placeholders);
+
+        $onConflict = $this->buildOnConflictClause($columns, $conflictCols, $forceBackup);
+
+        $sql = "INSERT INTO {$table} ({$colList}) VALUES {$valuesClause} ON CONFLICT ({$conflictList}) {$onConflict}";
+
+        return [$sql, $bindings];
     }
 
-    public static function sumPreviewCounts(array $preview): array
+    private function buildOnConflictClause(array $columns, array $conflictCols, bool $forceBackup): string
     {
-        $totalIeducar = 0;
-        foreach ($preview as $key => $value) {
-            if (is_int($value) && $key !== 'turma_count') {
-                $totalIeducar += $value;
+        if (!$forceBackup) {
+            return 'DO NOTHING';
+        }
+
+        $updateCols = array_diff($columns, $conflictCols);
+
+        if (empty($updateCols)) {
+            return 'DO NOTHING';
+        }
+
+        $setClauses = array_map(fn ($col) => "\"{$col}\" = EXCLUDED.\"{$col}\"", $updateCols);
+
+        return 'DO UPDATE SET ' . implode(', ', $setClauses);
+    }
+
+    private function restoreUpdatedTable(string $table, array $meta, bool $forceBackup): int
+    {
+        $rows = $meta['rows'] ?? [];
+        $pkCols = $meta['pk'] ?? self::TABLE_PKS[$table] ?? [];
+        $count = 0;
+
+        foreach ($rows as $row) {
+            if (!isset($row['anos_letivos']) || !is_array($row['anos_letivos'])) {
+                continue;
+            }
+
+            $originalValue = $this->formatPgSmallintArray($row['anos_letivos']);
+
+            $query = DB::table($table);
+            foreach ($pkCols as $col) {
+                if (!isset($row[$col])) {
+                    throw new \RuntimeException("Backup corrompido: coluna PK '{$col}' ausente na tabela {$table}.");
+                }
+                $query->where($col, $row[$col]);
+            }
+
+            $expression = $forceBackup
+                ? "{$originalValue}::smallint[]"
+                : "(SELECT ARRAY(SELECT DISTINCT unnest(COALESCE(anos_letivos, '{}') || {$originalValue}::smallint[]) ORDER BY 1))";
+
+            $count += $query->update([
+                'anos_letivos' => DB::raw($expression),
+                'updated_at' => now(),
+            ]);
+        }
+
+        return $count;
+    }
+
+    // ─── Apresentação ────────────────────────────────────────
+
+    public function buildWarnings(array $params, array $preview): array
+    {
+        $warnings = [];
+
+        if (($params['unlink_class_components'] ?? false)
+            && !($params['remove_records'] ?? false)) {
+            $hasRecords = ($preview['nota_media'] ?? 0) + ($preview['nota'] ?? 0)
+                + ($preview['falta'] ?? 0) + ($preview['parecer'] ?? 0);
+
+            if ($hasRecords === 0 && ($preview['turma_count'] ?? 0) > 0) {
+                $tempPreview = $this->calculatePreview(array_merge($params, [
+                    'remove_records' => true,
+                    'unlink_class_components' => false,
+                    'unlink_teacher_disciplines' => false,
+                    'unlink_school_grade_disciplines' => false,
+                    'unlink_grade_components' => false,
+                    'skip_idiario' => true,
+                ]));
+                $hasRecords = ($tempPreview['nota_media'] ?? 0) + ($tempPreview['nota'] ?? 0)
+                    + ($tempPreview['falta'] ?? 0) + ($tempPreview['parecer'] ?? 0);
+            }
+
+            if ($hasRecords > 0) {
+                $warnings[] = "Existem {$hasRecords} lançamentos. Desvincular sem remover pode gerar inconsistência.";
             }
         }
 
-        $totalIdiario = self::sumIdiarioCounts($preview['idiario'] ?? null);
+        if (($params['unlink_class_components'] ?? false)
+            && !($params['unlink_teacher_disciplines'] ?? false)) {
+            $warnings[] = 'Vínculos de professor/disciplina continuarão apontando para componentes removidos da turma.';
+        }
 
-        return ['totalIeducar' => $totalIeducar, 'totalIdiario' => $totalIdiario];
+        if ((($params['unlink_school_grade_disciplines'] ?? false) || ($params['unlink_grade_components'] ?? false))
+            && !($params['unlink_class_components'] ?? false)) {
+            $warnings[] = 'Componentes continuarão vinculados nas turmas.';
+        }
+
+        return $warnings;
     }
 
-    public function failed(ComponentBatchOperation $operation, string $error): void
+    public function buildBackupSummary(array $backup): array
     {
-        $operation->refresh();
+        $summary = [];
+        $actionMap = ['deleted' => 'deletados', 'updated' => 'atualizados'];
 
-        $friendlyMessage = str_starts_with($error, 'Exclusão do i-Diário')
-            || str_starts_with($error, 'Não foi possível')
-            ? $error
-            : 'Ocorreu um erro inesperado durante a execução. Contate o administrador.';
+        foreach ($actionMap as $type => $action) {
+            foreach ($backup[$type] ?? [] as $table => $meta) {
+                $summary[] = [
+                    'label' => self::TABLE_LABELS[$table] ?? $table,
+                    'count' => count($meta['rows'] ?? []),
+                    'action' => $action,
+                ];
+            }
+        }
 
-        $data = $operation->data ?? [];
-        $data['error_detail'] = $error;
-
-        $operation->update([
-            'status_id' => ComponentBatchStatus::FAILED->value,
-            'error_message' => $friendlyMessage,
-            'data' => $data,
-        ]);
+        return $summary;
     }
+
+    // ─── Consultas ──────────────────────────────────────────
 
     private function getAffectedTurmaIds(int $year, array $gradeIds, ?array $schoolIds): array
     {
@@ -312,17 +790,13 @@ class ComponentBatchManagerService
     private function getIdiarioPreview(array $params): ?array
     {
         try {
-            $service = app(iDiarioService::class);
-
-            return $service->getDisciplineRecordsCount($params);
+            return app(iDiarioService::class)->getDisciplineRecordsCount($params);
         } catch (\Exception $e) {
             return ['error' => $e->getMessage()];
         }
     }
 
-    /**
-     * @param  class-string  $modelClass
-     */
+    /** @param class-string $modelClass */
     private function registrationScopedQuery(
         string $modelClass,
         string $parentRelation,
@@ -360,12 +834,32 @@ class ComponentBatchManagerService
             ->whereIn('turma_id', $turmaIds);
     }
 
-    private function escolaSerieDisciplinaQuery(array $gradeIds, array $disciplineIds, ?array $schoolIds = null): Builder
+    private function escolaSerieDisciplinaQuery(array $gradeIds, array $disciplineIds, ?array $schoolIds = null, ?int $year = null): Builder
     {
-        return LegacySchoolGradeDiscipline::query()
+        $query = LegacySchoolGradeDiscipline::query()
             ->whereIn('ref_ref_cod_serie', $gradeIds)
             ->whereIn('ref_cod_disciplina', $disciplineIds)
             ->when($schoolIds, fn ($q) => $q->whereIn('ref_ref_cod_escola', $schoolIds));
+
+        if ($year !== null) {
+            $query->where(function ($q) use ($year) {
+                $q->whereRaw('array_length(anos_letivos, 1) > 1')
+                    ->orWhere(function ($q2) use ($year) {
+                        $q2->whereRaw('array_length(anos_letivos, 1) = 1')
+                            ->whereNotExists(function ($sub) use ($year) {
+                                $sub->selectRaw('1')
+                                    ->from('modules.componente_curricular_turma as cct')
+                                    ->join('pmieducar.turma as t', 't.cod_turma', 'cct.turma_id')
+                                    ->whereColumn('cct.componente_curricular_id', 'escola_serie_disciplina.ref_cod_disciplina')
+                                    ->whereColumn('cct.escola_id', 'escola_serie_disciplina.ref_ref_cod_escola')
+                                    ->whereColumn('cct.ano_escolar_id', 'escola_serie_disciplina.ref_ref_cod_serie')
+                                    ->where('t.ano', '!=', $year);
+                            });
+                    });
+            });
+        }
+
+        return $query;
     }
 
     private function dispensaQuery(array $gradeIds, array $disciplineIds, int $year, ?array $schoolIds): Builder
@@ -377,42 +871,95 @@ class ComponentBatchManagerService
             ->whereHas('registration', fn ($q) => $q->where('ano', $year));
     }
 
-    private function componenteAnoEscolarQuery(array $gradeIds, array $disciplineIds): Builder
+    private function componenteAnoEscolarQuery(array $gradeIds, array $disciplineIds, ?int $year = null, ?array $schoolIds = null): Builder
     {
-        return LegacyDisciplineAcademicYear::query()
+        $query = LegacyDisciplineAcademicYear::query()
             ->whereIn('ano_escolar_id', $gradeIds)
             ->whereIn('componente_curricular_id', $disciplineIds);
+
+        if ($year !== null) {
+            $query->whereNotExists(function ($sub) use ($year, $schoolIds) {
+                $sub->selectRaw('1')
+                    ->from('pmieducar.escola_serie_disciplina as esd')
+                    ->whereColumn('esd.ref_cod_disciplina', 'componente_curricular_ano_escolar.componente_curricular_id')
+                    ->whereColumn('esd.ref_ref_cod_serie', 'componente_curricular_ano_escolar.ano_escolar_id')
+                    ->whereRaw('ARRAY[?::smallint] <@ esd.anos_letivos', [$year])
+                    ->when($schoolIds, fn ($q) => $q->whereNotIn('esd.ref_ref_cod_escola', $schoolIds));
+            });
+        }
+
+        return $query;
     }
 
-    private function unlinkEscolaSerieDisciplina(array $gradeIds, array $disciplineIds, int $year, ?array $schoolIds = null): int
+    // ─── Utilitários ────────────────────────────────────────
+
+    /**
+     * Captura snapshot bruto dos registros (sem casts do Eloquent).
+     * $intArrayColumns: colunas PostgreSQL integer[] convertidas para array PHP.
+     */
+    private function snapshotRows(Builder $query, array $intArrayColumns = []): array
     {
-        $base = $this->escolaSerieDisciplinaQuery($gradeIds, $disciplineIds, $schoolIds);
+        $rows = (clone $query)->toBase()->get()->map(fn ($r) => (array) $r)->values()->toArray();
 
-        $updated = (clone $base)
-            ->whereRaw('ARRAY[?::smallint] <@ anos_letivos', [$year])
-            ->update([
-                'anos_letivos' => DB::raw("array_remove(anos_letivos, {$year}::smallint)"),
-                'updated_at' => now(),
-            ]);
+        if ($intArrayColumns) {
+            foreach ($rows as &$row) {
+                foreach ($intArrayColumns as $col) {
+                    if (isset($row[$col]) && is_string($row[$col])) {
+                        $inner = trim($row[$col], '{}');
+                        $row[$col] = $inner === '' ? [] : array_map('intval', explode(',', $inner));
+                    }
+                }
+            }
+        }
 
-        (clone $base)->whereRaw("anos_letivos = '{}'")->delete();
-
-        return $updated;
+        return $rows;
     }
 
-    private function unlinkComponenteAnoEscolar(array $gradeIds, array $disciplineIds, int $year): int
+    private function deleteByColumns(string $table, array $columns, array $rows): void
     {
-        $base = $this->componenteAnoEscolarQuery($gradeIds, $disciplineIds);
+        if (empty($rows)) {
+            return;
+        }
 
-        $updated = (clone $base)
-            ->whereRaw('ARRAY[?::smallint] <@ anos_letivos', [$year])
-            ->update([
-                'anos_letivos' => DB::raw("array_remove(anos_letivos, {$year}::smallint)"),
-                'updated_at' => now(),
-            ]);
+        if (count($columns) === 1) {
+            $col = $columns[0];
+            $values = array_values(array_unique(array_column($rows, $col)));
 
-        (clone $base)->whereRaw("anos_letivos = '{}'")->delete();
+            foreach (array_chunk($values, 500) as $chunk) {
+                DB::table($table)->whereIn($col, $chunk)->delete();
+            }
 
-        return $updated;
+            return;
+        }
+
+        foreach (array_chunk($rows, 500) as $chunk) {
+            $tuples = [];
+            $bindings = [];
+
+            foreach ($chunk as $row) {
+                $placeholders = [];
+                foreach ($columns as $col) {
+                    $placeholders[] = '?';
+                    $bindings[] = $row[$col] ?? null;
+                }
+                $tuples[] = '(' . implode(', ', $placeholders) . ')';
+            }
+
+            $colList = '"' . implode('", "', $columns) . '"';
+            DB::statement(
+                "DELETE FROM {$table} WHERE ({$colList}) IN (" . implode(', ', $tuples) . ')',
+                $bindings
+            );
+        }
+    }
+
+    private function buildKeyExtractor(array $pkCols): \Closure
+    {
+        return fn (array $r) => implode(':', array_map(fn ($c) => $r[$c], $pkCols));
+    }
+
+    private function formatPgSmallintArray(array $values): string
+    {
+        return "'{" . implode(',', array_map('intval', $values)) . "}'";
     }
 }

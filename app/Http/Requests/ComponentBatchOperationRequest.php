@@ -24,6 +24,8 @@ class ComponentBatchOperationRequest extends FormRequest
             'unlink_grade_components' => $this->has('unlink_grade_components'),
             'remove_exemptions' => $this->has('remove_exemptions'),
         ]);
+
+        $this->enforceCheckboxHierarchy();
     }
 
     public function rules(): array
@@ -33,7 +35,7 @@ class ComponentBatchOperationRequest extends FormRequest
             'institution_id' => ['required', 'integer'],
             'course_ids' => ['required', 'array'],
             'course_ids.*' => ['integer'],
-            'grade_ids' => ['nullable', 'array'],
+            'grade_ids' => ['required', 'array'],
             'grade_ids.*' => ['integer'],
             'school_ids' => ['required', 'array'],
             'school_ids.*' => ['integer'],
@@ -51,47 +53,46 @@ class ComponentBatchOperationRequest extends FormRequest
     public function withValidator(Validator $validator): void
     {
         $validator->after(function (Validator $validator) {
-            // Ao menos uma operação deve ser marcada
-            $hasPhase = $this->input('remove_records')
+            $hasOperation = $this->input('remove_records')
                 || $this->input('unlink_class_components')
                 || $this->input('unlink_teacher_disciplines')
                 || $this->input('unlink_school_grade_disciplines')
                 || $this->input('unlink_grade_components')
                 || $this->input('remove_exemptions');
 
-            if (!$hasPhase) {
+            if (!$hasOperation) {
                 $validator->errors()->add('operations', 'Selecione ao menos uma operação.');
             }
-
-            // Hierarquia: remove_records ← unlink_class_components ← unlink_school_grade_disciplines ← unlink_grade_components
-            //            remove_records ← unlink_teacher_disciplines
-            $removeRecords = $this->input('remove_records');
-            $unlinkClass = $this->input('unlink_class_components');
-
-            $needsRecords = [];
-            if ($unlinkClass && !$removeRecords) {
-                $needsRecords[] = 'Remover componentes da turma';
-            }
-            if ($this->input('unlink_teacher_disciplines') && !$removeRecords) {
-                $needsRecords[] = 'Remover vínculos professor/turma e professor/disciplina';
-            }
-            if ($this->input('unlink_school_grade_disciplines') && !$removeRecords) {
-                $needsRecords[] = 'Remover componentes da série da escola';
-            }
-            if ($this->input('unlink_grade_components') && !$removeRecords) {
-                $needsRecords[] = 'Remover componentes da série';
-            }
-            if (!empty($needsRecords)) {
-                $validator->errors()->add('remove_records', 'Para executar "' . implode('", "', $needsRecords) . '" é necessário marcar "Remover lançamentos".');
-            }
-
-            if ($this->input('unlink_school_grade_disciplines') && !$unlinkClass) {
-                $validator->errors()->add('unlink_class_components', '"Remover componentes da série da escola" exige "Remover componentes da turma".');
-            }
-            if ($this->input('unlink_grade_components') && !$this->input('unlink_school_grade_disciplines')) {
-                $validator->errors()->add('unlink_school_grade_disciplines', '"Remover componentes da série" exige "Remover componentes da série da escola".');
-            }
         });
+    }
+
+    private function enforceCheckboxHierarchy(): void
+    {
+        // Propagar para cima: operação filha implica pais
+        // (ex: desvinc. componentes da série → força desvinc. escola/série → força desvinc. turma → força remover lançamentos)
+        if ($this->input('unlink_grade_components')) {
+            $this->merge(['unlink_school_grade_disciplines' => true]);
+        }
+        if ($this->input('unlink_school_grade_disciplines')) {
+            $this->merge(['unlink_class_components' => true]);
+        }
+        if ($this->input('unlink_class_components') || $this->input('unlink_teacher_disciplines')) {
+            $this->merge(['remove_records' => true]);
+        }
+
+        // Propagar para baixo: pai desmarcado desativa filhos
+        if (!$this->input('remove_records')) {
+            $this->merge([
+                'unlink_class_components' => false,
+                'unlink_teacher_disciplines' => false,
+            ]);
+        }
+        if (!$this->input('unlink_class_components')) {
+            $this->merge(['unlink_school_grade_disciplines' => false]);
+        }
+        if (!$this->input('unlink_school_grade_disciplines')) {
+            $this->merge(['unlink_grade_components' => false]);
+        }
     }
 
     private function inputToIntArray(string $field): array

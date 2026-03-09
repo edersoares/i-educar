@@ -13,26 +13,7 @@
         </tr>
         <tr>
             <td class="formmdtd" colspan="2">
-                <ul style="margin: 5px 0; padding-left: 20px;">
-                    @if($params['remove_records'] ?? false)
-                        <li>Remover lançamentos</li>
-                    @endif
-                    @if($params['remove_exemptions'] ?? false)
-                        <li>Remover dispensas</li>
-                    @endif
-                    @if($params['unlink_class_components'] ?? false)
-                        <li>Remover componentes da turma</li>
-                    @endif
-                    @if($params['unlink_teacher_disciplines'] ?? false)
-                        <li>Remover vínculos professor/turma e professor/disciplina</li>
-                    @endif
-                    @if($params['unlink_school_grade_disciplines'] ?? false)
-                        <li>Remover componentes da série da escola</li>
-                    @endif
-                    @if($params['unlink_grade_components'] ?? false)
-                        <li>Remover componentes da série</li>
-                    @endif
-                </ul>
+                @include('component-batch-manager._operations-list', ['params' => $params])
             </td>
         </tr>
 
@@ -74,7 +55,7 @@
 
         @php
             $idiarioError = isset($preview['idiario']['error']);
-            $hasBlockingError = $blockingError || $idiarioError;
+            $hasBlockingError = $blockingError || !empty($protectionDetails) || $idiarioError;
         @endphp
 
         </tbody>
@@ -116,7 +97,49 @@
                 </tr>
             @endif
 
-        @if($blockingError)
+        @if(!empty($protectionDetails))
+            <tr>
+                <td class="formmdtd" colspan="2">
+                    <div style="background-color: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; padding: 10px; border-radius: 4px;">
+                        <strong>Não é possível executar a operação.</strong>
+
+                        @if(!empty($protectionDetails['componente_ano_escolar']))
+                            <p style="margin: 8px 0 4px;">
+                                Os seguintes componentes da série não podem ser removidos porque
+                                outras escolas ainda os utilizam para o ano {{ $params['year'] }}:
+                            </p>
+                            <ul style="margin: 0; padding-left: 20px;">
+                                @foreach($protectionDetails['componente_ano_escolar'] as $item)
+                                    <li>
+                                        <strong>{{ $item['componente'] }}</strong> ({{ $item['serie'] }}):
+                                        {{ implode(', ', $item['escolas']) }}
+                                    </li>
+                                @endforeach
+                            </ul>
+                        @endif
+
+                        @if(!empty($protectionDetails['escola_serie_disciplina']))
+                            <p style="margin: 8px 0 4px;">
+                                Os seguintes componentes da série da escola não podem ser removidos porque
+                                turmas de outros anos ainda os utilizam:
+                            </p>
+                            <ul style="margin: 0; padding-left: 20px;">
+                                @foreach($protectionDetails['escola_serie_disciplina'] as $item)
+                                    <li>
+                                        <strong>{{ $item['componente'] }}</strong> — {{ $item['escola'] }}
+                                        ({{ $item['serie'] }}): ano(s) {{ implode(', ', $item['anos_bloqueando']) }}
+                                    </li>
+                                @endforeach
+                            </ul>
+                        @endif
+
+                        <p style="margin: 8px 0 0;">
+                            <em>Desmarque a opção ou inclua todas as escolas/anos envolvidos.</em>
+                        </p>
+                    </div>
+                </td>
+            </tr>
+        @elseif($blockingError)
             <tr>
                 <td class="formmdtd" colspan="2">
                     <div style="background-color: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; padding: 10px; border-radius: 4px;">
@@ -157,7 +180,7 @@
     </div>
 
     <div id="modal-confirmation" style="display: none;">
-        <p><strong>Atenção:</strong> esta operação é irreversível. Todos os lançamentos, vínculos e registros listados acima serão excluídos permanentemente do banco de dados.</p>
+        <p><strong>Atenção:</strong> todos os lançamentos, vínculos e registros listados acima serão excluídos do banco de dados. Um backup será salvo automaticamente para possibilitar restauração.</p>
         <p>Tem certeza que deseja prosseguir?</p>
     </div>
 @endsection

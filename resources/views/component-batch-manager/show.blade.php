@@ -28,30 +28,15 @@
             <td class="formmdtd" valign="top"><span class="form">Data</span></td>
             <td class="formmdtd" valign="top">{{ $operation->created_at->format('d/m/Y H:i') }}</td>
         </tr>
-        @if(isset($data['execution_time']))
-            @php
-                $formatTime = function ($s) {
-                    $s = (int) $s;
-                    if ($s < 1) return '< 1s';
-                    if ($s < 60) return $s . 's';
-                    if ($s < 3600) return floor($s / 60) . 'm ' . ($s % 60) . 's';
-                    return floor($s / 3600) . 'h ' . floor(($s % 3600) / 60) . 'm ' . ($s % 60) . 's';
-                };
-                $time = $data['execution_time'];
-                $parts = [];
-                $parts[] = isset($time['idiario']) ? "i-Diário: " . $formatTime($time['idiario']) : "i-Diário: não executado";
-                if (isset($time['ieducar'])) $parts[] = "i-Educar: " . $formatTime($time['ieducar']);
-                if (isset($time['verificacao'])) $parts[] = "Verificação: " . $formatTime($time['verificacao']);
-                $timeLabel = $formatTime($time['total'] ?? 0) . (count($parts) > 0 ? ' (' . implode(', ', $parts) . ')' : '');
-            @endphp
+        @if($timeLabel)
             <tr>
                 <td class="formlttd" valign="top"><span class="form">Tempo de execução</span></td>
                 <td class="formlttd" valign="top">{{ $timeLabel }}</td>
             </tr>
         @endif
         <tr>
-            <td class="{{ isset($data['execution_time']) ? 'formmdtd' : 'formlttd' }}" valign="top"><span class="form">Ano</span></td>
-            <td class="{{ isset($data['execution_time']) ? 'formmdtd' : 'formlttd' }}" valign="top">{{ $data['year'] }}</td>
+            <td class="{{ $timeLabel ? 'formmdtd' : 'formlttd' }}" valign="top"><span class="form">Ano</span></td>
+            <td class="{{ $timeLabel ? 'formmdtd' : 'formlttd' }}" valign="top">{{ $data['year'] }}</td>
         </tr>
         <tr>
             <td class="formmdtd" valign="top"><span class="form">Cursos</span></td>
@@ -87,26 +72,7 @@
         </tr>
         <tr>
             <td class="formmdtd" colspan="2">
-                <ul style="margin: 5px 0; padding-left: 20px;">
-                    @if($data['remove_records'] ?? false)
-                        <li>Remover lançamentos</li>
-                    @endif
-                    @if($data['remove_exemptions'] ?? false)
-                        <li>Remover dispensas</li>
-                    @endif
-                    @if($data['unlink_class_components'] ?? false)
-                        <li>Remover componentes da turma</li>
-                    @endif
-                    @if($data['unlink_teacher_disciplines'] ?? false)
-                        <li>Remover vínculos professor/turma e professor/disciplina</li>
-                    @endif
-                    @if($data['unlink_school_grade_disciplines'] ?? false)
-                        <li>Remover componentes da série da escola</li>
-                    @endif
-                    @if($data['unlink_grade_components'] ?? false)
-                        <li>Remover componentes da série</li>
-                    @endif
-                </ul>
+                @include('component-batch-manager._operations-list', ['params' => $data])
             </td>
         </tr>
 
@@ -140,7 +106,7 @@
     <table class="tablecadastro" width="100%" border="0" cellpadding="2" cellspacing="0" role="presentation">
         <tbody>
 
-        @if($status === \App\Models\Enums\ComponentBatchStatus::WAITING || $status === \App\Models\Enums\ComponentBatchStatus::RUNNING)
+        @if($isProcessing)
             @php $isStale = $operation->created_at < now()->subMinutes(20); @endphp
             <tr>
                 <td class="formmdtd" colspan="2">
@@ -160,7 +126,7 @@
             </tr>
         @endif
 
-        @if($status === \App\Models\Enums\ComponentBatchStatus::FAILED)
+        @if($isFailed)
             <tr>
                 <td class="formdktd" colspan="2" height="24"><b>Erro</b></td>
             </tr>
@@ -181,7 +147,7 @@
     </form>
 
     @if($showVerification)
-        @if($status === \App\Models\Enums\ComponentBatchStatus::COMPLETED && !empty($verificationWarnings))
+        @if(!$isProcessing && !$isFailed && !empty($verificationWarnings))
             <div style="background-color: #fcf8e3; border: 1px solid #faebcc; color: #8a6d3b; padding: 10px; border-radius: 4px; margin-bottom: 10px;">
                 <strong>Observações:</strong>
                 <ul style="margin: 5px 0 0 0; padding-left: 20px;">
@@ -214,6 +180,33 @@
         <div style="background-color: #fcf8e3; border: 1px solid #faebcc; color: #8a6d3b; padding: 10px; margin: 10px 0; border-radius: 4px; text-align: center;">
             {{ session('warning') }}
         </div>
+    @endif
+
+    @if(!empty($backupSummary))
+        <table class="tablecadastro" width="100%" border="0" cellpadding="2" cellspacing="0" role="presentation">
+            <tbody>
+            <tr>
+                <td class="formdktd" colspan="2" height="24"><b>Backup</b></td>
+            </tr>
+            @php $rowClass = 'formlttd'; @endphp
+            @foreach($backupSummary as $item)
+                <tr>
+                    <td class="{{ $rowClass }}" style="width: 60%;">{{ $item['label'] }}</td>
+                    <td class="{{ $rowClass }}">{{ $item['count'] }} registro(s) {{ $item['action'] }}</td>
+                </tr>
+                @php $rowClass = $rowClass === 'formlttd' ? 'formmdtd' : 'formlttd'; @endphp
+            @endforeach
+            @if($isRestored)
+                <tr>
+                    <td class="{{ $rowClass }}" colspan="2">
+                        <div style="background-color: #d9edf7; border: 1px solid #bce8f1; color: #31708f; padding: 10px; border-radius: 4px;">
+                            Esta operação foi restaurada em {{ $operation->updated_at->format('d/m/Y H:i') }}.
+                        </div>
+                    </td>
+                </tr>
+            @endif
+            </tbody>
+        </table>
     @endif
 
     <div style="text-align: center; margin-top: 20px; margin-bottom: 20px;">

@@ -14,11 +14,13 @@ class ComponentBatchOperation extends Model
         'user_id',
         'status_id',
         'data',
+        'backup',
         'error_message',
     ];
 
     protected $casts = [
-        'data' => 'json',
+        'data' => 'array',
+        'backup' => 'array',
     ];
 
     public function status(): ComponentBatchStatus

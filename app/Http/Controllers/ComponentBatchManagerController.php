@@ -44,11 +44,7 @@ class ComponentBatchManagerController extends Controller
         ]);
         $this->menu(Process::COMPONENT_BATCH_MANAGER);
 
-        $disciplines = LegacyDiscipline::query()->orderBy('nome')->pluck('nome', 'id');
-
-        return view('component-batch-manager.create', [
-            'disciplines' => $disciplines,
-        ]);
+        return view('component-batch-manager.create');
     }
 
     public function apiCourses(Request $request)
@@ -56,14 +52,16 @@ class ComponentBatchManagerController extends Controller
         $schoolIds = array_filter((array) $request->input('school_ids', []));
         $year = $request->input('year');
 
+        if (empty($schoolIds)) {
+            return response()->json([]);
+        }
+
         $courses = LegacyCourse::query()
             ->active()
-            ->when(!empty($schoolIds), fn ($q) => $q
-                ->join('pmieducar.escola_curso as ec', 'ec.ref_cod_curso', 'curso.cod_curso')
-                ->where('ec.ativo', 1)
-                ->whereIn('ec.ref_cod_escola', $schoolIds)
-                ->when($year, fn ($q) => $q->whereRaw('ARRAY[?::smallint] <@ ec.anos_letivos', [$year]))
-            )
+            ->join('pmieducar.escola_curso as ec', 'ec.ref_cod_curso', 'curso.cod_curso')
+            ->where('ec.ativo', 1)
+            ->whereIn('ec.ref_cod_escola', $schoolIds)
+            ->when($year, fn ($q) => $q->whereRaw('ARRAY[?::smallint] <@ ec.anos_letivos', [$year]))
             ->select('curso.cod_curso', 'curso.nm_curso')
             ->distinct()
             ->orderBy('curso.nm_curso')
@@ -77,6 +75,10 @@ class ComponentBatchManagerController extends Controller
         $schoolIds = array_filter((array) $request->input('school_ids', []));
         $courseIds = array_filter((array) $request->input('course_ids', []));
         $year = $request->input('year');
+
+        if (empty($courseIds)) {
+            return response()->json([]);
+        }
 
         $grades = LegacyGrade::query()
             ->active()
@@ -101,8 +103,8 @@ class ComponentBatchManagerController extends Controller
         $gradeIds = array_filter((array) $request->input('grade_ids', []));
         $year = $request->input('year');
 
-        if (empty($schoolIds) && empty($gradeIds)) {
-            return response()->json(LegacyDiscipline::query()->orderBy('nome')->pluck('nome', 'id'));
+        if (empty($gradeIds)) {
+            return response()->json([]);
         }
 
         $disciplines = LegacySchoolGradeDiscipline::query()
@@ -129,20 +131,6 @@ class ComponentBatchManagerController extends Controller
 
         $validated = $request->validated();
 
-        if (empty($validated['grade_ids'])) {
-            $validated['grade_ids'] = LegacyGrade::query()
-                ->active()
-                ->whereIn('ref_cod_curso', $validated['course_ids'])
-                ->pluck('cod_serie')
-                ->toArray();
-        }
-
-        if (empty($validated['grade_ids'])) {
-            return redirect()->route('component-batch-manager.create')
-                ->withErrors(['Nenhuma série encontrada para os cursos selecionados.'])
-                ->withInput();
-        }
-
         $service = app(ComponentBatchManagerService::class);
         $preview = $service->calculatePreview($validated);
 
@@ -150,12 +138,16 @@ class ComponentBatchManagerController extends Controller
             'preview_counts' => $preview,
         ])]);
 
-        $warnings = $this->buildWarnings(validated: $validated, preview: $preview, service: $service);
+        $warnings = $service->buildWarnings($validated, $preview);
 
         ['totalIeducar' => $totalIeducar, 'totalIdiario' => $totalIdiario] = ComponentBatchManagerService::sumPreviewCounts($preview);
 
         $blockingError = null;
-        if ($totalIeducar === 0 && $totalIdiario === 0) {
+        $protectionDetails = [];
+
+        if (($preview['escola_serie_disciplina_skipped'] ?? 0) > 0 || ($preview['componente_ano_escolar_skipped'] ?? 0) > 0) {
+            $protectionDetails = $service->getProtectionDetails($validated, $preview);
+        } elseif ($totalIeducar === 0 && $totalIdiario === 0) {
             $blockingError = 'Nenhum registro encontrado para os filtros selecionados.';
         }
 
@@ -166,6 +158,7 @@ class ComponentBatchManagerController extends Controller
                 'preview' => $preview,
                 'warnings' => $warnings,
                 'blockingError' => $blockingError,
+                'protectionDetails' => $protectionDetails,
                 'totalIeducar' => $totalIeducar,
                 'totalIdiario' => $totalIdiario,
             ]
@@ -216,7 +209,7 @@ class ComponentBatchManagerController extends Controller
         return redirect()->route('component-batch-manager.show', $operation);
     }
 
-    public function show(ComponentBatchOperation $componentBatchOperation)
+    public function show(ComponentBatchOperation $componentBatchOperation, ComponentBatchManagerService $service)
     {
         $this->breadcrumb('Resultado da Operação', [
             url('intranet/educar_configuracoes_index.php') => 'Configurações',
@@ -231,13 +224,18 @@ class ComponentBatchManagerController extends Controller
         $postIdiario = $data['post_idiario'] ?? null;
         $verificationWarnings = $data['verification_warnings'] ?? [];
 
-        ['totalIeducar' => $totalIeducar, 'totalIdiario' => $totalIdiario] = ComponentBatchManagerService::sumPreviewCounts($previewCounts);
+        ['totalIeducar' => $totalIeducar] = ComponentBatchManagerService::sumPreviewCounts($previewCounts);
         ['totalIeducar' => $totalPostIeducar] = ComponentBatchManagerService::sumPreviewCounts($postCounts ?? []);
-        $totalPostIdiario = ComponentBatchManagerService::sumIdiarioCounts($postIdiario);
 
         $hasVerificationData = $postCounts || $postIdiario;
-        $showVerification = $status === ComponentBatchStatus::COMPLETED
+        $showVerification = in_array($status, [ComponentBatchStatus::COMPLETED, ComponentBatchStatus::RESTORED])
             || ($status === ComponentBatchStatus::FAILED && $hasVerificationData);
+
+        $backupSummary = $service->buildBackupSummary($componentBatchOperation->backup ?? []);
+
+        $timeLabel = isset($data['execution_time'])
+            ? self::formatExecutionTime($data['execution_time'])
+            : null;
 
         return view('component-batch-manager.show', array_merge(
             $this->resolveNames($data),
@@ -246,55 +244,36 @@ class ComponentBatchManagerController extends Controller
                 'status' => $status,
                 'previewCounts' => $previewCounts,
                 'totalIeducar' => $totalIeducar,
-                'totalIdiario' => $totalIdiario,
                 'postCounts' => $postCounts,
                 'postIdiario' => $postIdiario,
                 'verificationWarnings' => $verificationWarnings,
                 'showVerification' => $showVerification,
                 'totalPostIeducar' => $totalPostIeducar,
-                'totalPostIdiario' => $totalPostIdiario,
+                'backupSummary' => $backupSummary,
+                'timeLabel' => $timeLabel,
+                'isProcessing' => in_array($status, [ComponentBatchStatus::WAITING, ComponentBatchStatus::RUNNING]),
+                'isFailed' => $status === ComponentBatchStatus::FAILED,
+                'isRestored' => $status === ComponentBatchStatus::RESTORED,
             ]
         ));
     }
 
-    private function buildWarnings(array $validated, array $preview, ComponentBatchManagerService $service): array
+    private static function formatExecutionTime(array $time): string
     {
-        $warnings = [];
+        $fmt = function (int $s): string {
+            if ($s < 1) return '< 1s';
+            if ($s < 60) return $s . 's';
+            if ($s < 3600) return floor($s / 60) . 'm ' . ($s % 60) . 's';
 
-        if (($validated['unlink_class_components'] ?? false)
-            && !($validated['remove_records'] ?? false)) {
-            $hasRecords = ($preview['nota_media'] ?? 0) + ($preview['nota'] ?? 0)
-                + ($preview['falta'] ?? 0) + ($preview['parecer'] ?? 0);
+            return floor($s / 3600) . 'h ' . floor(($s % 3600) / 60) . 'm ' . ($s % 60) . 's';
+        };
 
-            if ($hasRecords === 0 && ($preview['turma_count'] ?? 0) > 0) {
-                $tempPreview = $service->calculatePreview(array_merge($validated, [
-                    'remove_records' => true,
-                    'unlink_class_components' => false,
-                    'unlink_teacher_disciplines' => false,
-                    'unlink_school_grade_disciplines' => false,
-                    'unlink_grade_components' => false,
-                    'skip_idiario' => true,
-                ]));
-                $hasRecords = ($tempPreview['nota_media'] ?? 0) + ($tempPreview['nota'] ?? 0)
-                    + ($tempPreview['falta'] ?? 0) + ($tempPreview['parecer'] ?? 0);
-            }
+        $parts = [];
+        $parts[] = isset($time['idiario']) ? "i-Diário: " . $fmt($time['idiario']) : "i-Diário: não executado";
+        if (isset($time['ieducar'])) $parts[] = "i-Educar: " . $fmt($time['ieducar']);
+        if (isset($time['verificacao'])) $parts[] = "Verificação: " . $fmt($time['verificacao']);
 
-            if ($hasRecords > 0) {
-                $warnings[] = "Existem {$hasRecords} lançamentos. Desvincular sem remover pode gerar inconsistência.";
-            }
-        }
-
-        if (($validated['unlink_class_components'] ?? false)
-            && !($validated['unlink_teacher_disciplines'] ?? false)) {
-            $warnings[] = 'Vínculos de professor/disciplina continuarão apontando para componentes removidos da turma.';
-        }
-
-        if ((($validated['unlink_school_grade_disciplines'] ?? false) || ($validated['unlink_grade_components'] ?? false))
-            && !($validated['unlink_class_components'] ?? false)) {
-            $warnings[] = 'Componentes continuarão vinculados nas turmas.';
-        }
-
-        return $warnings;
+        return $fmt($time['total'] ?? 0) . (count($parts) > 0 ? ' (' . implode(', ', $parts) . ')' : '');
     }
 
     private function resolveNames(array $data): array

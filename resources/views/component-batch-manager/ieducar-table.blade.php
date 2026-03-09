@@ -39,11 +39,31 @@
             @php $rowClass = $rowClass === 'formlttd' ? 'formmdtd' : 'formlttd'; @endphp
         @endif
         @if($data['unlink_school_grade_disciplines'] ?? false)
-            <tr><td class="{{ $rowClass }}">Componentes da série da escola</td><td class="{{ $rowClass }}">{{ number_format($counts['escola_serie_disciplina'] ?? 0, 0, ',', '.') }}</td></tr>
+            <tr>
+                <td class="{{ $rowClass }}">Componentes da série da escola</td>
+                <td class="{{ $rowClass }}">
+                    {{ number_format($counts['escola_serie_disciplina'] ?? 0, 0, ',', '.') }}
+                    @if(($counts['escola_serie_disciplina_skipped'] ?? 0) > 0)
+                        <span style="color: #a94442; font-weight: bold; font-size: 0.9em;">
+                            ({{ $counts['escola_serie_disciplina_skipped'] }} protegido(s))
+                        </span>
+                    @endif
+                </td>
+            </tr>
             @php $rowClass = $rowClass === 'formlttd' ? 'formmdtd' : 'formlttd'; @endphp
         @endif
         @if($data['unlink_grade_components'] ?? false)
-            <tr><td class="{{ $rowClass }}">Componentes da série</td><td class="{{ $rowClass }}">{{ number_format($counts['componente_ano_escolar'] ?? 0, 0, ',', '.') }}</td></tr>
+            <tr>
+                <td class="{{ $rowClass }}">Componentes da série</td>
+                <td class="{{ $rowClass }}">
+                    {{ number_format($counts['componente_ano_escolar'] ?? 0, 0, ',', '.') }}
+                    @if(($counts['componente_ano_escolar_skipped'] ?? 0) > 0)
+                        <span style="color: #a94442; font-weight: bold; font-size: 0.9em;">
+                            ({{ $counts['componente_ano_escolar_skipped'] }} protegido(s))
+                        </span>
+                    @endif
+                </td>
+            </tr>
         @endif
     @endif
 </table>

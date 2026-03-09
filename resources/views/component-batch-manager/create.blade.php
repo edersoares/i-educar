@@ -55,9 +55,6 @@
                 </td>
                 <td class="formlttd" valign="top">
                     <select name="curso[]" id="cursos" multiple style="width: 308px;">
-                        @foreach(App_Model_IedFinder::getCursos() as $id => $name)
-                            <option value="{{ $id }}">{{ $name }}</option>
-                        @endforeach
                     </select>
                     <a href="javascript:void(0)" id="link-select-all-courses" style="margin-left: 10px; color: #47728f; text-decoration: none;">
                         Selecionar todos
@@ -67,13 +64,10 @@
 
             <tr>
                 <td class="formmdtd" valign="top">
-                    <label for="ref_cod_serie" class="form">Séries</label>
+                    <label for="ref_cod_serie" class="form">Séries <span class="campo_obrigatorio">*</span></label>
                 </td>
                 <td class="formmdtd" valign="top">
                     <select name="ref_cod_serie[]" id="ref_cod_serie" multiple="multiple" style="width: 308px;">
-                        @foreach(App_Model_IedFinder::getSeries() as $id => $name)
-                            <option value="{{ $id }}">{{ $name }}</option>
-                        @endforeach
                     </select>
                     <a href="javascript:void(0)" id="link-select-all-grades" style="margin-left: 10px; color: #47728f; text-decoration: none;">
                         Selecionar todas
@@ -87,9 +81,6 @@
                 </td>
                 <td class="formlttd" valign="top">
                     <select name="discipline_ids[]" id="discipline_ids" multiple="multiple" style="width: 308px;">
-                        @foreach($disciplines as $id => $name)
-                            <option value="{{ $id }}">{{ $name }}</option>
-                        @endforeach
                     </select>
                     <a href="javascript:void(0)" id="link-select-all-disciplines" style="margin-left: 10px; color: #47728f; text-decoration: none;">
                         Selecionar todos
@@ -182,13 +173,13 @@
                 $select.trigger('chosen:updated');
             }
 
-            multipleSearchHelper.setup('cursos', '', 'multiple', 'multiple', { placeholder: 'Todos os cursos' });
+            multipleSearchHelper.setup('cursos', '', 'multiple', 'multiple', { placeholder: 'Selecione os cursos' });
             $j('#cursos').trigger('chosen:updated');
 
-            multipleSearchHelper.setup('ref_cod_serie', '', 'multiple', 'multiple', { placeholder: 'Todas as séries' });
+            multipleSearchHelper.setup('ref_cod_serie', '', 'multiple', 'multiple', { placeholder: 'Selecione as séries' });
             $j('#ref_cod_serie').trigger('chosen:updated');
 
-            multipleSearchHelper.setup('discipline_ids', '', 'multiple', 'multiple', { placeholder: 'Todos os componentes' });
+            multipleSearchHelper.setup('discipline_ids', '', 'multiple', 'multiple', { placeholder: 'Selecione os componentes' });
             $j('#discipline_ids').trigger('chosen:updated');
 
             $j('#link-select-all-schools').on('click', function() {
@@ -225,6 +216,12 @@
                 var schoolIds = $j('#escola').val();
                 var year = $j('#ano').val();
 
+                if (!schoolIds || schoolIds.length === 0) {
+                    $j('#cursos').empty().trigger('chosen:updated');
+                    loadGrades();
+                    return;
+                }
+
                 $j.ajax({
                     url: '{{ route("component-batch-manager.api.courses") }}',
                     data: { school_ids: schoolIds, year: year },
@@ -244,8 +241,15 @@
             }
 
             function loadGrades() {
-                var schoolIds = $j('#escola').val();
                 var courseIds = $j('#cursos').val();
+
+                if (!courseIds || courseIds.length === 0) {
+                    $j('#ref_cod_serie').empty().trigger('chosen:updated');
+                    loadDisciplines();
+                    return;
+                }
+
+                var schoolIds = $j('#escola').val();
                 var year = $j('#ano').val();
 
                 $j.ajax({
@@ -267,8 +271,14 @@
             }
 
             function loadDisciplines() {
-                var schoolIds = $j('#escola').val();
                 var gradeIds = $j('#ref_cod_serie').val();
+
+                if (!gradeIds || gradeIds.length === 0) {
+                    $j('#discipline_ids').empty().trigger('chosen:updated');
+                    return;
+                }
+
+                var schoolIds = $j('#escola').val();
                 var year = $j('#ano').val();
 
                 $j.ajax({
