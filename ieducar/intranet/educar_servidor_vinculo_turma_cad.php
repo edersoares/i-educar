@@ -321,8 +321,20 @@ return new class extends clsCadastro
             return false;
         }
 
-        $professorTurmaId = $professorTurma->cadastra();
-        $professorTurma->gravaComponentes(professor_turma_id: $professorTurmaId, componentes: $this->componentecurricular);
+        DB::beginTransaction();
+
+        try {
+            $professorTurmaId = $professorTurma->cadastra();
+            $professorTurma->gravaComponentes(professor_turma_id: $professorTurmaId, componentes: $this->componentecurricular);
+
+            DB::commit();
+        } catch (Exception $exception) {
+            DB::rollBack();
+
+            $this->mensagem = $exception->getMessage();
+
+            return false;
+        }
 
         $this->mensagem = 'Cadastro efetuado com sucesso.<br>';
         $this->simpleRedirect(url: $backUrl);
@@ -429,17 +441,31 @@ return new class extends clsCadastro
             return false;
         }
 
-        $editou = $professorTurma->edita();
 
-        if ($editou) {
+        DB::beginTransaction();
+
+        try {
+            $editou = $professorTurma->edita();
+
+            if (empty($editou)) {
+                $this->mensagem = 'Edição não realizada.<br>';
+
+                return false;
+            }
+
             $professorTurma->gravaComponentes(professor_turma_id: $this->id, componentes: $this->componentecurricular);
-            $this->mensagem = 'Edição efetuada com sucesso.<br>';
-            $this->simpleRedirect(url: $backUrl);
+
+            DB::commit();
+        } catch (Exception $exception) {
+            DB::rollBack();
+
+            $this->mensagem = $exception->getMessage();
+
+            return false;
         }
 
-        $this->mensagem = 'Edição não realizada.<br>';
-
-        return false;
+        $this->mensagem = 'Edição efetuada com sucesso.<br>';
+        $this->simpleRedirect(url: $backUrl);
     }
 
     public function Excluir()
@@ -458,8 +484,21 @@ return new class extends clsCadastro
         $obj_permissoes->permissao_excluir(int_processo_ap: 635, int_idpes_usuario: $this->pessoa_logada, int_soma_nivel_acesso: 7, str_pagina_redirecionar: $backUrl);
 
         $professorTurma = new clsModulesProfessorTurma(id: $this->id);
-        $professorTurma->excluiComponentes(professor_turma_id: $this->id);
-        $professorTurma->excluir();
+
+        DB::beginTransaction();
+
+        try {
+            $professorTurma->excluiComponentes(professor_turma_id: $this->id);
+            $professorTurma->excluir();
+
+            DB::commit();
+        } catch (Exception $exception) {
+            DB::rollBack();
+
+            $this->mensagem = $exception->getMessage();
+
+            return false;
+        }
 
         $this->mensagem = 'Exclusão efetuada com sucesso.<br>';
         $this->simpleRedirect(url: $backUrl);
