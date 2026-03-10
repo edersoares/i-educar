@@ -586,28 +586,4 @@ class clsModulesProfessorTurma extends Model
         $db = new clsBanco;
         $db->Consulta("DELETE FROM modules.professor_turma_disciplina WHERE professor_turma_id = {$professor_turma_id}");
     }
-
-    public function retornaComponentesVinculados($professor_turma_id)
-    {
-        $componentesVinculados = [];
-        $sql = "SELECT componente_curricular_id
-                  FROM modules.professor_turma_disciplina
-                 WHERE professor_turma_id = {$professor_turma_id}";
-        $db = new clsBanco;
-        $db->Consulta($sql);
-        while ($db->ProximoRegistro()) {
-            $tupla = $db->Tupla();
-            $componentesVinculados[] = $tupla['componente_curricular_id'];
-        }
-
-        return $componentesVinculados;
-    }
-
-    public function retornaNomeDoComponente($idComponente)
-    {
-        $mapperComponente = new ComponenteCurricular_Model_ComponenteDataMapper;
-        $componente = $mapperComponente->find(['id' => $idComponente]);
-
-        return $componente->nome;
-    }
 }
