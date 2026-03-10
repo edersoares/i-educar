@@ -21,5 +21,6 @@ return new class extends Migration
         DB::unprepared('DROP FUNCTION IF EXISTS relatorio.get_pai_aluno');
         DB::unprepared('DROP FUNCTION IF EXISTS relatorio.get_telefone_escola');
         DB::unprepared('DROP FUNCTION IF EXISTS relatorio.get_total_geral_falta_componente');
+        DB::unprepared('DROP FUNCTION IF EXISTS relatorio.get_mae_aluno');
     }
 };
