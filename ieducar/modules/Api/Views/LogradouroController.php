@@ -11,22 +11,22 @@ class LogradouroController extends ApiCoreController
 
     protected function sqlsForNumericSearch()
     {
-        $sqls[] = 'SELECT distinct l.idlog as id, l.nome as name, \'\'::character varying tipo_logradouro, m.nome as municipio from
+        $sqls[] = 'SELECT distinct l.idlog as id, l.nome as name, \'\'::character varying tipo_logradouro, m.name as municipio from
                  public.logradouro l
-                 INNER JOIN public.municipio m ON m.idmun = l.idmun
-                 where l.idlog::varchar like $1||\'%\' and (m.idmun = $2 OR $2 = 0)';
+                 INNER JOIN cities m ON m.id = l.idmun
+                 where l.idlog::varchar like $1||\'%\' and (m.id = $2 OR $2 = 0)';
 
         return $sqls;
     }
 
     protected function sqlsForStringSearch()
     {
-        $sqls[] = 'SELECT distinct l.idlog as id, l.nome as name, \'\'::character varying tipo_logradouro, m.nome as municipio FROM
+        $sqls[] = 'SELECT distinct l.idlog as id, l.nome as name, \'\'::character varying tipo_logradouro, m.name as municipio FROM
                  public.logradouro l
-                 INNER JOIN public.municipio m ON m.idmun = l.idmun
+                 INNER JOIN cities m ON m.id = l.idmun
                  where (lower((l.nome)) like \'%\'||lower(($1))||\'%\'
                  OR lower((tl.descricao))|| \' \' ||lower((l.nome)) like \'%\'||lower(($1))||\'%\')
-                 and (m.idmun = $2 OR $2 = 0)';
+                 and (m.id = $2 OR $2 = 0)';
 
         return $sqls;
     }
