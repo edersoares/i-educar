@@ -184,15 +184,21 @@ class iDiarioService
     public function deleteDisciplineRecords(array $params): array
     {
         try {
+            $payload = [
+                'year' => $params['year'],
+                'unities' => $params['school_ids'] ?? [],
+                'courses' => $params['course_ids'] ?? [],
+                'grades' => $params['grade_ids'] ?? [],
+                'disciplines' => $params['discipline_ids'] ?? [],
+                'user' => $params['user_id'] ?? null,
+            ];
+
+            if (!empty($params['callback_url'])) {
+                $payload['callback_url'] = $params['callback_url'];
+            }
+
             $response = $this->http->request('POST', $this->apiUrl . '/api/v2/discipline_records/destroy_batch', [
-                'json' => [
-                    'year' => $params['year'],
-                    'unities' => $params['school_ids'] ?? [],
-                    'courses' => $params['course_ids'] ?? [],
-                    'grades' => $params['grade_ids'] ?? [],
-                    'disciplines' => $params['discipline_ids'] ?? [],
-                    'user' => $params['user_id'] ?? null,
-                ],
+                'json' => $payload,
                 'headers' => [
                     'token' => $this->apiToken,
                 ],

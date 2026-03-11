@@ -202,6 +202,13 @@ class ComponentBatchManagerController extends Controller
 
         Bus::batch([$job])
             ->then(function () use ($userId, $operation) {
+                $operation->refresh();
+
+                // Se está aguardando callback do iDiário, não notifica ainda
+                if ($operation->status_id === ComponentBatchStatus::RUNNING->value) {
+                    return;
+                }
+
                 (new NotificationService)->createByUser(
                     userId: $userId,
                     text: 'Remoção de componentes concluída com sucesso.',

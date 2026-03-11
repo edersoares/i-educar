@@ -6,6 +6,8 @@ use App\Http\Controllers\ExportController;
 use App\Http\Controllers\SchoolClassController;
 use App\Http\Controllers\SocialiteCallbackController;
 use App\Http\Controllers\SocialiteRedirectController;
+use App\Http\Controllers\ComponentBatchCallbackController;
+use App\Http\Controllers\TransferWebhookCallbackController;
 use App\Http\Controllers\WebController;
 use App\Http\Middleware\AnnouncementMiddleware;
 use App\Process;
@@ -210,3 +212,11 @@ Route::group(['middleware' => ['ieducar.navigation', 'ieducar.footer', 'ieducar.
 
 Route::get('/auth/redirect', SocialiteRedirectController::class)->name('socialite.redirect');
 Route::get('/auth/callback', SocialiteCallbackController::class)->name('socialite.callback');
+
+Route::get('/webhook/transfer/{id}', TransferWebhookCallbackController::class)
+    ->name('webhook.transfer.callback')
+    ->middleware(\App\Http\Middleware\ValidToken::class);
+
+Route::post('/webhook/component-batch/{id}', ComponentBatchCallbackController::class)
+    ->name('webhook.component-batch.callback')
+    ->middleware(\App\Http\Middleware\ValidToken::class);

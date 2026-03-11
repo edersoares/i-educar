@@ -107,7 +107,10 @@
         <tbody>
 
         @if($isProcessing)
-            @php $isStale = $operation->created_at < now()->subMinutes(20); @endphp
+            @php
+                $awaitingCallback = !empty($operation->data['callback_url']);
+                $isStale = !$awaitingCallback && $operation->created_at < now()->subMinutes(10);
+            @endphp
             <tr>
                 <td class="formmdtd" colspan="2">
                     @if($isStale)

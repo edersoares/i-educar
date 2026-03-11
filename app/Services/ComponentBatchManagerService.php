@@ -312,13 +312,56 @@ class ComponentBatchManagerService
         ['totalIeducar' => $totalIeducar, 'totalIdiario' => $totalIdiario] = self::sumPreviewCounts($previewCounts);
 
         $warnings = [];
+        $needsIdiario = $totalIdiario > 0 && ($data['remove_records'] ?? false) && iDiarioService::hasIdiarioConfigurations();
 
-        if ($totalIdiario > 0 && ($data['remove_records'] ?? false) && iDiarioService::hasIdiarioConfigurations()) {
+        if ($needsIdiario) {
             $t = now();
-            $warnings = $this->executeIdiarioDeletion($data, $previewCounts, $operation);
-            $timings['idiario'] = $t->diffInSeconds(now());
+            $callbackUrl = route('webhook.component-batch.callback', ['id' => $operation->id]);
+            $result = app(iDiarioService::class)->deleteDisciplineRecords(
+                array_merge($data, ['callback_url' => $callbackUrl])
+            );
+            $timings['idiario_request'] = $t->diffInSeconds(now());
+
+            // iDiário vai processar na fila e chamar o webhook com o resultado
+            if (!empty($result['queued'])) {
+                $data['execution_time'] = $timings;
+                $data['callback_url'] = $callbackUrl;
+                $operation->update(['data' => $data]);
+
+                return [];
+            }
+
+            // Fallback: resposta síncrona (iDiário antigo sem fila)
+            $warnings = $this->processIdiarioResult($result, $data, $previewCounts, $operation);
         }
 
+        return $this->completeExecution($operation, $data, $totalIeducar, $warnings, $timings, $startedAt);
+    }
+
+    public function handleIdiarioCallback(ComponentBatchOperation $operation, array $idiarioResult): void
+    {
+        $data = $operation->data;
+        $previewCounts = $data['preview_counts'] ?? [];
+        $timings = $data['execution_time'] ?? [];
+        $startedAt = now();
+
+        ['totalIeducar' => $totalIeducar] = self::sumPreviewCounts($previewCounts);
+
+        $warnings = $this->processIdiarioResult($idiarioResult, $data, $previewCounts, $operation);
+
+        $timings['idiario_callback'] = $startedAt->diffInSeconds(now());
+
+        $this->completeExecution($operation, $data, $totalIeducar, $warnings, $timings, $startedAt);
+    }
+
+    private function completeExecution(
+        ComponentBatchOperation $operation,
+        array &$data,
+        int $totalIeducar,
+        array $warnings,
+        array &$timings,
+        \DateTimeInterface $startedAt,
+    ): array {
         $backup = [];
 
         if ($totalIeducar > 0) {
@@ -370,11 +413,9 @@ class ComponentBatchManagerService
         ]);
     }
 
-    private function executeIdiarioDeletion(array &$data, array $previewCounts, ComponentBatchOperation $operation): array
+    private function processIdiarioResult(array $result, array &$data, array $previewCounts, ComponentBatchOperation $operation): array
     {
         $warnings = [];
-
-        $result = app(iDiarioService::class)->deleteDisciplineRecords($data);
 
         if (($result['success'] ?? false) !== true) {
             $data['idiario_error_detail'] = $result;
