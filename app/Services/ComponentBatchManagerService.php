@@ -737,24 +737,6 @@ class ComponentBatchManagerService
         return $warnings;
     }
 
-    public function buildBackupSummary(array $backup): array
-    {
-        $summary = [];
-        $actionMap = ['deleted' => 'deletados', 'updated' => 'atualizados'];
-
-        foreach ($actionMap as $type => $action) {
-            foreach ($backup[$type] ?? [] as $table => $meta) {
-                $summary[] = [
-                    'label' => self::TABLE_LABELS[$table] ?? $table,
-                    'count' => count($meta['rows'] ?? []),
-                    'action' => $action,
-                ];
-            }
-        }
-
-        return $summary;
-    }
-
     private function getAffectedTurmaIds(int $year, array $gradeIds, ?array $schoolIds): array
     {
         return LegacySchoolClass::query()

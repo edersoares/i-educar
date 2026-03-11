@@ -172,7 +172,7 @@ class iDiarioService
                 'courses' => $params['course_ids'] ?? [],
                 'grades' => $params['grade_ids'] ?? [],
                 'disciplines' => $params['discipline_ids'] ?? [],
-                'user' => auth()->id() ?? Context::get('audit_user_id'),
+                'user' => $params['user_id'] ?? null,
             ]);
 
             return (array) json_decode($response->getBody()->getContents(), true);
@@ -190,7 +190,7 @@ class iDiarioService
                 'courses' => $params['course_ids'] ?? [],
                 'grades' => $params['grade_ids'] ?? [],
                 'disciplines' => $params['discipline_ids'] ?? [],
-                'user' => auth()->id() ?? Context::get('audit_user_id'),
+                'user' => $params['user_id'] ?? null,
             ]);
 
             return (array) json_decode($response->getBody()->getContents(), true);

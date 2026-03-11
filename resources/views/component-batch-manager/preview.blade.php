@@ -180,7 +180,7 @@
     </div>
 
     <div id="modal-confirmation" style="display: none;">
-        <p><strong>Atenção:</strong> todos os lançamentos, vínculos e registros listados acima serão excluídos do banco de dados. Um backup será salvo automaticamente para possibilitar restauração.</p>
+        <p><strong>Atenção:</strong> todos os lançamentos, vínculos e registros listados acima serão excluídos permanentemente do banco de dados.</p>
         <p>Tem certeza que deseja prosseguir?</p>
     </div>
 @endsection

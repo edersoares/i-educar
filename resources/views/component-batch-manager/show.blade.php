@@ -182,33 +182,6 @@
         </div>
     @endif
 
-    @if(!empty($backupSummary))
-        <table class="tablecadastro" width="100%" border="0" cellpadding="2" cellspacing="0" role="presentation">
-            <tbody>
-            <tr>
-                <td class="formdktd" colspan="2" height="24"><b>Backup</b></td>
-            </tr>
-            @php $rowClass = 'formlttd'; @endphp
-            @foreach($backupSummary as $item)
-                <tr>
-                    <td class="{{ $rowClass }}" style="width: 60%;">{{ $item['label'] }}</td>
-                    <td class="{{ $rowClass }}">{{ $item['count'] }} registro(s) {{ $item['action'] }}</td>
-                </tr>
-                @php $rowClass = $rowClass === 'formlttd' ? 'formmdtd' : 'formlttd'; @endphp
-            @endforeach
-            @if($isRestored)
-                <tr>
-                    <td class="{{ $rowClass }}" colspan="2">
-                        <div style="background-color: #d9edf7; border: 1px solid #bce8f1; color: #31708f; padding: 10px; border-radius: 4px;">
-                            Esta operação foi restaurada em {{ $operation->updated_at->format('d/m/Y H:i') }}.
-                        </div>
-                    </td>
-                </tr>
-            @endif
-            </tbody>
-        </table>
-    @endif
-
     <div style="text-align: center; margin-top: 20px; margin-bottom: 20px;">
         <a href="{{ route('component-batch-manager.index') }}" class="btn" style="margin-right: 10px; text-decoration: none;">Voltar</a>
         <a href="{{ route('component-batch-manager.create') }}" class="btn-green" style="text-decoration: none;">Nova Operação</a>

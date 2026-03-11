@@ -191,7 +191,7 @@ class ComponentBatchManagerController extends Controller
 
         $operation = ComponentBatchOperation::create([
             'user_id' => $request->user()->getKey(),
-            'data' => $data,
+            'data' => array_merge($data, ['user_id' => $request->user()->getKey()]),
         ]);
 
         $job = new ComponentBatchOperationJob(
@@ -246,8 +246,6 @@ class ComponentBatchManagerController extends Controller
         $showVerification = in_array($status, [ComponentBatchStatus::COMPLETED, ComponentBatchStatus::RESTORED])
             || ($status === ComponentBatchStatus::FAILED && $hasVerificationData);
 
-        $backupSummary = $service->buildBackupSummary($componentBatchOperation->backup ?? []);
-
         $timeLabel = isset($data['execution_time'])
             ? self::formatExecutionTime($data['execution_time'])
             : null;
@@ -264,11 +262,9 @@ class ComponentBatchManagerController extends Controller
                 'verificationWarnings' => $verificationWarnings,
                 'showVerification' => $showVerification,
                 'totalPostIeducar' => $totalPostIeducar,
-                'backupSummary' => $backupSummary,
                 'timeLabel' => $timeLabel,
                 'isProcessing' => in_array($status, [ComponentBatchStatus::WAITING, ComponentBatchStatus::RUNNING]),
                 'isFailed' => $status === ComponentBatchStatus::FAILED,
-                'isRestored' => $status === ComponentBatchStatus::RESTORED,
             ]
         ));
     }
