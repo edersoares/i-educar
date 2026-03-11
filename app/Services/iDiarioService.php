@@ -2,10 +2,10 @@
 
 namespace App\Services;
 
+use App\Models\LegacyGeneralConfiguration;
 use App\Models\LegacyInstitution;
 use Exception;
 use GuzzleHttp\Client;
-use Illuminate\Support\Facades\Context;
 use RuntimeException;
 
 class iDiarioService
@@ -201,8 +201,17 @@ class iDiarioService
 
     public static function hasIdiarioConfigurations()
     {
-        return !empty(config('legacy.config.url_novo_educacao'))
-            && !empty(config('legacy.config.token_novo_educacao'));
+        if (!empty(config('legacy.config.url_novo_educacao')) && !empty(config('legacy.config.token_novo_educacao'))) {
+            return true;
+        }
+
+        // Fallback para contexto de Job (worker), onde o middleware LoadSettings não roda
+        $config = LegacyGeneralConfiguration::query()
+            ->whereHas('institution', fn ($q) => $q->where('ativo', 1))
+            ->select('url_novo_educacao', 'token_novo_educacao')
+            ->first();
+
+        return !empty($config->url_novo_educacao) && !empty($config->token_novo_educacao);
     }
 
     /**
