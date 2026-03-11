@@ -379,42 +379,6 @@ return new class extends clsCadastro
         return true;
     }
 
-    private function validaDataAdmissao($dataAdmissao)
-    {
-        if (!$dataAdmissao || !$this->data_inicial) {
-            return true;
-        }
-
-        $dataInicialVinculo = Carbon::createFromFormat('d/m/Y', $this->data_inicial)->format('Y-m-d');
-
-        if ($dataInicialVinculo < $dataAdmissao) {
-            $dataAdmissaoFormatada = Carbon::parse($dataAdmissao)->format('d/m/Y');
-            $this->mensagem = "Não é possível cadastrar o vínculo pois a data inicial do vínculo ({$this->data_inicial}) é anterior à data de admissão na escola ({$dataAdmissaoFormatada}).";
-
-            return false;
-        }
-
-        return true;
-    }
-
-    private function validaDataSaida($dataSaida)
-    {
-        if (!$dataSaida || !$this->data_fim) {
-            return true;
-        }
-
-        $dataFinalVinculo = Carbon::createFromFormat('d/m/Y', $this->data_fim)->format('Y-m-d');
-
-        if ($dataFinalVinculo > $dataSaida) {
-            $dataSaidaFormatada = Carbon::parse($dataSaida)->format('d/m/Y');
-            $this->mensagem = "Não é possível cadastrar o vínculo pois a data final do vínculo ({$this->data_fim}) é posterior à data de saída da escola ({$dataSaidaFormatada}).";
-
-            return false;
-        }
-
-        return true;
-    }
-
     public function Editar()
     {
         $backUrl = sprintf(
@@ -674,11 +638,6 @@ return new class extends clsCadastro
         }
 
         return false;
-    }
-
-    private function transformArrayInString($value): ?string
-    {
-        return is_array(value: $value) ? implode(separator: ',', array: $value) : null;
     }
 
     public function Formular()
