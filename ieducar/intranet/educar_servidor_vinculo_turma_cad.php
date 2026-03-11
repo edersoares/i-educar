@@ -441,7 +441,6 @@ return new class extends clsCadastro
             return false;
         }
 
-
         DB::beginTransaction();
 
         try {
