@@ -184,18 +184,36 @@ class iDiarioService
     public function deleteDisciplineRecords(array $params): array
     {
         try {
-            $response = $this->post('/api/v2/discipline_records/destroy_batch', [
-                'year' => $params['year'],
-                'unities' => $params['school_ids'] ?? [],
-                'courses' => $params['course_ids'] ?? [],
-                'grades' => $params['grade_ids'] ?? [],
-                'disciplines' => $params['discipline_ids'] ?? [],
-                'user' => $params['user_id'] ?? null,
+            $response = $this->http->request('POST', $this->apiUrl . '/api/v2/discipline_records/destroy_batch', [
+                'json' => [
+                    'year' => $params['year'],
+                    'unities' => $params['school_ids'] ?? [],
+                    'courses' => $params['course_ids'] ?? [],
+                    'grades' => $params['grade_ids'] ?? [],
+                    'disciplines' => $params['discipline_ids'] ?? [],
+                    'user' => $params['user_id'] ?? null,
+                ],
+                'headers' => [
+                    'token' => $this->apiToken,
+                ],
+                'timeout' => 600,
             ]);
 
-            return (array) json_decode($response->getBody()->getContents(), true);
+            $body = $response->getBody()->getContents();
+            $result = (array) json_decode($body, true);
+            $result['_status_code'] = $response->getStatusCode();
+            $result['_body'] = mb_substr($body, 0, 2000);
+
+            return $result;
         } catch (Exception $e) {
-            throw new RuntimeException('Erro ao excluir do i-Diário: ' . $e->getMessage());
+            $detail = ['exception' => get_class($e), 'message' => $e->getMessage()];
+
+            if (method_exists($e, 'getResponse') && $e->getResponse()) {
+                $detail['status_code'] = $e->getResponse()->getStatusCode();
+                $detail['body'] = mb_substr((string) $e->getResponse()->getBody(), 0, 2000);
+            }
+
+            throw new RuntimeException('Erro ao excluir do i-Diário: ' . json_encode($detail, JSON_UNESCAPED_UNICODE));
         }
     }
 
