@@ -15,6 +15,7 @@ use App\Models\LegacySchoolClass;
 use App\Models\LegacySchoolClassTeacher;
 use App\Models\LegacySchoolClassTeacherDiscipline;
 use App\Models\LegacySchoolGradeDiscipline;
+use App\Models\NotificationType;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 
@@ -316,7 +317,7 @@ class ComponentBatchManagerService
 
         if ($needsIdiario) {
             $t = now();
-            $callbackUrl = route('webhook.component-batch.callback', ['id' => $operation->id]);
+            $callbackUrl = url("module/Api/Diario?oper=post&resource=component-batch-callback&operation_id={$operation->id}");
             $result = app(iDiarioService::class)->deleteDisciplineRecords(
                 array_merge($data, ['callback_url' => $callbackUrl])
             );
@@ -336,6 +337,29 @@ class ComponentBatchManagerService
         }
 
         return $this->completeExecution($operation, $data, $totalIeducar, $warnings, $timings, $startedAt);
+    }
+
+    public function processCallback(ComponentBatchOperation $operation, array $idiarioResult): void
+    {
+        $failed = false;
+
+        try {
+            $this->handleIdiarioCallback($operation, $idiarioResult);
+        } catch (\Throwable $e) {
+            $this->failed($operation, $e->getMessage());
+            $failed = true;
+        }
+
+        $text = $failed
+            ? 'Erro na remoção de componentes. Clique para ver detalhes.'
+            : 'Remoção de componentes concluída com sucesso.';
+
+        (new NotificationService)->createByUser(
+            userId: $operation->user_id,
+            text: $text,
+            link: route('component-batch-manager.show', $operation),
+            type: NotificationType::OTHER
+        );
     }
 
     public function handleIdiarioCallback(ComponentBatchOperation $operation, array $idiarioResult): void
