@@ -12,6 +12,7 @@ return new class extends Migration
         $this->dropView('cadastro.endereco_pessoa');
         $this->dropView('public.bairro');
         $this->dropView('public.distrito');
+        $this->dropView('public.logradouro');
         $this->dropView('public.municipio');
         $this->dropView('public.pais');
         $this->dropView('public.uf');
