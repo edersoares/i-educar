@@ -317,16 +317,15 @@ class ComponentBatchManagerService
 
         if ($needsIdiario) {
             $t = now();
-            $callbackUrl = url("module/Api/Diario?oper=post&resource=component-batch-callback&operation_id={$operation->id}");
             $result = app(iDiarioService::class)->deleteDisciplineRecords(
-                array_merge($data, ['callback_url' => $callbackUrl])
+                array_merge($data, ['operation_id' => $operation->id])
             );
             $timings['idiario_request'] = $t->diffInSeconds(now());
 
             // iDiário vai processar na fila e chamar o webhook com o resultado
             if (!empty($result['queued'])) {
                 $data['execution_time'] = $timings;
-                $data['callback_url'] = $callbackUrl;
+                $data['awaiting_callback'] = true;
                 $operation->update(['data' => $data]);
 
                 return [];

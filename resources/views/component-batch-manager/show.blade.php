@@ -108,7 +108,7 @@
 
         @if($isProcessing)
             @php
-                $awaitingCallback = !empty($operation->data['callback_url']);
+                $awaitingCallback = !empty($operation->data['awaiting_callback']);
                 $isStale = !$awaitingCallback && $operation->created_at < now()->subMinutes(10);
             @endphp
             <tr>

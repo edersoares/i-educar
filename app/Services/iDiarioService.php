@@ -193,8 +193,8 @@ class iDiarioService
                 'user' => $params['user_id'] ?? null,
             ];
 
-            if (!empty($params['callback_url'])) {
-                $payload['callback_url'] = $params['callback_url'];
+            if (!empty($params['operation_id'])) {
+                $payload['operation_id'] = $params['operation_id'];
             }
 
             $response = $this->http->request('POST', $this->apiUrl . '/api/v2/discipline_records/destroy_batch', [
