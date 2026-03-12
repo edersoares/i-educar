@@ -16,5 +16,6 @@ return new class extends Migration
         $this->dropView('public.municipio');
         $this->dropView('public.pais');
         $this->dropView('public.uf');
+        $this->dropView('cadastro.v_endereco');
     }
 };
