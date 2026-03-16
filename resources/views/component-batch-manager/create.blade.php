@@ -304,13 +304,6 @@
             $j('#ref_cod_serie').on('change', loadDisciplines);
             $j('#ano').on('change blur', loadCourses);
 
-            // Restaurar old values após escola ser setada pelo componente (1000ms)
-            if (initialLoad) {
-                setTimeout(function() {
-                    loadCourses();
-                }, 1200);
-            }
-
             // Hierarquia de operações: desmarcar pai desmarca filhos, marcar filho marca pais
             var deps = {
                 'remove_records': [],
