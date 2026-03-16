@@ -10,7 +10,6 @@
         <tr>
             <th>Ano</th>
             <th>Status</th>
-            <th>Tempo</th>
             <th>Usuário</th>
             <th>Data</th>
         </tr>
@@ -26,13 +25,12 @@
                         <span class="label label-{{ $operation->view_status->color() }}">{{ $operation->view_status->label() }}</span>
                     @endif
                 </td>
-                <td>{{ $operation->view_time_label ?? '-' }}</td>
                 <td>{{ $operation->user?->name ?? 'Usuário #' . $operation->user_id }}</td>
                 <td>{{ $operation->created_at->format('d/m/Y H:i') }}</td>
             </tr>
         @empty
             <tr>
-                <td colspan="5">Nenhuma operação realizada</td>
+                <td colspan="4">Nenhuma operação realizada</td>
             </tr>
         @endforelse
         </tbody>

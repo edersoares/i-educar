@@ -36,13 +36,9 @@ class ComponentBatchManagerController extends Controller
             $status = $operation->status();
             $isStale = in_array($status, [ComponentBatchStatus::WAITING, ComponentBatchStatus::RUNNING])
                 && $operation->created_at < now()->subMinutes(20);
-            $time = $operation->data['execution_time'] ?? null;
 
             $operation->view_status = $status;
             $operation->view_is_stale = $isStale;
-            $operation->view_time_label = isset($time['total'])
-                ? self::formatExecutionTime($time)
-                : null;
 
             return $operation;
         });
@@ -253,10 +249,6 @@ class ComponentBatchManagerController extends Controller
         $showVerification = in_array($status, [ComponentBatchStatus::COMPLETED, ComponentBatchStatus::RESTORED])
             || ($status === ComponentBatchStatus::FAILED && $hasVerificationData);
 
-        $timeLabel = isset($data['execution_time'])
-            ? self::formatExecutionTime($data['execution_time'])
-            : null;
-
         return view('component-batch-manager.show', array_merge(
             $this->resolveNames($data),
             [
@@ -269,29 +261,10 @@ class ComponentBatchManagerController extends Controller
                 'verificationWarnings' => $verificationWarnings,
                 'showVerification' => $showVerification,
                 'totalPostIeducar' => $totalPostIeducar,
-                'timeLabel' => $timeLabel,
                 'isProcessing' => in_array($status, [ComponentBatchStatus::WAITING, ComponentBatchStatus::RUNNING]),
                 'isFailed' => $status === ComponentBatchStatus::FAILED,
             ]
         ));
-    }
-
-    private static function formatExecutionTime(array $time): string
-    {
-        $fmt = function (int $s): string {
-            if ($s < 1) return '< 1s';
-            if ($s < 60) return $s . 's';
-            if ($s < 3600) return floor($s / 60) . 'm ' . ($s % 60) . 's';
-
-            return floor($s / 3600) . 'h ' . floor(($s % 3600) / 60) . 'm ' . ($s % 60) . 's';
-        };
-
-        $parts = [];
-        $parts[] = isset($time['idiario']) ? "i-Diário: " . $fmt($time['idiario']) : "i-Diário: não executado";
-        if (isset($time['ieducar'])) $parts[] = "i-Educar: " . $fmt($time['ieducar']);
-        if (isset($time['verificacao'])) $parts[] = "Verificação: " . $fmt($time['verificacao']);
-
-        return $fmt($time['total'] ?? 0) . (count($parts) > 0 ? ' (' . implode(', ', $parts) . ')' : '');
     }
 
     private function resolveNames(array $data): array

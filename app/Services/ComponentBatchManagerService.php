@@ -302,9 +302,6 @@ class ComponentBatchManagerService
 
     public function execute(ComponentBatchOperation $operation): array
     {
-        $startedAt = now();
-        $timings = [];
-
         $operation->update(['status_id' => ComponentBatchStatus::RUNNING->value]);
 
         $data = $operation->data;
@@ -316,15 +313,12 @@ class ComponentBatchManagerService
         $needsIdiario = $totalIdiario > 0 && ($data['remove_records'] ?? false) && iDiarioService::hasIdiarioConfigurations();
 
         if ($needsIdiario) {
-            $t = now();
             $result = app(iDiarioService::class)->deleteDisciplineRecords(
                 array_merge($data, ['operation_id' => $operation->id])
             );
-            $timings['idiario_request'] = $t->diffInSeconds(now());
 
             // iDiário vai processar na fila e chamar o webhook com o resultado
             if (!empty($result['queued'])) {
-                $data['execution_time'] = $timings;
                 $data['awaiting_callback'] = true;
                 $operation->update(['data' => $data]);
 
@@ -335,7 +329,7 @@ class ComponentBatchManagerService
             $warnings = $this->processIdiarioResult($result, $data, $previewCounts, $operation);
         }
 
-        return $this->completeExecution($operation, $data, $totalIeducar, $warnings, $timings, $startedAt);
+        return $this->completeExecution($operation, $data, $totalIeducar, $warnings);
     }
 
     public function processCallback(ComponentBatchOperation $operation, array $idiarioResult): void
@@ -365,16 +359,12 @@ class ComponentBatchManagerService
     {
         $data = $operation->data;
         $previewCounts = $data['preview_counts'] ?? [];
-        $timings = $data['execution_time'] ?? [];
-        $startedAt = now();
 
         ['totalIeducar' => $totalIeducar] = self::sumPreviewCounts($previewCounts);
 
         $warnings = $this->processIdiarioResult($idiarioResult, $data, $previewCounts, $operation);
 
-        $timings['idiario_callback'] = $startedAt->diffInSeconds(now());
-
-        $this->completeExecution($operation, $data, $totalIeducar, $warnings, $timings, $startedAt);
+        $this->completeExecution($operation, $data, $totalIeducar, $warnings);
     }
 
     private function completeExecution(
@@ -382,31 +372,22 @@ class ComponentBatchManagerService
         array &$data,
         int $totalIeducar,
         array $warnings,
-        array &$timings,
-        \DateTimeInterface $startedAt,
     ): array {
         $backup = [];
 
         if ($totalIeducar > 0) {
-            $t = now();
             [$counts, $backup] = $this->executeIeducarDeletion($data);
-            $timings['ieducar'] = $t->diffInSeconds(now());
         } else {
             $counts = [];
         }
 
         $data['result_counts'] = $counts;
 
-        $t = now();
         $postCounts = $this->calculatePreview(array_merge($data, ['skip_idiario' => true]));
-        $timings['verificacao'] = $t->diffInSeconds(now());
-
         $data['post_counts'] = $postCounts;
 
         $warnings = array_merge($warnings, $this->buildVerificationWarnings($postCounts));
         $data['verification_warnings'] = $warnings;
-        $timings['total'] = $startedAt->diffInSeconds(now());
-        $data['execution_time'] = $timings;
 
         $operation->update([
             'status_id' => ComponentBatchStatus::COMPLETED->value,

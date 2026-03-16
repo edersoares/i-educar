@@ -28,15 +28,9 @@
             <td class="formmdtd" valign="top"><span class="form">Data</span></td>
             <td class="formmdtd" valign="top">{{ $operation->created_at->format('d/m/Y H:i') }}</td>
         </tr>
-        @if($timeLabel)
-            <tr>
-                <td class="formlttd" valign="top"><span class="form">Tempo de execução</span></td>
-                <td class="formlttd" valign="top">{{ $timeLabel }}</td>
-            </tr>
-        @endif
         <tr>
-            <td class="{{ $timeLabel ? 'formmdtd' : 'formlttd' }}" valign="top"><span class="form">Ano</span></td>
-            <td class="{{ $timeLabel ? 'formmdtd' : 'formlttd' }}" valign="top">{{ $data['year'] }}</td>
+            <td class="formlttd" valign="top"><span class="form">Ano</span></td>
+            <td class="formlttd" valign="top">{{ $data['year'] }}</td>
         </tr>
         <tr>
             <td class="formmdtd" valign="top"><span class="form">Cursos</span></td>
