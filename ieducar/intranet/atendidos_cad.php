@@ -802,7 +802,7 @@ return new class extends clsCadastro
             nome: 'idesco',
             campo: 'Escolaridade',
             valor: $opcoes,
-            default: $this->idesco->idesco,
+            default: $this->idesco,
             obrigatorio: false
         );
 
