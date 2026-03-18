@@ -311,6 +311,19 @@ class EnrollmentService
     }
 
     /**
+     * @throws Throwable
+     */
+    public function markWithSituation(LegacyEnrollment $enrollment, string $situation): void
+    {
+        $enrollment->transferido = $situation === 'transferido';
+        $enrollment->remanejado = $situation === 'remanejado';
+        $enrollment->reclassificado = $situation === 'reclassificado';
+        $enrollment->abandono = $situation === 'abandono';
+        $enrollment->falecido = $situation === 'falecido';
+        $enrollment->saveOrFail();
+    }
+
+    /**
      * Verifica se a matrícula tem enturmação anterior, com data de saída posterior a data base,
      * ou data base vazia
      *
