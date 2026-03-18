@@ -83,7 +83,7 @@ class ComponentBatchManagerService
         'modules.falta_componente_curricular' => 'Faltas',
         'modules.parecer_componente_curricular' => 'Pareceres',
         'modules.componente_curricular_turma' => 'Componentes da turma',
-        'modules.professor_turma_disciplina' => 'Vínculos professor/disciplina',
+        'modules.professor_turma_disciplina' => 'Disciplinas do vínculo professor/turma',
         'pmieducar.escola_serie_disciplina' => 'Componentes da série da escola',
         'modules.componente_curricular_ano_escolar' => 'Componentes da série',
         'pmieducar.dispensa_disciplina' => 'Dispensas',
@@ -275,7 +275,7 @@ class ComponentBatchManagerService
     {
         $totalIeducar = 0;
         foreach ($preview as $key => $value) {
-            if (is_int($value) && $key !== 'turma_count' && !str_ends_with($key, '_skipped')) {
+            if (is_int($value) && $key !== 'turma_count' && $key !== 'professor_turma' && !str_ends_with($key, '_skipped')) {
                 $totalIeducar += $value;
             }
         }
@@ -574,7 +574,7 @@ class ComponentBatchManagerService
 
         if ($remainingIeducar > 0) {
             foreach ($postCounts as $key => $value) {
-                if (is_int($value) && $key !== 'turma_count' && !str_ends_with($key, '_skipped') && $value > 0) {
+                if (is_int($value) && $key !== 'turma_count' && $key !== 'professor_turma' && !str_ends_with($key, '_skipped') && $value > 0) {
                     $table = self::PREVIEW_KEY_TO_TABLE[$key] ?? null;
                     $label = $table ? (self::TABLE_LABELS[$table] ?? $key) : $key;
                     $warnings[] = "{$label}: {$value} registros remanescentes após exclusão.";

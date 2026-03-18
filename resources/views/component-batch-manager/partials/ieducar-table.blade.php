@@ -33,9 +33,7 @@
             @php $rowClass = $rowClass === 'formlttd' ? 'formmdtd' : 'formlttd'; @endphp
         @endif
         @if($data['unlink_teacher_disciplines'] ?? false)
-            <tr><td class="{{ $rowClass }}">Vínculos professor/disciplina</td><td class="{{ $rowClass }}">{{ number_format($counts['professor_disciplina'] ?? 0, 0, ',', '.') }}</td></tr>
-            @php $rowClass = $rowClass === 'formlttd' ? 'formmdtd' : 'formlttd'; @endphp
-            <tr><td class="{{ $rowClass }}">Vínculos professor/turma</td><td class="{{ $rowClass }}">{{ number_format($counts['professor_turma'] ?? 0, 0, ',', '.') }}</td></tr>
+            <tr><td class="{{ $rowClass }}">Disciplinas do vínculo professor/turma</td><td class="{{ $rowClass }}">{{ number_format($counts['professor_disciplina'] ?? 0, 0, ',', '.') }}</td></tr>
             @php $rowClass = $rowClass === 'formlttd' ? 'formmdtd' : 'formlttd'; @endphp
         @endif
         @if($data['unlink_school_grade_disciplines'] ?? false)

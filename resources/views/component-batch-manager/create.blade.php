@@ -121,7 +121,7 @@
 
             <tr>
                 <td class="formlttd" valign="top">
-                    <span class="form">Remover vínculos professor/turma e professor/disciplina</span>
+                    <span class="form">Remover disciplinas do vínculo professor/turma</span>
                 </td>
                 <td class="formlttd" valign="top">
                     <input type="checkbox" name="unlink_teacher_disciplines" id="unlink_teacher_disciplines" value="1" {{ old('unlink_teacher_disciplines', '1') ? 'checked' : '' }} class="operation-checkbox">
@@ -309,13 +309,13 @@
                 'remove_records': [],
                 'remove_exemptions': [],
                 'unlink_class_components': ['remove_records'],
-                'unlink_teacher_disciplines': ['remove_records'],
+                'unlink_teacher_disciplines': [],
                 'unlink_school_grade_disciplines': ['unlink_class_components', 'remove_records'],
                 'unlink_grade_components': ['unlink_school_grade_disciplines', 'unlink_class_components', 'remove_records']
             };
 
             var children = {
-                'remove_records': ['unlink_class_components', 'unlink_teacher_disciplines', 'unlink_school_grade_disciplines', 'unlink_grade_components'],
+                'remove_records': ['unlink_class_components', 'unlink_school_grade_disciplines', 'unlink_grade_components'],
                 'remove_exemptions': [],
                 'unlink_class_components': ['unlink_school_grade_disciplines', 'unlink_grade_components'],
                 'unlink_school_grade_disciplines': ['unlink_grade_components'],
