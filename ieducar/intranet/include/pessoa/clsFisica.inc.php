@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\LegacyPerson;
+use App\Models\LegacySchoolingDegree;
 use iEducar\Modules\Educacenso\Model\Nacionalidade;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
@@ -179,8 +180,7 @@ class clsFisica
         if ($objPessoaResponsavel->detalhe() || $idpes_responsavel == 'NULL') {
             $this->idpes_responsavel = $idpes_responsavel;
         }
-        $objEscolaridade = new clsEscolaridade($idesco);
-        if ($objEscolaridade->detalhe()) {
+        if (LegacySchoolingDegree::find($idesco)) {
             $this->idesco = $idesco;
         }
         $objEstadoCivil = new clsEstadoCivil($ideciv);
@@ -1029,7 +1029,6 @@ class clsFisica
             if ($db->ProximoRegistro()) {
                 $tupla = $db->Tupla();
 
-                $tupla['idesco'] = new clsEscolaridade($tupla['idesco']);
                 $tupla['ideciv'] = new clsEstadoCivil($tupla['ideciv']);
 
                 return $tupla;
@@ -1040,7 +1039,6 @@ class clsFisica
             if ($db->ProximoRegistro()) {
                 $tupla = $db->Tupla();
 
-                $tupla['idesco'] = new clsEscolaridade($tupla['idesco']);
                 $tupla['ideciv'] = new clsEstadoCivil($tupla['ideciv']);
 
                 return $tupla;
