@@ -167,7 +167,7 @@
     </form>
 
     <div style="text-align: center; margin-top: 10px; margin-bottom: 20px;">
-        <a href="{{ route('component-batch-manager.create') }}" class="btn" style="margin-right: 10px; text-decoration: none;">Voltar</a>
+        <a href="{{ route('component-batch-manager.create', ['restore' => 1]) }}" class="btn" style="margin-right: 10px; text-decoration: none;">Voltar</a>
 
         @if(!$hasBlockingError)
             <form id="execute-form" action="{{ route('component-batch-manager.execute') }}" method="post" style="display: inline;">

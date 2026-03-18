@@ -48,12 +48,31 @@ class ComponentBatchManagerController extends Controller
         ]);
     }
 
-    public function create()
+    public function create(Request $request)
     {
         $this->breadcrumb('Gerenciamento em Lote de Componentes', [
             url('intranet/educar_configuracoes_index.php') => 'Configurações',
         ]);
         $this->menu(Process::COMPONENT_BATCH_MANAGER);
+
+        $preview = $request->has('restore') ? session('batch_operation_preview_data') : null;
+
+        if ($preview) {
+            session()->flashInput([
+                'ano' => $preview['year'],
+                'ref_cod_instituicao' => $preview['institution_id'],
+                'escola' => $preview['school_ids'],
+                'curso' => $preview['course_ids'],
+                'ref_cod_serie' => $preview['grade_ids'],
+                'discipline_ids' => $preview['discipline_ids'],
+                'remove_records' => $preview['remove_records'] ?? false,
+                'remove_exemptions' => $preview['remove_exemptions'] ?? false,
+                'unlink_class_components' => $preview['unlink_class_components'] ?? false,
+                'unlink_teacher_disciplines' => $preview['unlink_teacher_disciplines'] ?? false,
+                'unlink_school_grade_disciplines' => $preview['unlink_school_grade_disciplines'] ?? false,
+                'unlink_grade_components' => $preview['unlink_grade_components'] ?? false,
+            ]);
+        }
 
         return view('component-batch-manager.create');
     }
