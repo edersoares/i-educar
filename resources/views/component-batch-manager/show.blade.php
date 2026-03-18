@@ -96,6 +96,7 @@
         ])
     @endif
 
+    @if($isProcessing || $isFailed)
     <form id="formcadastro">
     <table class="tablecadastro" width="100%" border="0" cellpadding="2" cellspacing="0" role="presentation">
         <tbody>
@@ -142,35 +143,17 @@
         </tbody>
     </table>
     </form>
+    @endif
 
-    @if($showVerification)
-        @if(!$isProcessing && !$isFailed && !empty($verificationWarnings))
-            <div style="background-color: #fcf8e3; border: 1px solid #faebcc; color: #8a6d3b; padding: 10px; border-radius: 4px; margin-bottom: 10px;">
-                <strong>Observações:</strong>
-                <ul style="margin: 5px 0 0 0; padding-left: 20px;">
-                    @foreach($verificationWarnings as $warning)
-                        <li>{{ $warning }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
-
-        @if($postIdiario && ($data['remove_records'] ?? false))
-            @include('component-batch-manager.partials.idiario-table', [
-                'idiarioData' => $postIdiario,
-                'idiarioErrorMessage' => 'Não foi possível verificar o i-Diário após a execução.',
-            ])
-        @endif
-
-        @if($postCounts)
-            @include('component-batch-manager.partials.ieducar-table', [
-                'counts' => $postCounts,
-                'data' => $data,
-                'totalIeducar' => $totalPostIeducar,
-                'title' => 'Registros remanescentes no i-Educar',
-                'emptyMessage' => 'Nenhum registro remanescente.',
-            ])
-        @endif
+    @if(!empty($verificationWarnings))
+        <div style="background-color: #fcf8e3; border: 1px solid #faebcc; color: #8a6d3b; padding: 10px; border-radius: 4px; margin-bottom: 10px;">
+            <strong>Observações:</strong>
+            <ul style="margin: 5px 0 0 0; padding-left: 20px;">
+                @foreach($verificationWarnings as $warning)
+                    <li>{{ $warning }}</li>
+                @endforeach
+            </ul>
+        </div>
     @endif
 
     @if(session('warning'))
