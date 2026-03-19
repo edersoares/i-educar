@@ -329,7 +329,7 @@ return new class extends clsCadastro
             $this->createDisciplines($historicoEscolar);
         });
 
-        $this->mensagem .= 'Cadastro efetuado com sucesso.<br>';
+        $this->mensagem = 'Cadastro efetuado com sucesso.<br>';
         $this->simpleRedirect("educar_historico_escolar_lst.php?ref_cod_aluno={$this->ref_cod_aluno}");
     }
 
@@ -359,7 +359,7 @@ return new class extends clsCadastro
             }
         });
 
-        $this->mensagem .= 'Edição efetuada com sucesso.<br>';
+        $this->mensagem = 'Edição efetuada com sucesso.<br>';
         $this->simpleRedirect("educar_historico_escolar_lst.php?ref_cod_aluno={$this->ref_cod_aluno}");
     }
 
@@ -379,7 +379,7 @@ return new class extends clsCadastro
             $historicoEscolar->disciplines()->delete();
         });
 
-        $this->mensagem .= 'Exclusão efetuada com sucesso.<br>';
+        $this->mensagem = 'Exclusão efetuada com sucesso.<br>';
         $this->simpleRedirect("educar_historico_escolar_lst.php?ref_cod_aluno={$this->ref_cod_aluno}");
     }
 
