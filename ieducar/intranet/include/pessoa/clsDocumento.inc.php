@@ -108,7 +108,7 @@ class clsDocumento
         $this->zona_tit_eleitor = $int_zona_tit_eleitor;
         $this->secao_tit_eleitor = $int_secao_tit_eleitor;
 
-        if ($int_idorg_exp_rg && LegacyIssuingBody::find($int_idorg_exp_rg)) {
+        if ($int_idorg_exp_rg && LegacyIssuingBody::whereKey($int_idorg_exp_rg)->exists()) {
             $this->idorg_exp_rg = $int_idorg_exp_rg;
         }
 
