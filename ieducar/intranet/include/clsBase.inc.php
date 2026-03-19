@@ -85,8 +85,11 @@ class clsBase
             $ip_de_rede = empty($_SERVER['HTTP_X_FORWARDED_FOR']) ? 'NULL' : $_SERVER['HTTP_X_FORWARDED_FOR'];
             $id_pessoa = \Illuminate\Support\Facades\Auth::id();
 
-            $logAcesso = new clsLogAcesso(false, $ip, $ip_de_rede, $id_pessoa);
-            $logAcesso->cadastra();
+            \App\Models\LegacyAccess::create([
+                'ip_externo' => $ip,
+                'ip_interno' => $ip_de_rede,
+                'cod_pessoa' => $id_pessoa,
+            ]);
 
             Session::put('marcado', 'private');
             Session::save();
