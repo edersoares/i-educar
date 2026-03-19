@@ -420,6 +420,10 @@ return new class extends clsCadastro
         }
 
         foreach ($this->nm_disciplina as $key => $disciplina) {
+            $faltas = $this->faltas[$key] ?? null;
+            $ordenamento = $this->ordenamento[$key] ?? null;
+            $cargaHoraria = $this->carga_horaria_disciplina[$key] ?? null;
+
             LegacySchoolHistoryDiscipline::create([
                 'historico_escolar_id' => $historicoEscolar->id,
                 'ref_ref_cod_aluno' => $this->ref_cod_aluno,
@@ -427,9 +431,9 @@ return new class extends clsCadastro
                 'sequencial' => $key + 1,
                 'nm_disciplina' => $disciplina,
                 'nota' => $this->nota[$key] ?? '',
-                'faltas' => $this->faltas[$key] ?? null,
-                'ordenamento' => $this->ordenamento[$key] ?? null,
-                'carga_horaria_disciplina' => $this->carga_horaria_disciplina[$key] ?? null,
+                'faltas' => is_numeric($faltas) ? $faltas : null,
+                'ordenamento' => is_numeric($ordenamento) ? $ordenamento : null,
+                'carga_horaria_disciplina' => is_numeric($cargaHoraria) ? $cargaHoraria : null,
                 'dependencia' => ($this->disciplinaDependencia[$key] ?? '') == 'on',
                 'tipo_base' => $this->tipo_base[$key] ?? 1,
             ]);
