@@ -217,7 +217,7 @@ return new class extends clsCadastro
         $this->campoNumero(nome: 'ano', campo: 'Ano', valor: $this->ano, tamanhovisivel: 4, tamanhomaximo: 4, obrigatorio: true);
 
         if ($this->validaControlePosicaoHistorico()) {
-            $this->campoNumero(nome: 'posicao', campo: 'Posição', valor: $this->posicao, tamanhovisivel: 1, tamanhomaximo: 1, obrigatorio: true, descricao: 'Informe a coluna equivalente a série/ano/etapa a qual o histórico pertence. Ex.: 1º ano informe 1, 2º ano informe 2');
+            $this->campoNumero(nome: 'posicao', campo: 'Posição', valor: $this->posicao, tamanhovisivel: 1, tamanhomaximo: 1, obrigatorio: false, descricao: 'Informe a coluna equivalente a série/ano/etapa a qual o histórico pertence. Ex.: 1º ano informe 1, 2º ano informe 2');
         }
 
         $this->campoNumero(nome: 'carga_horaria', campo: 'Carga Horária', valor: $this->carga_horaria, tamanhovisivel: 8, tamanhomaximo: 8);
