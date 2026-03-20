@@ -14,14 +14,14 @@ return new class extends Migration
 
     private function getSql(): string
     {
-        return <<<SQL
+        return <<<'SQL'
 with componentes as (
   select
     id,
     regexp_replace(
       regexp_replace(
         lower(unaccent(nome)),
-        '[^a-z0-9\\-_]+', ' ', 'gi'
+        '[^a-z0-9\-_]+', ' ', 'gi'
       ),
       '^-+|-+$', '', 'g'
     ) as slug

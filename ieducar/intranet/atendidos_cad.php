@@ -6,6 +6,7 @@ use App\Facades\Asset;
 use App\Models\EducacensoIndigenousPeople;
 use App\Models\LegacyIndividual;
 use App\Models\LegacyInstitution;
+use App\Models\LegacyIssuingBody;
 use App\Models\LegacyRace;
 use App\Models\LegacyUser;
 use App\Services\FileService;
@@ -178,7 +179,7 @@ return new class extends clsCadastro
             // $this->data_nasc = $this->data_nasc ? dataFromPgToBr($this->data_nasc) : '';
             $this->data_admissao = $this->data_admissao ? dataFromPgToBr(data_original: $this->data_admissao) : '';
 
-            $this->estado_civil_id = $this->estado_civil->ideciv;
+            $this->estado_civil_id = $this->estado_civil;
             $this->pais_origem_id = $this->pais_origem;
             $this->naturalidade_id = $this->naturalidade;
         }
@@ -363,11 +364,10 @@ return new class extends clsCadastro
         // orgão emissão rg
 
         $selectOptions = [null => 'Órgão emissor'];
-        $orgaos = new clsOrgaoEmissorRg;
-        $orgaos = $orgaos->lista();
+        $orgaos = LegacyIssuingBody::orderBy('sigla')->get();
 
         foreach ($orgaos as $orgao) {
-            $selectOptions[$orgao['idorg_rg']] = $orgao['sigla'];
+            $selectOptions[$orgao->idorg_rg] = $orgao->sigla;
         }
 
         $selectOptions = Portabilis_Array_Utils::sortByValue(array: $selectOptions);
@@ -802,7 +802,7 @@ return new class extends clsCadastro
             nome: 'idesco',
             campo: 'Escolaridade',
             valor: $opcoes,
-            default: $this->idesco->idesco,
+            default: $this->idesco,
             obrigatorio: false
         );
 

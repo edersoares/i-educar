@@ -25,7 +25,7 @@ class clsJuridica
     /**
      * Construtor
      *
-     * @return Object:clsEstadoCivil
+     * @return void
      */
     public function __construct($idpes = false, $cnpj = false, $fantasia = false, $insc_estadual = false, $capital_social = false, $idpes_cad = false, $idpes_rev = false)
     {
