@@ -1,7 +1,7 @@
 <?php
 
-use App\Models\LegacyPerson;
 use App\Models\LegacyMaritalStatus;
+use App\Models\LegacyPerson;
 use App\Models\LegacySchoolingDegree;
 use iEducar\Modules\Educacenso\Model\Nacionalidade;
 use Illuminate\Support\Facades\Auth;
