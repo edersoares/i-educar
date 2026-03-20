@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\LegacyInstitution;
+use App\Models\LegacyIssuingBody;
 use App\Models\LegacyRace;
 use App\Services\UrlPresigner;
 use App\User;
@@ -407,11 +408,10 @@ class AlunoController extends Portabilis_Controller_Page_EditController
         $this->inputsHelper()->date('data_emissao_rg', $options);
 
         $selectOptions = [null => 'Órgão emissor'];
-        $orgaos = new clsOrgaoEmissorRg;
-        $orgaos = $orgaos->lista();
+        $orgaos = LegacyIssuingBody::orderBy('sigla')->get();
 
         foreach ($orgaos as $orgao) {
-            $selectOptions[$orgao['idorg_rg']] = $orgao['sigla'];
+            $selectOptions[$orgao->idorg_rg] = $orgao->sigla;
         }
 
         $selectOptions = Portabilis_Array_Utils::sortByValue($selectOptions);
