@@ -626,7 +626,7 @@ class AlunoController extends ApiCoreController
 
         $aluno->emancipado = (bool) $this->getRequest()->emancipado;
         $aluno->tipo_responsavel = $tiposResponsavel[$this->getRequest()->tipo_responsavel];
-        $aluno->ref_usuario_exc = \Illuminate\Support\Facades\Auth::id();
+        $aluno->ref_usuario_exc = Auth::id();
 
         // INFORAMÇÕES PROVA INEP
         $recursosProvaInepRequest = $this->getRequest()->recursos_prova_inep__;
@@ -1769,7 +1769,7 @@ class AlunoController extends ApiCoreController
         if ($this->canEnable()) {
             $aluno = new clsPmieducarAluno;
             $aluno->cod_aluno = $id;
-            $aluno->ref_usuario_exc = \Illuminate\Support\Facades\Auth::id();
+            $aluno->ref_usuario_exc = Auth::id();
             $aluno->ativo = 1;
 
             if ($aluno->edita()) {
@@ -1791,7 +1791,7 @@ class AlunoController extends ApiCoreController
             if ($this->canDelete()) {
                 $aluno = new clsPmieducarAluno;
                 $aluno->cod_aluno = $id;
-                $aluno->ref_usuario_exc = \Illuminate\Support\Facades\Auth::id();
+                $aluno->ref_usuario_exc = Auth::id();
 
                 $detalheAluno = $aluno->detalhe();
 
@@ -2091,12 +2091,13 @@ class AlunoController extends ApiCoreController
                 coalesce(to_char(f.data_nasc, 'dd/mm/yyyy'), 'Não consta') AS data_nascimento,
                 coalesce(f.cpf::varchar, 'Não consta') AS cpf,
                 coalesce(d.rg, 'Não consta') AS rg,
-                coalesce(relatorio.get_mae_aluno(a.cod_aluno), 'Não consta') AS mae_aluno
+                coalesce(mae.nome, a.nm_mae, 'Não consta') AS mae_aluno
             FROM pmieducar.aluno a
             JOIN cadastro.pessoa p ON p.idpes = a.ref_idpes
             JOIN cadastro.fisica f ON f.idpes = a.ref_idpes
             LEFT JOIN cadastro.documento d ON d.idpes = a.ref_idpes
             LEFT JOIN modules.educacenso_cod_aluno eca ON eca.cod_aluno = a.cod_aluno
+            LEFT JOIN cadastro.pessoa mae ON mae.idpes = f.idpes_mae
             WHERE a.cod_aluno IN ($alunosIds);
         ";
 

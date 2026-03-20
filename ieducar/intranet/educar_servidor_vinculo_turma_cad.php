@@ -321,8 +321,20 @@ return new class extends clsCadastro
             return false;
         }
 
-        $professorTurmaId = $professorTurma->cadastra();
-        $professorTurma->gravaComponentes(professor_turma_id: $professorTurmaId, componentes: $this->componentecurricular);
+        DB::beginTransaction();
+
+        try {
+            $professorTurmaId = $professorTurma->cadastra();
+            $professorTurma->gravaComponentes(professor_turma_id: $professorTurmaId, componentes: $this->componentecurricular);
+
+            DB::commit();
+        } catch (Exception $exception) {
+            DB::rollBack();
+
+            $this->mensagem = $exception->getMessage();
+
+            return false;
+        }
 
         $this->mensagem = 'Cadastro efetuado com sucesso.<br>';
         $this->simpleRedirect(url: $backUrl);
@@ -379,42 +391,6 @@ return new class extends clsCadastro
         return true;
     }
 
-    private function validaDataAdmissao($dataAdmissao)
-    {
-        if (!$dataAdmissao || !$this->data_inicial) {
-            return true;
-        }
-
-        $dataInicialVinculo = Carbon::createFromFormat('d/m/Y', $this->data_inicial)->format('Y-m-d');
-
-        if ($dataInicialVinculo < $dataAdmissao) {
-            $dataAdmissaoFormatada = Carbon::parse($dataAdmissao)->format('d/m/Y');
-            $this->mensagem = "Não é possível cadastrar o vínculo pois a data inicial do vínculo ({$this->data_inicial}) é anterior à data de admissão na escola ({$dataAdmissaoFormatada}).";
-
-            return false;
-        }
-
-        return true;
-    }
-
-    private function validaDataSaida($dataSaida)
-    {
-        if (!$dataSaida || !$this->data_fim) {
-            return true;
-        }
-
-        $dataFinalVinculo = Carbon::createFromFormat('d/m/Y', $this->data_fim)->format('Y-m-d');
-
-        if ($dataFinalVinculo > $dataSaida) {
-            $dataSaidaFormatada = Carbon::parse($dataSaida)->format('d/m/Y');
-            $this->mensagem = "Não é possível cadastrar o vínculo pois a data final do vínculo ({$this->data_fim}) é posterior à data de saída da escola ({$dataSaidaFormatada}).";
-
-            return false;
-        }
-
-        return true;
-    }
-
     public function Editar()
     {
         $backUrl = sprintf(
@@ -465,17 +441,30 @@ return new class extends clsCadastro
             return false;
         }
 
-        $editou = $professorTurma->edita();
+        DB::beginTransaction();
 
-        if ($editou) {
+        try {
+            $editou = $professorTurma->edita();
+
+            if (empty($editou)) {
+                $this->mensagem = 'Edição não realizada.<br>';
+
+                return false;
+            }
+
             $professorTurma->gravaComponentes(professor_turma_id: $this->id, componentes: $this->componentecurricular);
-            $this->mensagem = 'Edição efetuada com sucesso.<br>';
-            $this->simpleRedirect(url: $backUrl);
+
+            DB::commit();
+        } catch (Exception $exception) {
+            DB::rollBack();
+
+            $this->mensagem = $exception->getMessage();
+
+            return false;
         }
 
-        $this->mensagem = 'Edição não realizada.<br>';
-
-        return false;
+        $this->mensagem = 'Edição efetuada com sucesso.<br>';
+        $this->simpleRedirect(url: $backUrl);
     }
 
     public function Excluir()
@@ -494,8 +483,21 @@ return new class extends clsCadastro
         $obj_permissoes->permissao_excluir(int_processo_ap: 635, int_idpes_usuario: $this->pessoa_logada, int_soma_nivel_acesso: 7, str_pagina_redirecionar: $backUrl);
 
         $professorTurma = new clsModulesProfessorTurma(id: $this->id);
-        $professorTurma->excluiComponentes(professor_turma_id: $this->id);
-        $professorTurma->excluir();
+
+        DB::beginTransaction();
+
+        try {
+            $professorTurma->excluiComponentes(professor_turma_id: $this->id);
+            $professorTurma->excluir();
+
+            DB::commit();
+        } catch (Exception $exception) {
+            DB::rollBack();
+
+            $this->mensagem = $exception->getMessage();
+
+            return false;
+        }
 
         $this->mensagem = 'Exclusão efetuada com sucesso.<br>';
         $this->simpleRedirect(url: $backUrl);
@@ -626,7 +628,7 @@ return new class extends clsCadastro
         $etapas_instrutor_educacao_pŕofissional = [39, 40, 73, 74, 64, 67, 68];
 
         if ($this->funcao_exercida == FuncaoExercida::INSTRUTOR_EDUCACAO_PROFISSIONAL && (($turma['organizacao_curricular'] && !in_array(needle: '2', haystack: transformStringFromDBInArray(string: $turma['organizacao_curricular']), strict: true)) || !in_array(needle: $turma['etapa_educacenso'], haystack: $etapas_instrutor_educacao_pŕofissional, strict: true))) {
-            $opcoes = \Str::replaceLast(search: ', ', replace: ' ou ', subject: implode(separator: ', ', array: $etapas_instrutor_educacao_pŕofissional));
+            $opcoes = Str::replaceLast(search: ', ', replace: ' ou ', subject: implode(separator: ', ', array: $etapas_instrutor_educacao_pŕofissional));
             $this->mensagem = "O campo: <b>Função que exerce na turma</b> pode ser <b>Instrutor da Educação Profissional</b> apenas quando o campo <b>Organização Curricular</b> da turma for: <b>Itinerário formativo</b> e o campo <b>Etapa de ensino</b> for uma das opções: {$opcoes}.";
 
             return false;
@@ -674,11 +676,6 @@ return new class extends clsCadastro
         }
 
         return false;
-    }
-
-    private function transformArrayInString($value): ?string
-    {
-        return is_array(value: $value) ? implode(separator: ',', array: $value) : null;
     }
 
     public function Formular()
