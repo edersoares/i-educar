@@ -179,7 +179,7 @@ return new class extends clsCadastro
             // $this->data_nasc = $this->data_nasc ? dataFromPgToBr($this->data_nasc) : '';
             $this->data_admissao = $this->data_admissao ? dataFromPgToBr(data_original: $this->data_admissao) : '';
 
-            $this->estado_civil_id = $this->estado_civil->ideciv;
+            $this->estado_civil_id = $this->estado_civil;
             $this->pais_origem_id = $this->pais_origem;
             $this->naturalidade_id = $this->naturalidade;
         }
