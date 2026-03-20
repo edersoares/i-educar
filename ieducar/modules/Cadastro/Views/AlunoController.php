@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\EducacensoIndigenousPeople;
 use App\Models\LegacyInstitution;
 use App\Models\LegacyIssuingBody;
 use App\Models\LegacyRace;
@@ -1241,7 +1242,7 @@ class AlunoController extends Portabilis_Controller_Page_EditController
 
         $this->campoLista('cor_raca', 'Raça', $race, $this->cod_raca, '', false, '', '', '', $obrigarCamposCenso);
 
-        $indigenous = \App\Models\EducacensoIndigenousPeople::query()
+        $indigenous = EducacensoIndigenousPeople::query()
             ->orderBy(column: 'name')
             ->pluck(column: 'name', key: 'id')
             ->prepend(value: 'Selecione', key: '')

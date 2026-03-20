@@ -626,7 +626,7 @@ class AlunoController extends ApiCoreController
 
         $aluno->emancipado = (bool) $this->getRequest()->emancipado;
         $aluno->tipo_responsavel = $tiposResponsavel[$this->getRequest()->tipo_responsavel];
-        $aluno->ref_usuario_exc = \Illuminate\Support\Facades\Auth::id();
+        $aluno->ref_usuario_exc = Auth::id();
 
         // INFORAMÇÕES PROVA INEP
         $recursosProvaInepRequest = $this->getRequest()->recursos_prova_inep__;
@@ -1769,7 +1769,7 @@ class AlunoController extends ApiCoreController
         if ($this->canEnable()) {
             $aluno = new clsPmieducarAluno;
             $aluno->cod_aluno = $id;
-            $aluno->ref_usuario_exc = \Illuminate\Support\Facades\Auth::id();
+            $aluno->ref_usuario_exc = Auth::id();
             $aluno->ativo = 1;
 
             if ($aluno->edita()) {
@@ -1791,7 +1791,7 @@ class AlunoController extends ApiCoreController
             if ($this->canDelete()) {
                 $aluno = new clsPmieducarAluno;
                 $aluno->cod_aluno = $id;
-                $aluno->ref_usuario_exc = \Illuminate\Support\Facades\Auth::id();
+                $aluno->ref_usuario_exc = Auth::id();
 
                 $detalheAluno = $aluno->detalhe();
 

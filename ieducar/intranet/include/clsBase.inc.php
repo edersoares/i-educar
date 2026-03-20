@@ -1,6 +1,7 @@
 <?php
 
 use App\Menu;
+use App\Models\LegacyAccess;
 use App\Services\MenuCacheService;
 use App\User;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -83,9 +84,9 @@ class clsBase
         if (Session::get('marcado') != 'private') {
             $ip = empty($_SERVER['REMOTE_ADDR']) ? 'NULL' : $_SERVER['REMOTE_ADDR'];
             $ip_de_rede = empty($_SERVER['HTTP_X_FORWARDED_FOR']) ? 'NULL' : $_SERVER['HTTP_X_FORWARDED_FOR'];
-            $id_pessoa = \Illuminate\Support\Facades\Auth::id();
+            $id_pessoa = Auth::id();
 
-            \App\Models\LegacyAccess::create([
+            LegacyAccess::create([
                 'ip_externo' => $ip,
                 'ip_interno' => $ip_de_rede,
                 'cod_pessoa' => $id_pessoa,

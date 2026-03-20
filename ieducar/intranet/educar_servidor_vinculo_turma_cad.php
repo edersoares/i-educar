@@ -628,7 +628,7 @@ return new class extends clsCadastro
         $etapas_instrutor_educacao_pŕofissional = [39, 40, 73, 74, 64, 67, 68];
 
         if ($this->funcao_exercida == FuncaoExercida::INSTRUTOR_EDUCACAO_PROFISSIONAL && (($turma['organizacao_curricular'] && !in_array(needle: '2', haystack: transformStringFromDBInArray(string: $turma['organizacao_curricular']), strict: true)) || !in_array(needle: $turma['etapa_educacenso'], haystack: $etapas_instrutor_educacao_pŕofissional, strict: true))) {
-            $opcoes = \Str::replaceLast(search: ', ', replace: ' ou ', subject: implode(separator: ', ', array: $etapas_instrutor_educacao_pŕofissional));
+            $opcoes = Str::replaceLast(search: ', ', replace: ' ou ', subject: implode(separator: ', ', array: $etapas_instrutor_educacao_pŕofissional));
             $this->mensagem = "O campo: <b>Função que exerce na turma</b> pode ser <b>Instrutor da Educação Profissional</b> apenas quando o campo <b>Organização Curricular</b> da turma for: <b>Itinerário formativo</b> e o campo <b>Etapa de ensino</b> for uma das opções: {$opcoes}.";
 
             return false;
