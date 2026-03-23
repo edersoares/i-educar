@@ -599,11 +599,11 @@ class PessoaController extends ApiCoreController
 
         $individual->saveOrFail();
 
-        $raca = new clsCadastroFisicaRaca($pessoaId, $this->getRequest()->cor_raca);
-        if ($raca->existe()) {
-            $this->getRequest()->cor_raca ? $raca->edita() : $raca->excluir();
-        } elseif ($this->getRequest()->cor_raca) {
-            $raca->cadastra();
+        $corRaca = $this->getRequest()->cor_raca;
+        if ($corRaca && is_numeric($corRaca)) {
+            $individual->race()->sync([$corRaca]);
+        } elseif (!$corRaca) {
+            $individual->race()->detach();
         }
 
         $ddd_fone_fixo = $this->getRequest()->ddd_telefone_1;
