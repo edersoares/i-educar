@@ -23,6 +23,7 @@ use iEducar\Modules\Educacenso\Validator\InepExamValidator;
 use iEducar\Modules\Educacenso\Validator\NisValidator;
 use iEducar\Modules\People\CertificateType;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class AlunoController extends ApiCoreController
 {
@@ -479,42 +480,41 @@ class AlunoController extends ApiCoreController
 
     protected function createOrUpdateMoradia($id)
     {
-        $obj = new clsModulesMoradiaAluno;
+        if (!is_numeric($id)) {
+            return;
+        }
 
-        $obj->ref_cod_aluno = $id;
-        $obj->moradia = $this->getRequest()->moradia;
-        $obj->material = $this->getRequest()->material;
-        $obj->casa_outra = $this->getRequest()->casa_outra;
-        $obj->moradia_situacao = $this->getRequest()->moradia_situacao;
-        $obj->quartos = $this->getRequest()->quartos;
-        $obj->sala = $this->getRequest()->sala;
-        $obj->copa = $this->getRequest()->copa;
-        $obj->banheiro = $this->getRequest()->banheiro;
-        $obj->garagem = $this->getRequest()->garagem;
-        $obj->empregada_domestica = ($this->getRequest()->empregada_domestica == 'on' ? 'S' : 'N');
-        $obj->automovel = ($this->getRequest()->automovel == 'on' ? 'S' : 'N');
-        $obj->motocicleta = ($this->getRequest()->motocicleta == 'on' ? 'S' : 'N');
-        $obj->geladeira = ($this->getRequest()->geladeira == 'on' ? 'S' : 'N');
-        $obj->fogao = ($this->getRequest()->fogao == 'on' ? 'S' : 'N');
-        $obj->maquina_lavar = ($this->getRequest()->maquina_lavar == 'on' ? 'S' : 'N');
-        $obj->microondas = ($this->getRequest()->microondas == 'on' ? 'S' : 'N');
-        $obj->video_dvd = ($this->getRequest()->video_dvd == 'on' ? 'S' : 'N');
-        $obj->televisao = ($this->getRequest()->televisao == 'on' ? 'S' : 'N');
-        $obj->telefone = ($this->getRequest()->telefone == 'on' ? 'S' : 'N');
+        $boolFields = [
+            'empregada_domestica', 'automovel', 'motocicleta', 'geladeira', 'fogao',
+            'maquina_lavar', 'microondas', 'video_dvd', 'televisao', 'telefone',
+            'agua_encanada', 'poco', 'energia', 'esgoto', 'fossa', 'lixo',
+        ];
+
+        $data = [
+            'moradia' => $this->getRequest()->moradia,
+            'material' => $this->getRequest()->material,
+            'casa_outra' => $this->getRequest()->casa_outra,
+            'moradia_situacao' => $this->getRequest()->moradia_situacao,
+            'quartos' => $this->getRequest()->quartos,
+            'sala' => $this->getRequest()->sala,
+            'copa' => $this->getRequest()->copa,
+            'banheiro' => $this->getRequest()->banheiro,
+            'garagem' => $this->getRequest()->garagem,
+            'quant_pessoas' => $this->getRequest()->quant_pessoas,
+            'renda' => floatval(preg_replace("/[^0-9\.]/", '', str_replace(',', '.', $this->getRequest()->renda))),
+        ];
+
+        foreach ($boolFields as $field) {
+            $data[$field] = ($this->getRequest()->{$field} == 'on') ? 'S' : 'N';
+        }
 
         $recursosTeconologicos = array_filter((array) $this->getRequest()->recursos_tecnologicos__);
-        $obj->recursos_tecnologicos = json_encode(array_values($recursosTeconologicos));
+        $data['recursos_tecnologicos'] = json_encode(array_values($recursosTeconologicos));
 
-        $obj->quant_pessoas = $this->getRequest()->quant_pessoas;
-        $obj->renda = floatval(preg_replace("/[^0-9\.]/", '', str_replace(',', '.', $this->getRequest()->renda)));
-        $obj->agua_encanada = ($this->getRequest()->agua_encanada == 'on' ? 'S' : 'N');
-        $obj->poco = ($this->getRequest()->poco == 'on' ? 'S' : 'N');
-        $obj->energia = ($this->getRequest()->energia == 'on' ? 'S' : 'N');
-        $obj->esgoto = ($this->getRequest()->esgoto == 'on' ? 'S' : 'N');
-        $obj->fossa = ($this->getRequest()->fossa == 'on' ? 'S' : 'N');
-        $obj->lixo = ($this->getRequest()->lixo == 'on' ? 'S' : 'N');
-
-        return $obj->existe() ? $obj->edita() : $obj->cadastra();
+        DB::table('modules.moradia_aluno')->updateOrInsert(
+            ['ref_cod_aluno' => $id],
+            array_filter($data, fn ($v) => $v !== null)
+        );
     }
 
     protected function loadAlunoInepId($alunoId)
@@ -1236,10 +1236,9 @@ class AlunoController extends ApiCoreController
                 $aluno = Portabilis_Array_Utils::merge($objFichaMedica, $aluno);
             }
 
-            $objMoradia = new clsModulesMoradiaAluno($id);
-            if ($objMoradia->existe()) {
-                $objMoradia = $objMoradia->detalhe();
-                $aluno = Portabilis_Array_Utils::merge($objMoradia, $aluno);
+            $moradia = DB::table('modules.moradia_aluno')->where('ref_cod_aluno', $id)->first();
+            if ($moradia) {
+                $aluno = Portabilis_Array_Utils::merge((array) $moradia, $aluno);
             }
 
             // TODO remover no futuro #transport-package
