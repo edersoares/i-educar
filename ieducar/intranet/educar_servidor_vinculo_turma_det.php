@@ -30,8 +30,11 @@ return new class extends clsDetalhe
 
         $this->id = $_GET['id'];
 
-        $tmp_obj = new clsModulesProfessorTurma(id: $this->id);
-        $registro = $tmp_obj->detalhe();
+        $registro = DB::selectOne("SELECT pt.id, pt.ano, pt.instituicao_id, pt.servidor_id, pt.turma_id, pt.funcao_exercida, pt.tipo_vinculo, pt.permite_lancar_faltas_componente, pt.turno_id, pt.data_inicial, pt.data_fim, pt.leciona_itinerario_tecnico_profissional, pt.area_itinerario, t.nm_turma, s.nm_serie, c.nm_curso, p.nome as nm_escola
+            FROM modules.professor_turma pt, pmieducar.turma t, pmieducar.serie s, pmieducar.curso c, pmieducar.escola e, cadastro.pessoa p
+            WHERE pt.turma_id = t.cod_turma AND t.ref_ref_cod_serie = s.cod_serie AND s.ref_cod_curso = c.cod_curso
+            AND t.ref_ref_cod_escola = e.cod_escola AND e.ref_idpes = p.idpes AND id = ?", [$this->id]);
+        $registro = $registro ? (array) $registro : null;
 
         if (!$registro) {
             $this->simpleRedirect(url: 'educar_servidor_professor_vinculo_lst.php');
