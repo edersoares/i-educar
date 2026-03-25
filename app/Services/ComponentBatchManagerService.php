@@ -50,6 +50,7 @@ class ComponentBatchManagerService
         'pmieducar.escola_serie_disciplina' => ['id'],
         'modules.componente_curricular_ano_escolar' => ['componente_curricular_id', 'ano_escolar_id'],
         'pmieducar.dispensa_disciplina' => ['cod_dispensa'],
+        'pmieducar.dispensa_etapa' => ['ref_cod_dispensa', 'etapa'],
     ];
 
     private const ESCOLA_SERIE_UNIQUE = ['ref_ref_cod_serie', 'ref_ref_cod_escola', 'ref_cod_disciplina'];
@@ -95,6 +96,7 @@ class ComponentBatchManagerService
         'modules.componente_curricular_turma',
         'modules.professor_turma_disciplina',
         'pmieducar.dispensa_disciplina',
+        'pmieducar.dispensa_etapa',
         'modules.nota_componente_curricular',
         'modules.falta_componente_curricular',
         'modules.parecer_componente_curricular',
@@ -499,13 +501,33 @@ class ComponentBatchManagerService
                 $rows = $this->snapshotRows($query);
 
                 if ($rows) {
-                    $backup['deleted'][$table] = ['pk' => self::TABLE_PKS[$table], 'rows' => $rows];
-                }
+                    $dispensaIds = collect($rows)->pluck('cod_dispensa')->toArray();
 
-                // DB::table para deletar de fato e disparar a trigger (Model faria soft delete e as queries no sistema não filtram por ativo)
-                $counts['dispensa'] = DB::table($table)
-                    ->whereIn('cod_dispensa', collect($rows)->pluck('cod_dispensa'))
-                    ->delete();
+                    // Deletar etapas primeiro (FK sem CASCADE) — padrão issues #6653/#6824
+                    $etapaRows = DB::table('pmieducar.dispensa_etapa')
+                        ->whereIn('ref_cod_dispensa', $dispensaIds)
+                        ->get()->map(fn ($r) => (array) $r)->toArray();
+
+                    if ($etapaRows) {
+                        $backup['deleted']['pmieducar.dispensa_etapa'] = [
+                            'pk' => ['ref_cod_dispensa', 'etapa'],
+                            'rows' => $etapaRows,
+                        ];
+                    }
+
+                    DB::table('pmieducar.dispensa_etapa')
+                        ->whereIn('ref_cod_dispensa', $dispensaIds)
+                        ->delete();
+
+                    // Depois deletar as dispensas (trigger copia para dispensa_disciplina_excluidos)
+                    $backup['deleted'][$table] = ['pk' => self::TABLE_PKS[$table], 'rows' => $rows];
+
+                    $counts['dispensa'] = DB::table($table)
+                        ->whereIn('cod_dispensa', $dispensaIds)
+                        ->delete();
+                } else {
+                    $counts['dispensa'] = 0;
+                }
             }
 
             return [$counts, $backup];

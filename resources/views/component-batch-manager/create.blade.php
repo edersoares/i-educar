@@ -106,7 +106,7 @@
                     <span class="form">Remover dispensas</span>
                 </td>
                 <td class="formlttd" valign="top">
-                    <input type="checkbox" name="remove_exemptions" id="remove_exemptions" value="1" {{ old('remove_exemptions') ? 'checked' : '' }} class="operation-checkbox">
+                    <input type="checkbox" name="remove_exemptions" id="remove_exemptions" value="1" {{ old('remove_exemptions', '1') ? 'checked' : '' }} class="operation-checkbox">
                 </td>
             </tr>
 
@@ -310,13 +310,13 @@
                 'remove_exemptions': [],
                 'unlink_class_components': ['remove_records'],
                 'unlink_teacher_disciplines': [],
-                'unlink_school_grade_disciplines': ['unlink_class_components', 'remove_records'],
-                'unlink_grade_components': ['unlink_school_grade_disciplines', 'unlink_class_components', 'remove_records']
+                'unlink_school_grade_disciplines': ['unlink_class_components', 'remove_records', 'remove_exemptions'],
+                'unlink_grade_components': ['unlink_school_grade_disciplines', 'unlink_class_components', 'remove_records', 'remove_exemptions']
             };
 
             var children = {
                 'remove_records': ['unlink_class_components', 'unlink_school_grade_disciplines', 'unlink_grade_components'],
-                'remove_exemptions': [],
+                'remove_exemptions': ['unlink_school_grade_disciplines', 'unlink_grade_components'],
                 'unlink_class_components': ['unlink_school_grade_disciplines', 'unlink_grade_components'],
                 'unlink_school_grade_disciplines': ['unlink_grade_components'],
                 'unlink_teacher_disciplines': [],
