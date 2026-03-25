@@ -380,16 +380,7 @@ return new class extends clsCadastro
             }
         }
 
-        $opcoes = ['' => 'Selecione'];
-
-        $objTemp = new clsCadastroEscolaridade;
-        $lista = $objTemp->lista();
-
-        if (is_array($lista) && count($lista)) {
-            foreach ($lista as $registro) {
-                $opcoes[$registro['idesco']] = $registro['descricao'];
-            }
-        }
+        $opcoes = LegacySchoolingDegree::query()->orderBy('descricao')->pluck('descricao', 'idesco')->prepend('Selecione', '')->toArray();
 
         $obj_permissoes = new clsPermissoes;
         if ($obj_permissoes->permissao_cadastra(632, $this->pessoa_logada, 4)) {
