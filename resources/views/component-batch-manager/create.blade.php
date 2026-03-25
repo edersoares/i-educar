@@ -162,160 +162,264 @@
     <script>
         (function($) {
         $(document).ready(function() {
-            var oldCursos = @json(old('curso', []));
-            var oldSeries = @json(old('ref_cod_serie', []));
-            var oldDisciplinas = @json(old('discipline_ids', []));
 
-            function restoreOld($select, oldValues) {
-                if (oldValues.length === 0) return;
-                var stringValues = oldValues.map(String);
-                $select.val(stringValues);
+            // ================================================================
+            // Constantes e seletores
+            // ================================================================
+
+            var SELECTORS = {
+                ano:         $j('#ano'),
+                escola:      $j('#escola'),
+                cursos:      $j('#cursos'),
+                series:      $j('#ref_cod_serie'),
+                disciplinas: $j('#discipline_ids'),
+                btnSubmit:   $j('.btn-green[type="submit"]')
+            };
+
+            var ROUTES = {
+                cursos:      '{{ route("component-batch-manager.api.courses") }}',
+                series:      '{{ route("component-batch-manager.api.grades") }}',
+                disciplinas: '{{ route("component-batch-manager.api.disciplines") }}'
+            };
+
+            var oldValues = {
+                cursos:      @json(old('curso', [])),
+                series:      @json(old('ref_cod_serie', [])),
+                disciplinas: @json(old('discipline_ids', []))
+            };
+
+            // ================================================================
+            // Estado interno
+            // ================================================================
+
+            var pendingRequests = 0;
+            var xhrCourses = null;
+            var xhrGrades = null;
+            var xhrDisciplines = null;
+            var lastYear = SELECTORS.ano.val();
+            var initialLoad = oldValues.cursos.length > 0 || oldValues.series.length > 0 || oldValues.disciplinas.length > 0;
+
+            // ================================================================
+            // Funções auxiliares
+            // ================================================================
+
+            function startLoading() {
+                pendingRequests++;
+                SELECTORS.btnSubmit.prop('disabled', true).css('opacity', '0.6');
+            }
+
+            function stopLoading() {
+                pendingRequests = Math.max(0, pendingRequests - 1);
+                if (pendingRequests === 0) {
+                    SELECTORS.btnSubmit.prop('disabled', false).css('opacity', '');
+                }
+            }
+
+            function abortXhr(xhr) {
+                if (xhr) xhr.abort();
+            }
+
+            function isAborted(xhr) {
+                return xhr.statusText === 'abort';
+            }
+
+            function disableSelect($select) {
+                $select.empty().trigger('chosen:updated');
+                $select.prop('disabled', true).trigger('chosen:updated');
+            }
+
+            function enableSelect($select) {
+                $select.prop('disabled', false).trigger('chosen:updated');
+            }
+
+            function populateSelect($select, response) {
+                var html = '';
+                $j.each(response, function(id, name) {
+                    html += '<option value="' + id + '">' + name + '</option>';
+                });
+                $select.html(html);
+            }
+
+            function restoreOld($select, values) {
+                if (!values || values.length === 0) return;
+                $select.val(values.map(String));
                 $select.trigger('chosen:updated');
             }
 
-            multipleSearchHelper.setup('cursos', '', 'multiple', 'multiple', { placeholder: 'Selecione os cursos' });
-            $j('#cursos').trigger('chosen:updated');
-
-            multipleSearchHelper.setup('ref_cod_serie', '', 'multiple', 'multiple', { placeholder: 'Selecione as séries' });
-            $j('#ref_cod_serie').trigger('chosen:updated');
-
-            multipleSearchHelper.setup('discipline_ids', '', 'multiple', 'multiple', { placeholder: 'Selecione os componentes' });
-            $j('#discipline_ids').trigger('chosen:updated');
-
-            $j('#link-select-all-schools').on('click', function() {
-                var $select = $j('#escola');
+            function selectAll($select) {
                 $select.find('option').prop('selected', true);
                 $select.trigger('chosen:updated');
-                loadCourses();
-            });
+            }
 
-            $j('#link-select-all-courses').on('click', function() {
-                var $select = $j('#cursos');
-                $select.find('option').prop('selected', true);
-                $select.trigger('chosen:updated');
-                loadGrades();
-            });
+            function clearAllDependents() {
+                disableSelect(SELECTORS.cursos);
+                disableSelect(SELECTORS.series);
+                disableSelect(SELECTORS.disciplinas);
+            }
 
-            $j('#link-select-all-grades').on('click', function() {
-                var $select = $j('#ref_cod_serie');
-                $select.find('option').prop('selected', true);
-                $select.trigger('chosen:updated');
-                loadDisciplines();
-            });
-
-            $j('#link-select-all-disciplines').on('click', function() {
-                var $select = $j('#discipline_ids');
-                $select.find('option').prop('selected', true);
-                $select.trigger('chosen:updated');
-            });
-
-            // Cascata dinâmica: Escola → Curso → Série → Componentes
-            var initialLoad = oldCursos.length > 0 || oldSeries.length > 0 || oldDisciplinas.length > 0;
+            // ================================================================
+            // Cascata dinâmica: Escola → Curso → Série → Componente
+            // ================================================================
 
             function loadCourses() {
-                var schoolIds = $j('#escola').val();
-                var year = $j('#ano').val();
+                abortXhr(xhrCourses);
+                abortXhr(xhrGrades);
+                abortXhr(xhrDisciplines);
+
+                var schoolIds = SELECTORS.escola.val();
+                var year = SELECTORS.ano.val();
 
                 if (!schoolIds || schoolIds.length === 0) {
-                    $j('#cursos').empty().trigger('chosen:updated');
-                    loadGrades();
+                    clearAllDependents();
                     return;
                 }
 
-                $j.ajax({
-                    url: '{{ route("component-batch-manager.api.courses") }}',
+                disableSelect(SELECTORS.cursos);
+                disableSelect(SELECTORS.series);
+                disableSelect(SELECTORS.disciplinas);
+                startLoading();
+
+                xhrCourses = $j.ajax({
+                    url: ROUTES.cursos,
                     data: { school_ids: schoolIds, year: year },
                     dataType: 'json',
                     success: function(response) {
-                        $j('#cursos').empty();
-                        $j.each(response, function(id, name) {
-                            $j('#cursos').append($j('<option>', { value: id, text: name }));
-                        });
-                        if (initialLoad) {
-                            restoreOld($j('#cursos'), oldCursos);
-                        }
-                        $j('#cursos').trigger('chosen:updated');
+                        populateSelect(SELECTORS.cursos, response);
+                        if (initialLoad) restoreOld(SELECTORS.cursos, oldValues.cursos);
+                        enableSelect(SELECTORS.cursos);
                         loadGrades();
-                    }
+                    },
+                    error: function(xhr) {
+                        if (!isAborted(xhr)) enableSelect(SELECTORS.cursos);
+                    },
+                    complete: stopLoading
                 });
             }
 
             function loadGrades() {
-                var courseIds = $j('#cursos').val();
+                abortXhr(xhrGrades);
+                abortXhr(xhrDisciplines);
+
+                var courseIds = SELECTORS.cursos.val();
 
                 if (!courseIds || courseIds.length === 0) {
-                    $j('#ref_cod_serie').empty().trigger('chosen:updated');
-                    loadDisciplines();
+                    disableSelect(SELECTORS.series);
+                    disableSelect(SELECTORS.disciplinas);
                     return;
                 }
 
-                var schoolIds = $j('#escola').val();
-                var year = $j('#ano').val();
+                var schoolIds = SELECTORS.escola.val();
+                var year = SELECTORS.ano.val();
 
-                $j.ajax({
-                    url: '{{ route("component-batch-manager.api.grades") }}',
+                disableSelect(SELECTORS.series);
+                disableSelect(SELECTORS.disciplinas);
+                startLoading();
+
+                xhrGrades = $j.ajax({
+                    url: ROUTES.series,
                     data: { school_ids: schoolIds, course_ids: courseIds, year: year },
                     dataType: 'json',
                     success: function(response) {
-                        $j('#ref_cod_serie').empty();
-                        $j.each(response, function(id, name) {
-                            $j('#ref_cod_serie').append($j('<option>', { value: id, text: name }));
-                        });
-                        if (initialLoad) {
-                            restoreOld($j('#ref_cod_serie'), oldSeries);
-                        }
-                        $j('#ref_cod_serie').trigger('chosen:updated');
+                        populateSelect(SELECTORS.series, response);
+                        if (initialLoad) restoreOld(SELECTORS.series, oldValues.series);
+                        enableSelect(SELECTORS.series);
                         loadDisciplines();
-                    }
+                    },
+                    error: function(xhr) {
+                        if (!isAborted(xhr)) enableSelect(SELECTORS.series);
+                    },
+                    complete: stopLoading
                 });
             }
 
             function loadDisciplines() {
-                var gradeIds = $j('#ref_cod_serie').val();
+                abortXhr(xhrDisciplines);
+
+                var gradeIds = SELECTORS.series.val();
 
                 if (!gradeIds || gradeIds.length === 0) {
-                    $j('#discipline_ids').empty().trigger('chosen:updated');
+                    disableSelect(SELECTORS.disciplinas);
                     return;
                 }
 
-                var schoolIds = $j('#escola').val();
-                var year = $j('#ano').val();
+                var schoolIds = SELECTORS.escola.val();
+                var year = SELECTORS.ano.val();
 
-                $j.ajax({
-                    url: '{{ route("component-batch-manager.api.disciplines") }}',
+                disableSelect(SELECTORS.disciplinas);
+                startLoading();
+
+                xhrDisciplines = $j.ajax({
+                    url: ROUTES.disciplinas,
                     data: { school_ids: schoolIds, grade_ids: gradeIds, year: year },
                     dataType: 'json',
                     success: function(response) {
-                        $j('#discipline_ids').empty();
-                        $j.each(response, function(id, name) {
-                            $j('#discipline_ids').append($j('<option>', { value: id, text: name }));
-                        });
+                        populateSelect(SELECTORS.disciplinas, response);
                         if (initialLoad) {
-                            restoreOld($j('#discipline_ids'), oldDisciplinas);
+                            restoreOld(SELECTORS.disciplinas, oldValues.disciplinas);
                             initialLoad = false;
+                            // Restauração completa: reabilitar escola
+                            SELECTORS.escola.prop('disabled', false).trigger('chosen:updated');
                         }
-                        $j('#discipline_ids').trigger('chosen:updated');
-                    }
+                        enableSelect(SELECTORS.disciplinas);
+                    },
+                    error: function(xhr) {
+                        if (!isAborted(xhr)) enableSelect(SELECTORS.disciplinas);
+                    },
+                    complete: stopLoading
                 });
             }
 
-            $j('#escola').on('change', loadCourses);
-            $j('#cursos').on('change', loadGrades);
-            $j('#ref_cod_serie').on('change', loadDisciplines);
-            $j('#ano').on('change blur', loadCourses);
+            // ================================================================
+            // Inicialização dos selects Chosen
+            // ================================================================
+
+            multipleSearchHelper.setup('cursos', '', 'multiple', 'multiple', { placeholder: 'Selecione os cursos' });
+            multipleSearchHelper.setup('ref_cod_serie', '', 'multiple', 'multiple', { placeholder: 'Selecione as séries' });
+            multipleSearchHelper.setup('discipline_ids', '', 'multiple', 'multiple', { placeholder: 'Selecione os componentes' });
+
+            // Estado inicial: desabilitar selects dependentes até serem populados pela cascata
+            SELECTORS.cursos.prop('disabled', true).trigger('chosen:updated');
+            SELECTORS.series.prop('disabled', true).trigger('chosen:updated');
+            SELECTORS.disciplinas.prop('disabled', true).trigger('chosen:updated');
+
+            // Se está restaurando do preview, desabilitar escola e botão até a cascata completar
+            if (initialLoad) {
+                SELECTORS.escola.prop('disabled', true).trigger('chosen:updated');
+                SELECTORS.btnSubmit.prop('disabled', true).css('opacity', '0.6');
+            }
+
+            // ================================================================
+            // Eventos
+            // ================================================================
+
+            SELECTORS.escola.on('change', loadCourses);
+            SELECTORS.cursos.on('change', loadGrades);
+            SELECTORS.series.on('change', loadDisciplines);
+            SELECTORS.ano.on('change', loadCourses);
+            SELECTORS.ano.on('blur', function() {
+                if (SELECTORS.ano.val() !== lastYear) {
+                    lastYear = SELECTORS.ano.val();
+                    loadCourses();
+                }
+            });
+
+            $j('#link-select-all-schools').on('click', function() { selectAll(SELECTORS.escola); loadCourses(); });
+            $j('#link-select-all-courses').on('click', function() { selectAll(SELECTORS.cursos); loadGrades(); });
+            $j('#link-select-all-grades').on('click', function() { selectAll(SELECTORS.series); loadDisciplines(); });
+            $j('#link-select-all-disciplines').on('click', function() { selectAll(SELECTORS.disciplinas); });
 
             // Hierarquia de operações: desmarcar pai desmarca filhos, marcar filho marca pais
             var deps = {
                 'remove_records': [],
                 'remove_exemptions': [],
                 'unlink_class_components': ['remove_records'],
-                'unlink_teacher_disciplines': [],
+                'unlink_teacher_disciplines': ['remove_records'],
                 'unlink_school_grade_disciplines': ['unlink_class_components', 'remove_records', 'remove_exemptions'],
                 'unlink_grade_components': ['unlink_school_grade_disciplines', 'unlink_class_components', 'remove_records', 'remove_exemptions']
             };
 
             var children = {
-                'remove_records': ['unlink_class_components', 'unlink_school_grade_disciplines', 'unlink_grade_components'],
+                'remove_records': ['unlink_class_components', 'unlink_teacher_disciplines', 'unlink_school_grade_disciplines', 'unlink_grade_components'],
                 'remove_exemptions': ['unlink_school_grade_disciplines', 'unlink_grade_components'],
                 'unlink_class_components': ['unlink_school_grade_disciplines', 'unlink_grade_components'],
                 'unlink_school_grade_disciplines': ['unlink_grade_components'],

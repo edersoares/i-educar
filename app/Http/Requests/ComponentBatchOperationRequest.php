@@ -135,13 +135,14 @@ class ComponentBatchOperationRequest extends FormRequest
         if ($this->input('unlink_school_grade_disciplines')) {
             $this->merge(['unlink_class_components' => true, 'remove_exemptions' => true]);
         }
-        if ($this->input('unlink_class_components')) {
+        if ($this->input('unlink_class_components') || $this->input('unlink_teacher_disciplines')) {
             $this->merge(['remove_records' => true]);
         }
 
         if (!$this->input('remove_records')) {
             $this->merge([
                 'unlink_class_components' => false,
+                'unlink_teacher_disciplines' => false,
             ]);
         }
         if (!$this->input('unlink_class_components') || !$this->input('remove_exemptions')) {
