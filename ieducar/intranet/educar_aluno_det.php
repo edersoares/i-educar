@@ -5,6 +5,7 @@ use App\Models\Country;
 use App\Models\DeficiencyType;
 use App\Models\LegacyBenefit;
 use App\Models\LegacyDeficiency;
+use App\Models\LegacyMaritalStatus;
 use App\Models\LegacyProject;
 use App\Models\LegacyRace;
 use App\Models\PersonHasPlace;
@@ -121,18 +122,9 @@ return new class extends clsDetalhe
 
             $registro['sexo'] = $det_fisica['sexo'] ? $opcoes[$det_fisica['sexo']] : '';
 
-            $obj_estado_civil = new clsEstadoCivil;
-            $obj_estado_civil_lista = $obj_estado_civil->lista();
+            $lista_estado_civil = LegacyMaritalStatus::pluck('descricao', 'ideciv')->toArray();
 
-            $lista_estado_civil = [];
-
-            if ($obj_estado_civil_lista) {
-                foreach ($obj_estado_civil_lista as $estado_civil) {
-                    $lista_estado_civil[$estado_civil['ideciv']] = $estado_civil['descricao'];
-                }
-            }
-
-            $registro['ideciv'] = $lista_estado_civil[$det_fisica['ideciv']->ideciv];
+            $registro['ideciv'] = $lista_estado_civil[$det_fisica['ideciv']] ?? '';
             $registro['email'] = $det_pessoa_fj['email'];
             $registro['url'] = $det_pessoa_fj['url'];
 

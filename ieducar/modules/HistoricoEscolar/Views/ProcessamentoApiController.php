@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 // TODO migrar classe novo padrao api controller
@@ -112,7 +113,7 @@ class ProcessamentoApiController extends Core_Controller_Page_EditController
     protected function requiresLogin($raiseExceptionOnEmpty)
     {
         return $this->validatesPresenceOf(
-            \Illuminate\Support\Facades\Auth::id(),
+            Auth::id(),
             '',
             $raiseExceptionOnEmpty,
             'Usuário deve estar logado'
@@ -444,7 +445,7 @@ class ProcessamentoApiController extends Core_Controller_Page_EditController
                 $historicoEscolar = new clsPmieducarHistoricoEscolar(
                     $ref_cod_aluno = $alunoId,
                     $sequencial,
-                    $ref_usuario_exc = \Illuminate\Support\Facades\Auth::id(),
+                    $ref_usuario_exc = Auth::id(),
                     $ref_usuario_cad = null,
                     // TODO nm_curso
                     $nm_serie = null,
@@ -580,7 +581,7 @@ class ProcessamentoApiController extends Core_Controller_Page_EditController
                         $alunoId,
                         $sequencial,
                         $ref_usuario_exc = null,
-                        $ref_usuario_cad = \Illuminate\Support\Facades\Auth::id(),
+                        $ref_usuario_cad = Auth::id(),
                         $dadosMatricula['nome_serie'],
                         $ano,
                         $this->getCargaHorariaDisciplinas($alunoId),
@@ -620,7 +621,7 @@ class ProcessamentoApiController extends Core_Controller_Page_EditController
                     $historicoEscolar = new clsPmieducarHistoricoEscolar(
                         $alunoId,
                         $sequencial,
-                        \Illuminate\Support\Facades\Auth::id(),
+                        Auth::id(),
                         $ref_usuario_cad = null,
                         $dadosMatricula['nome_serie'],
                         $ano,
@@ -1187,7 +1188,7 @@ class ProcessamentoApiController extends Core_Controller_Page_EditController
                 $this->service = new Avaliacao_Service_Boletim(
                     [
                         'matricula' => $matriculaId,
-                        'usuario' => \Illuminate\Support\Facades\Auth::id(),
+                        'usuario' => Auth::id(),
                         'ignorarDispensasParciais' => true,
                     ]
                 );
