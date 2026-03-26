@@ -412,10 +412,10 @@
             var deps = {
                 'remove_records': [],
                 'remove_exemptions': [],
-                'unlink_class_components': ['remove_records'],
+                'unlink_class_components': ['remove_records', 'unlink_teacher_disciplines'],
                 'unlink_teacher_disciplines': ['remove_records'],
-                'unlink_school_grade_disciplines': ['unlink_class_components', 'remove_records', 'remove_exemptions'],
-                'unlink_grade_components': ['unlink_school_grade_disciplines', 'unlink_class_components', 'remove_records', 'remove_exemptions']
+                'unlink_school_grade_disciplines': ['unlink_class_components', 'unlink_teacher_disciplines', 'remove_records', 'remove_exemptions'],
+                'unlink_grade_components': ['unlink_school_grade_disciplines', 'unlink_class_components', 'unlink_teacher_disciplines', 'remove_records', 'remove_exemptions']
             };
 
             var children = {
