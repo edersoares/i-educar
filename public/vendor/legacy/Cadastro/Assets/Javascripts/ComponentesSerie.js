@@ -83,15 +83,15 @@ function disableComponent(elements, isChecked, isAnosLetivos = false) {
       return;
     }
     $j(this).prop("disabled", !isChecked);
+
+    if (!isChecked) {
+      $j(this).val('');
+    }
+
+    if (isAnosLetivos) {
+      reloadChosenAnosLetivos($j(this));
+    }
   })
-
-  if (!isChecked) {
-    $j(this).val('');
-  }
-
-  if (isAnosLetivos) {
-    $j(this).trigger("chosen:updated");
-  }
 }
 
 function checkAll(id) {
@@ -625,7 +625,7 @@ function htmlComponentesAreaConhecimento(id, componente_id, componente_nome, fir
                            size="5"
                            maxlength="5"
                            name="componentes[` + id + componente_id + `][hora_falta]"
-                           class="carga_horaria"
+                           class="hora_falta"
                            id="hora_falta_` + componente_id + `"
                            value=""
                            disabled>
