@@ -2,6 +2,8 @@
 
 use App\Facades\Asset;
 use App\Models\LegacyEmployee;
+use App\Models\LegacyPhone;
+use App\Services\PhoneService;
 use App\Services\ChangeUserPasswordService;
 use App\Services\UrlPresigner;
 use Illuminate\Support\Facades\Session;
@@ -186,11 +188,19 @@ return new class extends clsCadastro
 
         $this->savePhoto($this->pessoa_logada);
 
-        $telefone = new clsPessoaTelefone($this->pessoa_logada, 1, str_replace('-', '', $this->telefone), $this->ddd_telefone);
-        $telefone->cadastra();
+        app(PhoneService::class)->salvar(
+            idpes: $this->pessoa_logada,
+            tipo: LegacyPhone::TYPE_LANDLINE,
+            ddd: $this->ddd_telefone,
+            fone: $this->telefone
+        );
 
-        $celular = new clsPessoaTelefone($this->pessoa_logada, 3, str_replace('-', '', $this->celular), $this->ddd_celular);
-        $celular->cadastra();
+        app(PhoneService::class)->salvar(
+            idpes: $this->pessoa_logada,
+            tipo: LegacyPhone::TYPE_MOBILE_ALT,
+            ddd: $this->ddd_celular,
+            fone: $this->celular
+        );
 
         $pessoa = new clsPessoa_($this->pessoa_logada);
         $pessoa->nome = $this->nome;
