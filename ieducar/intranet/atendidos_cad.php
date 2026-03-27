@@ -667,7 +667,9 @@ return new class extends clsCadastro
             ->prepend(value: 'Selecione', key: '')
             ->toArray();
 
-        $this->cod_raca = LegacyRace::query()->whereHas('individual', fn ($q) => $q->whereKey($this->cod_pessoa_fj))->value('cod_raca') ?? $this->cor_raca;
+        $this->cod_raca = is_numeric($this->cod_pessoa_fj)
+            ? LegacyRace::query()->whereHas('individual', fn ($q) => $q->whereKey($this->cod_pessoa_fj))->value('cod_raca') ?? $this->cor_raca
+            : $this->cor_raca;
 
         $this->campoLista(nome: 'cor_raca', campo: 'Raça', valor: $race, default: $this->cod_raca, obrigatorio: $obrigarCamposCenso);
 
