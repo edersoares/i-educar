@@ -4,6 +4,7 @@ use App\Events\UserDeleted;
 use App\Events\UserUpdated;
 use App\Facades\Asset;
 use App\Models\EducacensoIndigenousPeople;
+use App\Models\LegacyEmployee;
 use App\Models\LegacyIndividual;
 use App\Models\LegacyInstitution;
 use App\Models\LegacyIssuingBody;
@@ -884,11 +885,12 @@ return new class extends clsCadastro
 
         $usuario = new clsPmieducarUsuario;
         $usuario = $usuario->lista(int_cod_usuario: $idPes, int_ref_cod_escola: null, int_ref_cod_instituicao: null, int_ref_funcionario_cad: null, int_ref_funcionario_exc: null, int_ref_cod_tipo_usuario: null, date_data_cadastro_ini: null, date_data_cadastro_fim: null, date_data_exclusao_ini: null, date_data_exclusao_fim: null, int_ativo: true);
-        $funcionario = new clsPortalFuncionario;
-        $funcionario->ref_cod_pessoa_fj = $idPes;
-        $funcionario = $funcionario->lista(str_matricula: null, str_senha: null, int_ativo: 1);
+        $funcionarioAtivo = LegacyEmployee::query()
+            ->where('ref_cod_pessoa_fj', $idPes)
+            ->where('ativo', 1)
+            ->exists();
 
-        if ($funcionario && $usuario) {
+        if ($funcionarioAtivo && $usuario) {
             $this->mensagem = 'Não foi possível excluir. Esta pessoa possuí vínculo com usuário do sistema.';
 
             return false;
