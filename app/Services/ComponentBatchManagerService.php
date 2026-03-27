@@ -811,6 +811,7 @@ class ComponentBatchManagerService
                 $join->on('ts.turma_id', '=', 'turma.cod_turma')
                     ->where('turma.multiseriada', '=', 1);
             })
+            ->where('turma.ativo', 1)
             ->where('turma.ano', $year)
             ->when($schoolIds, fn ($q) => $q->whereIn('turma.ref_ref_cod_escola', $schoolIds))
             ->whereIn(DB::raw('coalesce(ts.serie_id, turma.ref_ref_cod_serie)'), $gradeIds)
