@@ -548,17 +548,8 @@ return new class extends clsCadastro
             $dados['senha'] = $senha;
         }
 
-        if ($dataExpiracao) {
-            $dados['data_expiracao'] = $dataExpiracao;
-        } elseif ($dataExpiracao === null || $dataExpiracao === '') {
-            $dados['data_expiracao'] = null;
-        }
-
-        if ($dataInicial) {
-            $dados['data_inicial'] = $dataInicial;
-        } elseif ($dataInicial === null || $dataInicial === '') {
-            $dados['data_inicial'] = null;
-        }
+        $dados['data_expiracao'] = $dataExpiracao ?: null;
+        $dados['data_inicial'] = $dataInicial ?: null;
 
         return $dados;
     }
