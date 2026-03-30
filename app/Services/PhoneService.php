@@ -43,12 +43,12 @@ class PhoneService
 
     private function upsert(int $idpes, int $tipo, string $ddd, string $fone, ?int $userId): void
     {
-        $existe = LegacyPhone::query()
+        $exists = LegacyPhone::query()
             ->where('idpes', $idpes)
             ->where('tipo', $tipo)
             ->exists();
 
-        if ($existe) {
+        if ($exists) {
             LegacyPhone::query()
                 ->where('idpes', $idpes)
                 ->where('tipo', $tipo)
