@@ -6,6 +6,9 @@ use App\Facades\Asset;
 use App\Models\EducacensoIndigenousPeople;
 use App\Models\LegacyIndividual;
 use App\Models\LegacyInstitution;
+use App\Models\LegacyPhone;
+use App\Services\PhoneService;
+use Illuminate\Support\Facades\Auth;
 use App\Models\LegacyIssuingBody;
 use App\Models\LegacyRace;
 use App\Models\LegacySchoolingDegree;
@@ -1505,16 +1508,33 @@ return new class extends clsCadastro
 
     protected function createOrUpdateTelefones($pessoaId)
     {
-        $telefones = [];
+        app(PhoneService::class)->save(
+            personId: $pessoaId,
+            type: LegacyPhone::TYPE_LANDLINE,
+            ddd: $this->ddd_telefone_1,
+            phone: $this->telefone_1
+        );
 
-        $telefones[] = new clsPessoaTelefone(int_idpes: $pessoaId, int_tipo: 1, str_fone: $this->telefone_1, str_ddd: $this->ddd_telefone_1);
-        $telefones[] = new clsPessoaTelefone(int_idpes: $pessoaId, int_tipo: 2, str_fone: $this->telefone_2, str_ddd: $this->ddd_telefone_2);
-        $telefones[] = new clsPessoaTelefone(int_idpes: $pessoaId, int_tipo: 3, str_fone: $this->telefone_mov, str_ddd: $this->ddd_telefone_mov);
-        $telefones[] = new clsPessoaTelefone(int_idpes: $pessoaId, int_tipo: 4, str_fone: $this->telefone_fax, str_ddd: $this->ddd_telefone_fax);
+        app(PhoneService::class)->save(
+            personId: $pessoaId,
+            type: LegacyPhone::TYPE_MOBILE,
+            ddd: $this->ddd_telefone_2,
+            phone: $this->telefone_2
+        );
 
-        foreach ($telefones as $telefone) {
-            $telefone->cadastra();
-        }
+        app(PhoneService::class)->save(
+            personId: $pessoaId,
+            type: LegacyPhone::TYPE_MOBILE_ALT,
+            ddd: $this->ddd_telefone_mov,
+            phone: $this->telefone_mov
+        );
+
+        app(PhoneService::class)->save(
+            personId: $pessoaId,
+            type: LegacyPhone::TYPE_FAX,
+            ddd: $this->ddd_telefone_fax,
+            phone: $this->telefone_fax
+        );
     }
 
     // inputs usados em Gerar,

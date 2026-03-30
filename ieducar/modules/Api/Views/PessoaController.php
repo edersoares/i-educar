@@ -2,6 +2,8 @@
 
 use App\Models\LegacyIndividual;
 use App\Models\LegacyInstitution;
+use App\Models\LegacyPhone;
+use App\Services\PhoneService;
 use App\Models\PersonHasPlace;
 use iEducar\Modules\Addressing\LegacyAddressingFields;
 use iEducar\Modules\Educacenso\Model\Nacionalidade;
@@ -612,14 +614,20 @@ class PessoaController extends ApiCoreController
         $fone_mov = $this->getRequest()->telefone_mov;
 
         if ($fone_fixo || $fone_fixo == '') {
-            $ddd_fixo = $ddd_fone_fixo;
-            $telefone = new clsPessoaTelefone($individual->idpes, 1, $fone_fixo, $ddd_fixo);
-            $telefone->cadastra();
+            app(PhoneService::class)->save(
+                personId: $individual->idpes,
+                type: LegacyPhone::TYPE_LANDLINE,
+                ddd: $ddd_fone_fixo,
+                phone: $fone_fixo
+            );
         }
         if ($fone_mov || $fone_mov == '') {
-            $ddd_mov = $ddd_fone_mov;
-            $telefone = new clsPessoaTelefone($individual->idpes, 2, $fone_mov, $ddd_mov);
-            $telefone->cadastra();
+            app(PhoneService::class)->save(
+                personId: $individual->idpes,
+                type: LegacyPhone::TYPE_MOBILE,
+                ddd: $ddd_fone_mov,
+                phone: $fone_mov
+            );
         }
     }
 
