@@ -200,31 +200,31 @@ return new class extends clsCadastro
         ))->cadastra();
 
         app(PhoneService::class)->save(
-            idpes: $this->cod_pessoa_fj,
-            tipo: LegacyPhone::TYPE_LANDLINE,
+            personId: $this->cod_pessoa_fj,
+            type: LegacyPhone::TYPE_LANDLINE,
             ddd: $this->ddd_telefone_1,
-            fone: $this->telefone_1
+            phone: $this->telefone_1
         );
 
         app(PhoneService::class)->save(
-            idpes: $this->cod_pessoa_fj,
-            tipo: LegacyPhone::TYPE_MOBILE,
+            personId: $this->cod_pessoa_fj,
+            type: LegacyPhone::TYPE_MOBILE,
             ddd: $this->ddd_telefone_2,
-            fone: $this->telefone_2
+            phone: $this->telefone_2
         );
 
         app(PhoneService::class)->save(
-            idpes: $this->cod_pessoa_fj,
-            tipo: LegacyPhone::TYPE_MOBILE_ALT,
+            personId: $this->cod_pessoa_fj,
+            type: LegacyPhone::TYPE_MOBILE_ALT,
             ddd: $this->ddd_telefone_mov,
-            fone: $this->telefone_mov
+            phone: $this->telefone_mov
         );
 
         app(PhoneService::class)->save(
-            idpes: $this->cod_pessoa_fj,
-            tipo: LegacyPhone::TYPE_FAX,
+            personId: $this->cod_pessoa_fj,
+            type: LegacyPhone::TYPE_FAX,
             ddd: $this->ddd_telefone_fax,
-            fone: $this->telefone_fax
+            phone: $this->telefone_fax
         );
 
         $this->saveAddress(person: $this->cod_pessoa_fj);
@@ -333,31 +333,31 @@ return new class extends clsCadastro
         $objJuridica->edita();
 
         app(PhoneService::class)->save(
-            idpes: $this->cod_pessoa_fj,
-            tipo: LegacyPhone::TYPE_LANDLINE,
+            personId: $this->cod_pessoa_fj,
+            type: LegacyPhone::TYPE_LANDLINE,
             ddd: $this->ddd_telefone_1,
-            fone: $this->telefone_1
+            phone: $this->telefone_1
         );
 
         app(PhoneService::class)->save(
-            idpes: $this->cod_pessoa_fj,
-            tipo: LegacyPhone::TYPE_MOBILE,
+            personId: $this->cod_pessoa_fj,
+            type: LegacyPhone::TYPE_MOBILE,
             ddd: $this->ddd_telefone_2,
-            fone: $this->telefone_2
+            phone: $this->telefone_2
         );
 
         app(PhoneService::class)->save(
-            idpes: $this->cod_pessoa_fj,
-            tipo: LegacyPhone::TYPE_MOBILE_ALT,
+            personId: $this->cod_pessoa_fj,
+            type: LegacyPhone::TYPE_MOBILE_ALT,
             ddd: $this->ddd_telefone_mov,
-            fone: $this->telefone_mov
+            phone: $this->telefone_mov
         );
 
         app(PhoneService::class)->save(
-            idpes: $this->cod_pessoa_fj,
-            tipo: LegacyPhone::TYPE_FAX,
+            personId: $this->cod_pessoa_fj,
+            type: LegacyPhone::TYPE_FAX,
             ddd: $this->ddd_telefone_fax,
-            fone: $this->telefone_fax
+            phone: $this->telefone_fax
         );
 
         $this->saveAddress(person: $this->cod_pessoa_fj, optionalFields: true);

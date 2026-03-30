@@ -189,17 +189,17 @@ return new class extends clsCadastro
         $this->savePhoto($this->pessoa_logada);
 
         app(PhoneService::class)->save(
-            idpes: $this->pessoa_logada,
-            tipo: LegacyPhone::TYPE_LANDLINE,
+            personId: $this->pessoa_logada,
+            type: LegacyPhone::TYPE_LANDLINE,
             ddd: $this->ddd_telefone,
-            fone: $this->telefone
+            phone: $this->telefone
         );
 
         app(PhoneService::class)->save(
-            idpes: $this->pessoa_logada,
-            tipo: LegacyPhone::TYPE_MOBILE_ALT,
+            personId: $this->pessoa_logada,
+            type: LegacyPhone::TYPE_MOBILE_ALT,
             ddd: $this->ddd_celular,
-            fone: $this->celular
+            phone: $this->celular
         );
 
         $pessoa = new clsPessoa_($this->pessoa_logada);

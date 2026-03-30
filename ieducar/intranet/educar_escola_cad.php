@@ -1954,34 +1954,34 @@ return new class extends clsCadastro
         $phoneService->deleteAll($idpes);
 
         $phoneService->save(
-            idpes: $idpes,
-            tipo: LegacyPhone::TYPE_LANDLINE,
+            personId: $idpes,
+            type: LegacyPhone::TYPE_LANDLINE,
             ddd: $this->p_ddd_telefone_1,
-            fone: $this->p_telefone_1,
+            phone: $this->p_telefone_1,
             userId: $this->pessoa_logada
         );
 
         $phoneService->save(
-            idpes: $idpes,
-            tipo: LegacyPhone::TYPE_MOBILE,
+            personId: $idpes,
+            type: LegacyPhone::TYPE_MOBILE,
             ddd: $this->p_ddd_telefone_2,
-            fone: $this->p_telefone_2,
+            phone: $this->p_telefone_2,
             userId: $this->pessoa_logada
         );
 
         $phoneService->save(
-            idpes: $idpes,
-            tipo: LegacyPhone::TYPE_MOBILE_ALT,
+            personId: $idpes,
+            type: LegacyPhone::TYPE_MOBILE_ALT,
             ddd: $this->p_ddd_telefone_mov,
-            fone: $this->p_telefone_mov,
+            phone: $this->p_telefone_mov,
             userId: $this->pessoa_logada
         );
 
         $phoneService->save(
-            idpes: $idpes,
-            tipo: LegacyPhone::TYPE_FAX,
+            personId: $idpes,
+            type: LegacyPhone::TYPE_FAX,
             ddd: $this->p_ddd_telefone_fax,
-            fone: $this->p_telefone_fax,
+            phone: $this->p_telefone_fax,
             userId: $this->pessoa_logada
         );
     }

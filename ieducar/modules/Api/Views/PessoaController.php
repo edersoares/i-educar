@@ -615,18 +615,18 @@ class PessoaController extends ApiCoreController
 
         if ($fone_fixo || $fone_fixo == '') {
             app(PhoneService::class)->save(
-                idpes: $individual->idpes,
-                tipo: LegacyPhone::TYPE_LANDLINE,
+                personId: $individual->idpes,
+                type: LegacyPhone::TYPE_LANDLINE,
                 ddd: $ddd_fone_fixo,
-                fone: $fone_fixo
+                phone: $fone_fixo
             );
         }
         if ($fone_mov || $fone_mov == '') {
             app(PhoneService::class)->save(
-                idpes: $individual->idpes,
-                tipo: LegacyPhone::TYPE_MOBILE,
+                personId: $individual->idpes,
+                type: LegacyPhone::TYPE_MOBILE,
                 ddd: $ddd_fone_mov,
-                fone: $fone_mov
+                phone: $fone_mov
             );
         }
     }
