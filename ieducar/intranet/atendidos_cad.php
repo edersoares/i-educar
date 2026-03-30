@@ -671,9 +671,9 @@ return new class extends clsCadastro
             ->prepend(value: 'Selecione', key: '')
             ->toArray();
 
-        $raca = new clsCadastroFisicaRaca(ref_idpes: $this->cod_pessoa_fj);
-        $raca = $raca->detalhe();
-        $this->cod_raca = is_array(value: $raca) ? $raca['ref_cod_raca'] : $this->cor_raca;
+        $this->cod_raca = is_numeric($this->cod_pessoa_fj)
+            ? LegacyRace::query()->whereHas('individual', fn ($q) => $q->whereKey($this->cod_pessoa_fj))->value('cod_raca') ?? $this->cor_raca
+            : $this->cor_raca;
 
         $this->campoLista(nome: 'cor_raca', campo: 'Raça', valor: $race, default: $this->cod_raca, obrigatorio: $obrigarCamposCenso);
 
@@ -1416,13 +1416,10 @@ return new class extends clsCadastro
             return false;
         } // Quando não tiver cor/raça selecionado não faz update
 
-        $raca = new clsCadastroFisicaRaca(ref_idpes: $pessoaId, ref_cod_raca: $corRaca);
-
-        if ($raca->existe()) {
-            return $raca->edita();
+        $individual = LegacyIndividual::find($pessoaId, ['idpes']);
+        if ($individual) {
+            $individual->race()->sync([$corRaca]);
         }
-
-        return $raca->cadastra();
     }
 
     protected function createOrUpdateDocumentos($pessoaId)

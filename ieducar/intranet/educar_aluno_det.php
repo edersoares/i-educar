@@ -97,14 +97,7 @@ return new class extends clsDetalhe
             $obj_fisica = new clsFisica(idpes: $this->ref_idpes);
             $det_fisica = $obj_fisica->detalhe();
 
-            $obj_fisica_raca = new clsCadastroFisicaRaca;
-            $lst_fisica_raca = $obj_fisica_raca->lista(int_ref_idpes: $this->ref_idpes);
-
-            $nameRace = null;
-            if ($lst_fisica_raca) {
-                $det_fisica_raca = array_shift(array: $lst_fisica_raca);
-                $nameRace = LegacyRace::query()->whereKey(id: $det_fisica_raca['ref_cod_raca'])->value(column: 'nm_raca');
-            }
+            $nameRace = LegacyRace::query()->whereHas('individual', fn ($q) => $q->whereKey($this->ref_idpes))->value('nm_raca');
 
             $objFoto = new clsCadastroFisicaFoto(idpes: $this->ref_idpes);
             $detalheFoto = $objFoto->detalhe();
