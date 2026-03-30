@@ -17,6 +17,7 @@ use App\Services\UrlPresigner;
 use iEducar\Modules\Educacenso\Model\Nacionalidade;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\URL;
 
@@ -825,8 +826,8 @@ return new class extends clsDetalhe
             }
         }
 
-        $objMoradia = new clsModulesMoradiaAluno(ref_cod_aluno: $this->cod_aluno);
-        $reg = $objMoradia->detalhe();
+        $reg = DB::table('modules.moradia_aluno')->where('ref_cod_aluno', $this->cod_aluno)->first();
+        $reg = $reg ? (array) $reg : null;
 
         if ($reg) {
             $moradia = '';
