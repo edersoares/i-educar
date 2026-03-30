@@ -6,14 +6,13 @@ use App\Facades\Asset;
 use App\Models\EducacensoIndigenousPeople;
 use App\Models\LegacyIndividual;
 use App\Models\LegacyInstitution;
-use App\Models\LegacyPhone;
-use App\Services\PhoneService;
-use Illuminate\Support\Facades\Auth;
 use App\Models\LegacyIssuingBody;
+use App\Models\LegacyPhone;
 use App\Models\LegacyRace;
 use App\Models\LegacySchoolingDegree;
 use App\Models\LegacyUser;
 use App\Services\FileService;
+use App\Services\PhoneService;
 use App\Services\UrlPresigner;
 use iEducar\Modules\Addressing\LegacyAddressingFields;
 use iEducar\Modules\Educacenso\Model\Nacionalidade;
@@ -24,6 +23,7 @@ use iEducar\Modules\Educacenso\Validator\DifferentiatedLocationValidator;
 use iEducar\Modules\Educacenso\Validator\NameValidator;
 use iEducar\Modules\Educacenso\Validator\NisValidator;
 use iEducar\Support\View\SelectOptions;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 
 return new class extends clsCadastro

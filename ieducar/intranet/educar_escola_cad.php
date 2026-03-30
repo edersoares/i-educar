@@ -2,14 +2,14 @@
 
 use App\Models\City;
 use App\Models\EmployeeInep;
-use App\Models\LegacyPhone;
 use App\Models\Enums\SchoolCharacteristic;
-use App\Services\PhoneService;
 use App\Models\LegacyPerson;
+use App\Models\LegacyPhone;
 use App\Models\SchoolManager;
 use App\Models\SchoolSpace;
 use App\Rules\SchoolManagerAtLeastOneChief;
 use App\Rules\SchoolManagerUniqueIndividuals;
+use App\Services\PhoneService;
 use App\Services\SchoolManagerService;
 use iEducar\Modules\Addressing\LegacyAddressingFields;
 use iEducar\Modules\Educacenso\Model\AbastecimentoAgua;

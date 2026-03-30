@@ -3,8 +3,8 @@
 use App\Models\LegacyIndividual;
 use App\Models\LegacyInstitution;
 use App\Models\LegacyPhone;
-use App\Services\PhoneService;
 use App\Models\PersonHasPlace;
+use App\Services\PhoneService;
 use iEducar\Modules\Addressing\LegacyAddressingFields;
 use iEducar\Modules\Educacenso\Model\Nacionalidade;
 use iEducar\Modules\Educacenso\Validator\BirthDateValidator;

@@ -4,6 +4,7 @@ use App\Models\Employee;
 use App\Models\LegacyInstitution;
 use App\Models\LegacySchoolClass;
 use App\Models\LegacySchoolClassTeacher;
+use App\Models\LegacySchoolClassTeacherDiscipline;
 use App\Services\iDiarioService;
 use Carbon\Carbon;
 use iEducar\Modules\Educacenso\Model\ModalidadeCurso;
@@ -701,24 +702,24 @@ return new class extends clsCadastro
     private function gravaComponentesProfessorTurma($professorTurmaId, $componentes)
     {
         foreach ($componentes as $componente) {
-            \App\Models\LegacySchoolClassTeacherDiscipline::query()->updateOrCreate([
+            LegacySchoolClassTeacherDiscipline::query()->updateOrCreate([
                 'professor_turma_id' => $professorTurmaId,
                 'componente_curricular_id' => $componente,
             ]);
         }
 
-        \App\Models\LegacySchoolClassTeacherDiscipline::query()
+        LegacySchoolClassTeacherDiscipline::query()
             ->where('professor_turma_id', $professorTurmaId)
             ->whereNotIn('componente_curricular_id', $componentes ?? [])
             ->get()
-            ->each(fn (\App\Models\LegacySchoolClassTeacherDiscipline $model) => $model->delete());
+            ->each(fn (LegacySchoolClassTeacherDiscipline $model) => $model->delete());
     }
 
     private function excluiComponentesProfessorTurma($professorTurmaId)
     {
-        \App\Models\LegacySchoolClassTeacherDiscipline::query()
+        LegacySchoolClassTeacherDiscipline::query()
             ->where('professor_turma_id', $professorTurmaId)
             ->get()
-            ->each(fn (\App\Models\LegacySchoolClassTeacherDiscipline $model) => $model->delete());
+            ->each(fn (LegacySchoolClassTeacherDiscipline $model) => $model->delete());
     }
 };
