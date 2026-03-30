@@ -199,28 +199,28 @@ return new class extends clsCadastro
             capital_social: $this->capital_social
         ))->cadastra();
 
-        app(PhoneService::class)->salvar(
+        app(PhoneService::class)->save(
             idpes: $this->cod_pessoa_fj,
             tipo: LegacyPhone::TYPE_LANDLINE,
             ddd: $this->ddd_telefone_1,
             fone: $this->telefone_1
         );
 
-        app(PhoneService::class)->salvar(
+        app(PhoneService::class)->save(
             idpes: $this->cod_pessoa_fj,
             tipo: LegacyPhone::TYPE_MOBILE,
             ddd: $this->ddd_telefone_2,
             fone: $this->telefone_2
         );
 
-        app(PhoneService::class)->salvar(
+        app(PhoneService::class)->save(
             idpes: $this->cod_pessoa_fj,
             tipo: LegacyPhone::TYPE_MOBILE_ALT,
             ddd: $this->ddd_telefone_mov,
             fone: $this->telefone_mov
         );
 
-        app(PhoneService::class)->salvar(
+        app(PhoneService::class)->save(
             idpes: $this->cod_pessoa_fj,
             tipo: LegacyPhone::TYPE_FAX,
             ddd: $this->ddd_telefone_fax,
@@ -332,28 +332,28 @@ return new class extends clsCadastro
         );
         $objJuridica->edita();
 
-        app(PhoneService::class)->salvar(
+        app(PhoneService::class)->save(
             idpes: $this->cod_pessoa_fj,
             tipo: LegacyPhone::TYPE_LANDLINE,
             ddd: $this->ddd_telefone_1,
             fone: $this->telefone_1
         );
 
-        app(PhoneService::class)->salvar(
+        app(PhoneService::class)->save(
             idpes: $this->cod_pessoa_fj,
             tipo: LegacyPhone::TYPE_MOBILE,
             ddd: $this->ddd_telefone_2,
             fone: $this->telefone_2
         );
 
-        app(PhoneService::class)->salvar(
+        app(PhoneService::class)->save(
             idpes: $this->cod_pessoa_fj,
             tipo: LegacyPhone::TYPE_MOBILE_ALT,
             ddd: $this->ddd_telefone_mov,
             fone: $this->telefone_mov
         );
 
-        app(PhoneService::class)->salvar(
+        app(PhoneService::class)->save(
             idpes: $this->cod_pessoa_fj,
             tipo: LegacyPhone::TYPE_FAX,
             ddd: $this->ddd_telefone_fax,

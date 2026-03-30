@@ -7,14 +7,14 @@ use Illuminate\Support\Facades\Auth;
 
 class PhoneService
 {
-    public function salvar(int $idpes, int $tipo, ?string $ddd, ?string $fone, ?int $userId = null): void
+    public function save(int $idpes, int $tipo, ?string $ddd, ?string $fone, ?int $userId = null): void
     {
-        $ddd = apenasDigitos($ddd);
-        $fone = apenasDigitos($fone);
+        $ddd = onlyDigits($ddd);
+        $fone = onlyDigits($fone);
         $userId = $userId ?? Auth::id();
 
         if (empty($ddd) && empty($fone)) {
-            $this->deletar($idpes, $tipo);
+            $this->delete($idpes, $tipo);
 
             return;
         }
@@ -26,7 +26,7 @@ class PhoneService
         $this->upsert($idpes, $tipo, $ddd, $fone, $userId);
     }
 
-    public function deletar(int $idpes, int $tipo): void
+    public function delete(int $idpes, int $tipo): void
     {
         LegacyPhone::query()
             ->where('idpes', $idpes)
@@ -34,7 +34,7 @@ class PhoneService
             ->delete();
     }
 
-    public function deletarTodos(int $idpes): void
+    public function deleteAll(int $idpes): void
     {
         LegacyPhone::query()
             ->where('idpes', $idpes)

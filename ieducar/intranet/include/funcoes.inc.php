@@ -99,7 +99,7 @@ function int2CEP($int)
     }
 }
 
-function apenasDigitos($valor)
+function onlyDigits($valor)
 {
     return preg_replace('/\D/', '', $valor ?? '');
 }

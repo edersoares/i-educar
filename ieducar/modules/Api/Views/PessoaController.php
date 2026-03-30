@@ -614,7 +614,7 @@ class PessoaController extends ApiCoreController
         $fone_mov = $this->getRequest()->telefone_mov;
 
         if ($fone_fixo || $fone_fixo == '') {
-            app(PhoneService::class)->salvar(
+            app(PhoneService::class)->save(
                 idpes: $individual->idpes,
                 tipo: LegacyPhone::TYPE_LANDLINE,
                 ddd: $ddd_fone_fixo,
@@ -622,7 +622,7 @@ class PessoaController extends ApiCoreController
             );
         }
         if ($fone_mov || $fone_mov == '') {
-            app(PhoneService::class)->salvar(
+            app(PhoneService::class)->save(
                 idpes: $individual->idpes,
                 tipo: LegacyPhone::TYPE_MOBILE,
                 ddd: $ddd_fone_mov,

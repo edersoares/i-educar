@@ -188,14 +188,14 @@ return new class extends clsCadastro
 
         $this->savePhoto($this->pessoa_logada);
 
-        app(PhoneService::class)->salvar(
+        app(PhoneService::class)->save(
             idpes: $this->pessoa_logada,
             tipo: LegacyPhone::TYPE_LANDLINE,
             ddd: $this->ddd_telefone,
             fone: $this->telefone
         );
 
-        app(PhoneService::class)->salvar(
+        app(PhoneService::class)->save(
             idpes: $this->pessoa_logada,
             tipo: LegacyPhone::TYPE_MOBILE_ALT,
             ddd: $this->ddd_celular,

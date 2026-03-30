@@ -1951,9 +1951,9 @@ return new class extends clsCadastro
     private function processaTelefones($idpes)
     {
         $phoneService = app(PhoneService::class);
-        $phoneService->deletarTodos($idpes);
+        $phoneService->deleteAll($idpes);
 
-        $phoneService->salvar(
+        $phoneService->save(
             idpes: $idpes,
             tipo: LegacyPhone::TYPE_LANDLINE,
             ddd: $this->p_ddd_telefone_1,
@@ -1961,7 +1961,7 @@ return new class extends clsCadastro
             userId: $this->pessoa_logada
         );
 
-        $phoneService->salvar(
+        $phoneService->save(
             idpes: $idpes,
             tipo: LegacyPhone::TYPE_MOBILE,
             ddd: $this->p_ddd_telefone_2,
@@ -1969,7 +1969,7 @@ return new class extends clsCadastro
             userId: $this->pessoa_logada
         );
 
-        $phoneService->salvar(
+        $phoneService->save(
             idpes: $idpes,
             tipo: LegacyPhone::TYPE_MOBILE_ALT,
             ddd: $this->p_ddd_telefone_mov,
@@ -1977,7 +1977,7 @@ return new class extends clsCadastro
             userId: $this->pessoa_logada
         );
 
-        $phoneService->salvar(
+        $phoneService->save(
             idpes: $idpes,
             tipo: LegacyPhone::TYPE_FAX,
             ddd: $this->p_ddd_telefone_fax,

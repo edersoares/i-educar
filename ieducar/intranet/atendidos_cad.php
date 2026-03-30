@@ -1515,28 +1515,28 @@ return new class extends clsCadastro
 
     protected function createOrUpdateTelefones($pessoaId)
     {
-        app(PhoneService::class)->salvar(
+        app(PhoneService::class)->save(
             idpes: $pessoaId,
             tipo: LegacyPhone::TYPE_LANDLINE,
             ddd: $this->ddd_telefone_1,
             fone: $this->telefone_1
         );
 
-        app(PhoneService::class)->salvar(
+        app(PhoneService::class)->save(
             idpes: $pessoaId,
             tipo: LegacyPhone::TYPE_MOBILE,
             ddd: $this->ddd_telefone_2,
             fone: $this->telefone_2
         );
 
-        app(PhoneService::class)->salvar(
+        app(PhoneService::class)->save(
             idpes: $pessoaId,
             tipo: LegacyPhone::TYPE_MOBILE_ALT,
             ddd: $this->ddd_telefone_mov,
             fone: $this->telefone_mov
         );
 
-        app(PhoneService::class)->salvar(
+        app(PhoneService::class)->save(
             idpes: $pessoaId,
             tipo: LegacyPhone::TYPE_FAX,
             ddd: $this->ddd_telefone_fax,
