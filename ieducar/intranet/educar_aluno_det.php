@@ -5,7 +5,7 @@ use App\Models\Country;
 use App\Models\DeficiencyType;
 use App\Models\LegacyBenefit;
 use App\Models\LegacyMaritalStatus;
-use App\Models\LegacyPerson;
+use App\Models\LegacyDeficiency;
 use App\Models\LegacyProject;
 use App\Models\LegacyRace;
 use App\Models\PersonHasPlace;
@@ -193,8 +193,10 @@ return new class extends clsDetalhe
             $registro['fone_mov'] = $det_pessoa_fj['fone_mov'] ?? null;
 
             $deficiencias = is_numeric($this->ref_idpes)
-                ? LegacyPerson::find($this->ref_idpes)?->deficiencies
-                : null;
+                ? LegacyDeficiency::query()
+                    ->whereHas('individuals', fn ($q) => $q->whereKey($this->ref_idpes))
+                    ->get()
+                : collect();
 
             $obj_beneficios_lista = LegacyBenefit::query()
                 ->whereHas(relation: 'students', callback: fn ($q) => $q->where('cod_aluno', $this->cod_aluno))
