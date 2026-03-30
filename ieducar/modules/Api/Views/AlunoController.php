@@ -1238,7 +1238,7 @@ class AlunoController extends ApiCoreController
 
             $moradia = DB::table('modules.moradia_aluno')->where('ref_cod_aluno', $id)->first();
             if ($moradia) {
-                $aluno = Portabilis_Array_Utils::merge((array) $moradia, $aluno);
+                $aluno = array_merge($aluno, (array) $moradia);
             }
 
             // TODO remover no futuro #transport-package
