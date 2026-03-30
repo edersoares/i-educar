@@ -8,6 +8,7 @@ use App\Models\LegacyDeficiency;
 use App\Models\LegacyMaritalStatus;
 use App\Models\LegacyProject;
 use App\Models\LegacyRace;
+use App\Models\LegacyStudentMedicalRecord;
 use App\Models\PersonHasPlace;
 use App\Models\Religion;
 use App\Models\TransportationProvider;
@@ -668,8 +669,7 @@ return new class extends clsDetalhe
             }
         }
 
-        $objFichaMedica = new clsModulesFichaMedicaAluno(ref_cod_aluno: $this->cod_aluno);
-        $reg = $objFichaMedica->detalhe();
+        $reg = LegacyStudentMedicalRecord::whereKey($this->cod_aluno)->first()?->toArray();
 
         if ($reg) {
             $this->addHtml('<span id="fmedica"></span>');

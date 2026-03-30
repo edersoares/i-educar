@@ -5,6 +5,7 @@ use App\Models\Individual;
 use App\Models\LegacyDeficiency;
 use App\Models\LegacyIndividual;
 use App\Models\LegacyInstitution;
+use App\Models\LegacyStudentMedicalRecord;
 use App\Models\LegacyRegistration;
 use App\Models\LegacySchoolHistory;
 use App\Models\LegacyStudentBenefit;
@@ -424,57 +425,44 @@ class AlunoController extends ApiCoreController
 
     protected function createOrUpdateFichaMedica($id)
     {
-        $obj = new clsModulesFichaMedicaAluno;
+        if (!is_numeric($id)) {
+            return;
+        }
 
-        $obj->ref_cod_aluno = $id;
-        $obj->altura = $this->getRequest()->altura;
-        $obj->peso = $this->getRequest()->peso;
-        $obj->grupo_sanguineo = $this->getRequest()->grupo_sanguineo;
-        $obj->grupo_sanguineo = trim($obj->grupo_sanguineo);
-        $obj->fator_rh = $this->getRequest()->fator_rh;
-        $obj->alergia_medicamento = ($this->getRequest()->alergia_medicamento == 'on' ? 'S' : 'N');
-        $obj->desc_alergia_medicamento = $this->getRequest()->desc_alergia_medicamento;
-        $obj->alergia_alimento = ($this->getRequest()->alergia_alimento == 'on' ? 'S' : 'N');
-        $obj->desc_alergia_alimento = $this->getRequest()->desc_alergia_alimento;
-        $obj->doenca_congenita = ($this->getRequest()->doenca_congenita == 'on' ? 'S' : 'N');
-        $obj->desc_doenca_congenita = $this->getRequest()->desc_doenca_congenita;
-        $obj->fumante = ($this->getRequest()->fumante == 'on' ? 'S' : 'N');
-        $obj->doenca_caxumba = ($this->getRequest()->doenca_caxumba == 'on' ? 'S' : 'N');
-        $obj->doenca_sarampo = ($this->getRequest()->doenca_sarampo == 'on' ? 'S' : 'N');
-        $obj->doenca_rubeola = ($this->getRequest()->doenca_rubeola == 'on' ? 'S' : 'N');
-        $obj->doenca_catapora = ($this->getRequest()->doenca_catapora == 'on' ? 'S' : 'N');
-        $obj->doenca_escarlatina = ($this->getRequest()->doenca_escarlatina == 'on' ? 'S' : 'N');
-        $obj->doenca_coqueluche = ($this->getRequest()->doenca_coqueluche == 'on' ? 'S' : 'N');
-        $obj->doenca_outras = $this->getRequest()->doenca_outras;
-        $obj->epiletico = ($this->getRequest()->epiletico == 'on' ? 'S' : 'N');
-        $obj->epiletico_tratamento = ($this->getRequest()->epiletico_tratamento == 'on' ? 'S' : 'N');
-        $obj->hemofilico = ($this->getRequest()->hemofilico == 'on' ? 'S' : 'N');
-        $obj->hipertenso = ($this->getRequest()->hipertenso == 'on' ? 'S' : 'N');
-        $obj->asmatico = ($this->getRequest()->asmatico == 'on' ? 'S' : 'N');
-        $obj->diabetico = ($this->getRequest()->diabetico == 'on' ? 'S' : 'N');
-        $obj->insulina = ($this->getRequest()->insulina == 'on' ? 'S' : 'N');
-        $obj->tratamento_medico = ($this->getRequest()->tratamento_medico == 'on' ? 'S' : 'N');
-        $obj->desc_tratamento_medico = $this->getRequest()->desc_tratamento_medico;
-        $obj->medicacao_especifica = ($this->getRequest()->medicacao_especifica == 'on' ? 'S' : 'N');
-        $obj->desc_medicacao_especifica = $this->getRequest()->desc_medicacao_especifica;
-        $obj->acomp_medico_psicologico = ($this->getRequest()->acomp_medico_psicologico == 'on' ? 'S' : 'N');
-        $obj->desc_acomp_medico_psicologico = $this->getRequest()->desc_acomp_medico_psicologico;
-        $obj->acomp_medico_psicologico = ($this->getRequest()->acomp_medico_psicologico == 'on' ? 'S' : 'N');
-        $obj->desc_acomp_medico_psicologico = $this->getRequest()->desc_acomp_medico_psicologico;
-        $obj->restricao_atividade_fisica = ($this->getRequest()->restricao_atividade_fisica == 'on' ? 'S' : 'N');
-        $obj->desc_restricao_atividade_fisica = $this->getRequest()->desc_restricao_atividade_fisica;
-        $obj->fratura_trauma = ($this->getRequest()->fratura_trauma == 'on' ? 'S' : 'N');
-        $obj->desc_fratura_trauma = $this->getRequest()->desc_fratura_trauma;
-        $obj->plano_saude = ($this->getRequest()->plano_saude == 'on' ? 'S' : 'N');
-        $obj->desc_plano_saude = $this->getRequest()->desc_plano_saude;
-        $obj->responsavel = $this->getRequest()->responsavel;
-        $obj->responsavel_parentesco = $this->getRequest()->responsavel_parentesco;
-        $obj->responsavel_parentesco_telefone = $this->getRequest()->responsavel_parentesco_telefone;
-        $obj->responsavel_parentesco_celular = $this->getRequest()->responsavel_parentesco_celular;
-        $obj->aceita_hospital_proximo = ($this->getRequest()->aceita_hospital_proximo == 'on' ? 'S' : 'N');
-        $obj->desc_aceita_hospital_proximo = $this->getRequest()->desc_aceita_hospital_proximo;
+        $boolFields = [
+            'alergia_medicamento', 'alergia_alimento', 'doenca_congenita', 'fumante',
+            'doenca_caxumba', 'doenca_sarampo', 'doenca_rubeola', 'doenca_catapora',
+            'doenca_escarlatina', 'doenca_coqueluche', 'epiletico', 'epiletico_tratamento',
+            'hemofilico', 'hipertenso', 'asmatico', 'diabetico', 'insulina',
+            'tratamento_medico', 'medicacao_especifica', 'acomp_medico_psicologico',
+            'restricao_atividade_fisica', 'fratura_trauma', 'plano_saude', 'aceita_hospital_proximo',
+        ];
 
-        return $obj->existe() ? $obj->edita() : $obj->cadastra();
+        $data = [
+            'grupo_sanguineo' => trim($this->getRequest()->grupo_sanguineo),
+            'fator_rh' => $this->getRequest()->fator_rh,
+            'desc_alergia_medicamento' => $this->getRequest()->desc_alergia_medicamento,
+            'desc_alergia_alimento' => $this->getRequest()->desc_alergia_alimento,
+            'desc_doenca_congenita' => $this->getRequest()->desc_doenca_congenita,
+            'doenca_outras' => $this->getRequest()->doenca_outras,
+            'desc_tratamento_medico' => $this->getRequest()->desc_tratamento_medico,
+            'desc_medicacao_especifica' => $this->getRequest()->desc_medicacao_especifica,
+            'desc_acomp_medico_psicologico' => $this->getRequest()->desc_acomp_medico_psicologico,
+            'desc_restricao_atividade_fisica' => $this->getRequest()->desc_restricao_atividade_fisica,
+            'desc_fratura_trauma' => $this->getRequest()->desc_fratura_trauma,
+            'desc_plano_saude' => $this->getRequest()->desc_plano_saude,
+            'responsavel' => $this->getRequest()->responsavel,
+            'responsavel_parentesco' => $this->getRequest()->responsavel_parentesco,
+            'responsavel_parentesco_telefone' => $this->getRequest()->responsavel_parentesco_telefone,
+            'responsavel_parentesco_celular' => $this->getRequest()->responsavel_parentesco_celular,
+            'desc_aceita_hospital_proximo' => $this->getRequest()->desc_aceita_hospital_proximo,
+        ];
+
+        foreach ($boolFields as $field) {
+            $data[$field] = ($this->getRequest()->{$field} == 'on') ? 'S' : 'N';
+        }
+
+        LegacyStudentMedicalRecord::updateOrCreate(['ref_cod_aluno' => $id], $data);
     }
 
     protected function createOrUpdateMoradia($id)
@@ -1224,16 +1212,9 @@ class AlunoController extends ApiCoreController
             $aluno['destroyed_by'] = is_null($entity) ? null : $entity->get('matricula');
             $aluno['destroyed_at'] = Portabilis_Date_Utils::pgSQLToBr($aluno['destroyed_at']);
 
-            $objFichaMedica = new clsModulesFichaMedicaAluno($id);
-
-            if ($objFichaMedica->existe()) {
-                $objFichaMedica = $objFichaMedica->detalhe();
-
-                foreach ($objFichaMedica as $chave => $value) {
-                    $objFichaMedica[$chave] = Portabilis_String_Utils::toUtf8($value);
-                }
-
-                $aluno = Portabilis_Array_Utils::merge($objFichaMedica, $aluno);
+            $fichaMedica = LegacyStudentMedicalRecord::whereKey($id)->first()?->toArray();
+            if ($fichaMedica) {
+                $aluno = array_merge($aluno, $fichaMedica);
             }
 
             $objMoradia = new clsModulesMoradiaAluno($id);
