@@ -8,6 +8,7 @@ use App\Models\LegacyIndividual;
 use App\Models\LegacyInstitution;
 use App\Models\LegacyIssuingBody;
 use App\Models\LegacyRace;
+use App\Models\LegacySchoolingDegree;
 use App\Models\LegacyUser;
 use App\Services\FileService;
 use App\Services\UrlPresigner;
@@ -788,15 +789,7 @@ return new class extends clsCadastro
         $this->campoRotulo(nome: 'renda', campo: '<b>Trabalho e renda</b>', valor: '', duplo: '', descricao: 'Informações de trabalho e renda da pessoa');
         $this->campoTexto(nome: 'ocupacao', campo: 'Ocupação', valor: $this->ocupacao, tamanhovisivel: '50', tamanhomaximo: '255');
 
-        $opcoes = ['' => 'Selecione'];
-        $objTemp = new clsCadastroEscolaridade;
-        $lista = $objTemp->lista();
-
-        if (is_array($lista) && count($lista)) {
-            foreach ($lista as $registro) {
-                $opcoes[$registro['idesco']] = $registro['descricao'];
-            }
-        }
+        $opcoes = LegacySchoolingDegree::query()->orderBy('descricao')->pluck('descricao', 'idesco')->prepend('Selecione', '')->toArray();
 
         $this->campoLista(
             nome: 'idesco',
