@@ -192,7 +192,9 @@ return new class extends clsDetalhe
             $registro['ddd_mov'] = $det_pessoa_fj['ddd_mov'] ?? null;
             $registro['fone_mov'] = $det_pessoa_fj['fone_mov'] ?? null;
 
-            $deficiencias = LegacyPerson::find($this->ref_idpes)?->deficiencies;
+            $deficiencias = is_numeric($this->ref_idpes)
+                ? LegacyPerson::find($this->ref_idpes)?->deficiencies
+                : null;
 
             $obj_beneficios_lista = LegacyBenefit::query()
                 ->whereHas(relation: 'students', callback: fn ($q) => $q->where('cod_aluno', $this->cod_aluno))
