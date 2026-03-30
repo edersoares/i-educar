@@ -41,6 +41,7 @@ use iEducar\Modules\Educacenso\Validator\School\HasDifferentStepsOfChildEducatio
 use iEducar\Modules\Educacenso\Validator\SchoolManagers;
 use iEducar\Modules\Educacenso\Validator\Telefone;
 use iEducar\Modules\ValueObjects\SchoolManagerValueObject;
+use iEducar\Support\Exceptions\Exception;
 use iEducar\Support\View\SelectOptions;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\RedirectResponse;
@@ -1750,7 +1751,7 @@ return new class extends clsCadastro
         $pessoaJuridica = (new clsJuridica((int) $this->pessoaj_id_oculto))->detalhe();
 
         if ($pessoaJuridica === false) {
-            throw new \iEducar\Support\Exceptions\Exception('Pessoa jurídica não encontrada');
+            throw new Exception('Pessoa jurídica não encontrada');
         }
 
         $this->bloquear_lancamento_diario_anos_letivos_encerrados = is_null($this->bloquear_lancamento_diario_anos_letivos_encerrados) ? 0 : 1;

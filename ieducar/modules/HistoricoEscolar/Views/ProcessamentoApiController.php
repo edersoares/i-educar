@@ -116,7 +116,7 @@ class ProcessamentoApiController extends Core_Controller_Page_EditController
     protected function requiresLogin($raiseExceptionOnEmpty)
     {
         return $this->validatesPresenceOf(
-            \Illuminate\Support\Facades\Auth::id(),
+            Auth::id(),
             '',
             $raiseExceptionOnEmpty,
             'Usuário deve estar logado'
@@ -1156,7 +1156,7 @@ class ProcessamentoApiController extends Core_Controller_Page_EditController
                 $this->service = new Avaliacao_Service_Boletim(
                     [
                         'matricula' => $matriculaId,
-                        'usuario' => \Illuminate\Support\Facades\Auth::id(),
+                        'usuario' => Auth::id(),
                         'ignorarDispensasParciais' => true,
                     ]
                 );

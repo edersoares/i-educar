@@ -1,5 +1,7 @@
 <?php
 
+use Illuminate\Support\Facades\Auth;
+
 class clsPessoaTelefone
 {
     public $idpes;
@@ -26,8 +28,8 @@ class clsPessoaTelefone
         $this->ddd = $str_ddd;
         $this->fone = $str_fone;
         $this->tipo = $int_tipo;
-        $this->idpes_cad = $idpes_cad ? $idpes_cad : \Illuminate\Support\Facades\Auth::id();
-        $this->idpes_rev = $idpes_rev ? $idpes_rev : \Illuminate\Support\Facades\Auth::id();
+        $this->idpes_cad = $idpes_cad ? $idpes_cad : Auth::id();
+        $this->idpes_rev = $idpes_rev ? $idpes_rev : Auth::id();
     }
 
     public function cadastra()

@@ -32,7 +32,7 @@ class ComponentesSerieController extends ApiCoreController
 
         try {
             $valido = $this->validaAtualizacao($serieId, $updateInfo);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return ['msgErro' => $e->getMessage()];
         }
 
@@ -120,7 +120,7 @@ class ComponentesSerieController extends ApiCoreController
         if ($erros) {
             $errosDisplay = implode("\n", $erros);
 
-            throw new \Exception($errosDisplay);
+            throw new Exception($errosDisplay);
         }
 
         return true;
@@ -440,7 +440,7 @@ SQL;
 
         try {
             $valido = $this->validaAtualizacao($serieId, $componentes);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return ['msgErro' => $e->getMessage()];
         }
 

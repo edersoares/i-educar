@@ -298,7 +298,7 @@ return new class extends clsCadastro
                 try {
                     (new Avaliacao_Model_NotaComponenteMediaDataMapper)
                         ->updateSituation(notaAlunoId: $notaAlunoId, situacao: App_Model_MatriculaSituacao::TRANSFERIDO);
-                } catch (\Throwable) {
+                } catch (Throwable) {
                     DB::rollback();
                 }
             }
