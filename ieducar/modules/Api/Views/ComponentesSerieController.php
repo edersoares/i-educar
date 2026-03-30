@@ -4,11 +4,11 @@ use App\Models\LegacyDiscipline;
 use App\Models\LegacyDisciplineAcademicYear;
 use App\Models\LegacyDisciplineExemption;
 use App\Models\LegacyGrade;
-use Illuminate\Support\Facades\DB;
 use App\Models\LegacySchoolAcademicYear;
 use App\Models\LegacySchoolGradeDiscipline;
 use App\Services\CheckPostedDataService;
 use App\Services\iDiarioService;
+use Illuminate\Support\Facades\DB;
 
 class ComponentesSerieController extends ApiCoreController
 {
