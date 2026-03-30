@@ -685,15 +685,17 @@ return new class extends clsCadastro
             return false;
         }
 
-        $sql = 'SELECT id FROM modules.professor_turma WHERE ano = ? AND turma_id = ? AND instituicao_id = ? AND servidor_id = ?';
-        $params = [$ano, $turmaId, $instituicaoId, $servidorId];
+        $query = LegacySchoolClassTeacher::query()
+            ->where('ano', $ano)
+            ->where('turma_id', $turmaId)
+            ->where('instituicao_id', $instituicaoId)
+            ->where('servidor_id', $servidorId);
 
         if (is_numeric($excluirId)) {
-            $sql .= ' AND id <> ?';
-            $params[] = $excluirId;
+            $query->where('id', '<>', $excluirId);
         }
 
-        return DB::selectOne($sql, $params)?->id;
+        return $query->value('id');
     }
 
     private function gravaComponentesProfessorTurma($professorTurmaId, $componentes)
