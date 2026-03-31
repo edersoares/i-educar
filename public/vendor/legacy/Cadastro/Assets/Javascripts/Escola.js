@@ -110,9 +110,14 @@ function validaCursos() {
     var temCurso = selectCurso.value && selectCurso.value !== '';
     var temAnos = selectAnos && selectAnos.selectedOptions.length > 0;
 
-    // Se selecionou curso mas não selecionou anos, bloqueia
+    // Se preencheu um mas não o outro, bloqueia
     if (temCurso && !temAnos) {
       alert('Preencha os anos letivos do curso "' + selectCurso.options[selectCurso.selectedIndex].text + '".');
+      return false;
+    }
+
+    if (!temCurso && temAnos) {
+      alert('Selecione o curso na linha ' + (i + 1) + ' ou remova os anos letivos selecionados.');
       return false;
     }
   }
