@@ -114,23 +114,23 @@ class SchoolHistoryService
 
     private function dadosMatricula(int $registrationId): array
     {
-        return (array) DB::selectOne("
+        return (array) DB::selectOne('
             SELECT m.ref_cod_aluno, nm_serie AS nome_serie, s.cod_serie, m.ano,
                    m.ref_ref_cod_escola, c.ref_cod_instituicao, c.nm_curso AS nome_curso, s.carga_horaria
             FROM pmieducar.matricula m
             INNER JOIN pmieducar.serie s ON m.ref_ref_cod_serie = s.cod_serie
             INNER JOIN pmieducar.curso c ON m.ref_cod_curso = c.cod_curso
             WHERE m.cod_matricula = ?
-        ", [$registrationId]);
+        ', [$registrationId]);
     }
 
     private function dadosEscola(int $schoolId): array
     {
-        return (array) DB::selectOne("
+        return (array) DB::selectOne('
             SELECT nome, municipio AS cidade, uf_municipio AS uf
             FROM relatorio.view_dados_escola
             WHERE cod_escola = ?
-        ", [$schoolId]);
+        ', [$schoolId]);
     }
 
     private function getDisciplineNames(int $gradeId, int $schoolId): array

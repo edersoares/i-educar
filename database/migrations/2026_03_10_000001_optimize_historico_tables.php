@@ -52,11 +52,11 @@ return new class extends Migration
     public function down(): void
     {
         // Recriar FK duplicada
-        DB::statement("
+        DB::statement('
             ALTER TABLE pmieducar.historico_escolar
             ADD CONSTRAINT historico_escolar_ref_cod_escola_fkey1
             FOREIGN KEY (ref_cod_escola) REFERENCES pmieducar.escola(cod_escola)
-        ");
+        ');
 
         // Recriar constraint UNIQUE invertida
         DB::statement('
