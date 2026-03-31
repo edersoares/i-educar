@@ -963,7 +963,6 @@ $j(document).ready(function() {
 
         var select = document.createElement('select');
         select.name = 'curso_anos_letivos[' + idx + '][]';
-        select.id = 'curso_anos_letivos_select_' + idx;
         select.multiple = true;
         select.className = 'curso-anos-letivos-select';
 
@@ -1008,6 +1007,17 @@ $j(document).ready(function() {
         }
     });
 
+    // Re-indexa os names dos multi-selects de anos letivos conforme posição no DOM
+    function reindexAnosLetivos() {
+        var rows = document.querySelectorAll('#cursos tr[name="tr_cursos[]"]');
+        rows.forEach(function(row, idx) {
+            var select = row.querySelector('select.curso-anos-letivos-select');
+            if (select) {
+                select.name = 'curso_anos_letivos[' + idx + '][]';
+            }
+        });
+    }
+
     $j('input[id^="curso_anos_letivos"]').each(function() {
         initAnosLetivosSelect(this);
     });
@@ -1028,6 +1038,13 @@ $j(document).ready(function() {
             input.value = '';
             initAnosLetivosSelect(input);
         }
+
+        reindexAnosLetivos();
+    });
+
+    // Observa cliques de excluir para re-indexar após remoção de linha
+    $j(document).on('click', '#cursos a[id^="link_remove"]', function() {
+        setTimeout(reindexAnosLetivos, 50);
     });
 });
 

@@ -1704,7 +1704,7 @@ return new class extends clsCadastro
         $autorizacoes = is_array($this->curso_autorizacao) ? $this->curso_autorizacao : [];
         $anosLetivos = $_POST['curso_anos_letivos'] ?? [];
 
-        // Monta array do formulário (filtra vazios e duplicados)
+        // Monta array do formulário (filtra vazios, incompletos e duplicados)
         $cursosForm = [];
         foreach ($cursos as $key => $cursoId) {
             if (!is_numeric($cursoId) || isset($cursosForm[$cursoId])) {
@@ -1714,6 +1714,11 @@ return new class extends clsCadastro
             $anos = is_array($anosLetivos[$key] ?? null)
                 ? array_map('intval', array_filter($anosLetivos[$key]))
                 : [];
+
+            // Pula linhas sem anos letivos (obrigatório)
+            if (empty($anos)) {
+                continue;
+            }
 
             $cursosForm[(int) $cursoId] = [
                 'autorizacao' => $autorizacoes[$key] ?? '',
