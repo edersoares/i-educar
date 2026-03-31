@@ -1712,8 +1712,9 @@ return new class extends clsCadastro
             }
 
             $anos = is_array($anosLetivos[$key] ?? null)
-                ? array_map('intval', array_filter($anosLetivos[$key]))
+                ? array_values(array_map('intval', array_filter($anosLetivos[$key])))
                 : [];
+            sort($anos);
 
             // Pula linhas sem anos letivos (obrigatório)
             if (empty($anos)) {
@@ -1721,7 +1722,7 @@ return new class extends clsCadastro
             }
 
             $cursosForm[(int) $cursoId] = [
-                'autorizacao' => $autorizacoes[$key] ?? '',
+                'autorizacao' => trim($autorizacoes[$key] ?? ''),
                 'anos_letivos' => $anos,
             ];
         }
@@ -1775,9 +1776,11 @@ return new class extends clsCadastro
 
         $cursosDb = [];
         foreach ($registros as $reg) {
+            $anosDb = array_map('intval', json_decode($reg['anos_letivos']) ?: []);
+            sort($anosDb);
             $cursosDb[(int) $reg['ref_cod_curso']] = [
-                'autorizacao' => $reg['autorizacao'] ?? '',
-                'anos_letivos' => array_map('intval', json_decode($reg['anos_letivos']) ?: []),
+                'autorizacao' => trim($reg['autorizacao'] ?? ''),
+                'anos_letivos' => $anosDb,
             ];
         }
 
