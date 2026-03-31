@@ -117,7 +117,7 @@ function validaCursos() {
     }
 
     if (!temCurso && temAnos) {
-      alert('Selecione o curso na linha ' + (i + 1) + ' ou remova os anos letivos selecionados.');
+      alert('Selecione o curso na linha ' + (i + 1) + ' ou remova a linha.');
       return false;
     }
   }
