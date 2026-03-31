@@ -163,7 +163,6 @@ window.addEventListener(
     habilitaCampoFormaDeContratacao();
     habilitaCampoFormaDeContratacaoEscolaSecretariaEstadual();
     habilitaCampoFormaDeContratacaoEscolaSecretariaMunicipal();
-    habilitaAbaMatriculasAtendidas();
     obrigarCnpjMantenedora();
   },false
 );
@@ -866,18 +865,19 @@ if (cnpj !== null) {
 
 function getCurso(cursos)
 {
-  const campoCurso = document.getElementById('ref_cod_curso');
-
-  if(cursos.length)
-    {
-        setAttributes(campoCurso,'Selecione um curso',false);
-
-        $j.each(cursos, function(i, item) {
-            campoCurso.options[campoCurso.options.length] = new Option(item.name,item.id, false, false);
-        });
-    }
-    else
-        campoCurso.options[0].text = 'A instituição não possui nenhum curso';
+    var selects = document.querySelectorAll('select[id^="ref_cod_curso"]');
+    selects.forEach(function(campoCurso) {
+        var valorAtual = campoCurso.value;
+        if (cursos.length) {
+            setAttributes(campoCurso, 'Selecione um curso', false);
+            $j.each(cursos, function(i, item) {
+                campoCurso.options[campoCurso.options.length] = new Option(item.name, item.id, false, false);
+            });
+            campoCurso.value = valorAtual;
+        } else {
+            campoCurso.options[0].text = 'A instituição não possui nenhum curso';
+        }
+    });
 }
 
 
@@ -887,8 +887,10 @@ if ( document.getElementById('ref_cod_instituicao') )
     {
         const campoInstituicao = document.getElementById('ref_cod_instituicao').value;
 
-        const campoCurso = document.getElementById('ref_cod_curso');
-        setAttributes(campoCurso,'Carregando curso',true);
+        var campoCurso = document.querySelector('select[id^="ref_cod_curso"]');
+        if (campoCurso) {
+            setAttributes(campoCurso,'Carregando curso',true);
+        }
 
         getApiResource("/api/resource/course",getCurso,{institution:campoInstituicao});
 
@@ -903,6 +905,102 @@ if ( document.getElementById('ref_cod_instituicao') )
 
     }
 }
+
+// Ajustes na tabela de cursos
+$j(document).ready(function() {
+    var sugestaoEl = document.getElementById('sugestao_anos_letivos');
+    if (!sugestaoEl) return;
+
+    // Ajusta largura das colunas: Curso menor, Anos letivos maior
+    var cabCursos = $j('#cursos tr[id="tr_cursos_cab"] td');
+    if (cabCursos.length) {
+        cabCursos.eq(0).css('width', '30%');  // Curso
+        cabCursos.eq(1).css('width', '30%');  // Autorização
+        cabCursos.eq(2).css('width', '30%');  // Anos letivos
+    }
+
+    // Centraliza ícone de excluir na coluna Ação (só linhas de dados)
+    $j('<style>#cursos tr.tr_cursos td:last-child { text-align: center; }</style>').appendTo('head');
+
+    var anos = JSON.parse(decodeURIComponent(sugestaoEl.value));
+
+    function initAnosLetivosSelect(input) {
+        var valoresAtuais = input.value
+            ? input.value.split(',').map(function(v) { return v.trim(); })
+            : [];
+
+        var match = input.id.match(/\[(\d+)\]/);
+        var idx = match ? match[1] : '0';
+
+        var select = document.createElement('select');
+        select.name = 'curso_anos_letivos[' + idx + '][]';
+        select.id = 'curso_anos_letivos_select_' + idx;
+        select.multiple = true;
+        select.className = 'curso-anos-letivos-select';
+
+        anos.forEach(function(ano) {
+            var opt = document.createElement('option');
+            opt.value = ano;
+            opt.text = ano;
+            if (valoresAtuais.indexOf(String(ano)) !== -1) {
+                opt.selected = true;
+            }
+            select.appendChild(opt);
+        });
+
+        input.style.display = 'none';
+        input.removeAttribute('name');
+        input.parentNode.appendChild(select);
+
+        $j(select).chosen({
+            no_results_text: 'Sem resultados para ',
+            width: '100%',
+            placeholder_text_multiple: 'Selecione os anos'
+        });
+    }
+
+    // Valida curso duplicado ao trocar o select
+    $j(document).on('change', 'select[id^="ref_cod_curso"]', function() {
+        var valorSelecionado = this.value;
+        if (!valorSelecionado) return;
+
+        var duplicado = false;
+        var selectAtual = this;
+        $j('select[id^="ref_cod_curso"]').each(function() {
+            if (this !== selectAtual && this.value === valorSelecionado) {
+                duplicado = true;
+                return false;
+            }
+        });
+
+        if (duplicado) {
+            alert('Este curso já foi adicionado.');
+            this.value = '';
+        }
+    });
+
+    $j('input[id^="curso_anos_letivos"]').each(function() {
+        initAnosLetivosSelect(this);
+    });
+
+    $j('#cursos').find('a[id^="btn_add_"]').click(function() {
+        var rows = document.querySelectorAll('#cursos tr[name="tr_cursos[]"]');
+        var lastRow = rows[rows.length - 1];
+        if (!lastRow) return;
+
+        // Limpa Chosen e select clonados pelo addRow
+        var chosenClone = lastRow.querySelector('.chosen-container');
+        if (chosenClone) chosenClone.remove();
+        var selectClone = lastRow.querySelector('select.curso-anos-letivos-select');
+        if (selectClone) selectClone.remove();
+
+        var input = lastRow.querySelector('input[id^="curso_anos_letivos"]');
+        if (input) {
+            input.value = '';
+            initAnosLetivosSelect(input);
+        }
+    });
+});
 
 var search = function (request, response) {
     var searchPath = '/module/Api/Servidor?oper=get&resource=servidor-search',
