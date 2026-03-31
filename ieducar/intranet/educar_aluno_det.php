@@ -4,8 +4,8 @@ use App\Models\City;
 use App\Models\Country;
 use App\Models\DeficiencyType;
 use App\Models\LegacyBenefit;
-use App\Models\LegacyDeficiency;
 use App\Models\LegacyMaritalStatus;
+use App\Models\LegacyDeficiency;
 use App\Models\LegacyProject;
 use App\Models\LegacyRace;
 use App\Models\LegacyStudentMedicalRecord;
@@ -187,29 +187,28 @@ return new class extends clsDetalhe
             $registro['ddd_mov'] = $det_pessoa_fj['ddd_mov'] ?? null;
             $registro['fone_mov'] = $det_pessoa_fj['fone_mov'] ?? null;
 
-            $obj_deficiencia_pessoa = new clsCadastroFisicaDeficiencia;
-            $obj_deficiencia_pessoa_lista = $obj_deficiencia_pessoa->lista(int_ref_idpes: $this->ref_idpes);
+            $deficiencias = is_numeric($this->ref_idpes)
+                ? LegacyDeficiency::query()
+                    ->whereHas('individuals', fn ($q) => $q->whereKey($this->ref_idpes))
+                    ->get()
+                : collect();
 
             $obj_beneficios_lista = LegacyBenefit::query()
                 ->whereHas(relation: 'students', callback: fn ($q) => $q->where('cod_aluno', $this->cod_aluno))
                 ->get(columns: ['nm_beneficio']);
 
-            if ($obj_deficiencia_pessoa_lista) {
+            if ($deficiencias && $deficiencias->isNotEmpty()) {
                 $deficiencia_pessoa = [];
                 $transtorno_pessoa = [];
 
-                foreach ($obj_deficiencia_pessoa_lista as $deficiencia) {
-                    $deficiencia_pessoa[$deficiencia['ref_cod_deficiencia']] = LegacyDeficiency::where('cod_deficiencia', $deficiencia['ref_cod_deficiencia'])
-                        ->where('deficiency_type_id', DeficiencyType::DEFICIENCY)
-                        ->value('nm_deficiencia');
-
-                    $transtorno_pessoa[$deficiencia['ref_cod_deficiencia']] = LegacyDeficiency::where('cod_deficiencia', $deficiencia['ref_cod_deficiencia'])
-                        ->where('deficiency_type_id', DeficiencyType::DISORDER)
-                        ->value('nm_deficiencia');
+                foreach ($deficiencias as $deficiencia) {
+                    if ($deficiencia->deficiency_type_id == DeficiencyType::DEFICIENCY) {
+                        $deficiencia_pessoa[$deficiencia->cod_deficiencia] = $deficiencia->nm_deficiencia;
+                    }
+                    if ($deficiencia->deficiency_type_id == DeficiencyType::DISORDER) {
+                        $transtorno_pessoa[$deficiencia->cod_deficiencia] = $deficiencia->nm_deficiencia;
+                    }
                 }
-
-                $deficiencia_pessoa = array_filter($deficiencia_pessoa, fn ($v) => !is_null($v));
-                $transtorno_pessoa = array_filter($transtorno_pessoa, fn ($v) => !is_null($v));
             }
 
             $ObjDocumento = new clsDocumento(int_idpes: $this->ref_idpes);

@@ -5,7 +5,9 @@ use App\Models\Employee;
 use App\Models\EmployeeGraduation;
 use App\Models\EmployeePosgraduate;
 use App\Models\LegacyAbsenceDelay;
+use App\Models\LegacyDeficiency;
 use App\Models\LegacyEmployeeRole;
+use App\Models\LegacyIndividual;
 use App\Models\LegacyRole;
 use App\Models\LegacySchoolingDegree;
 use App\Services\EmployeeGraduationService;
@@ -977,16 +979,22 @@ JS;
 
     protected function createOrUpdateDeficiencias()
     {
-        $servidorId = $this->cod_servidor;
+        if (!is_numeric($this->cod_servidor)) {
+            return;
+        }
 
-        $sql = 'delete from cadastro.fisica_deficiencia where ref_idpes = $1';
-        Portabilis_Utils_Database::fetchPreparedQuery($sql, ['params' => [$servidorId]], false);
+        $individual = LegacyIndividual::find($this->cod_servidor, ['idpes']);
+        if (!$individual) {
+            return;
+        }
 
-        foreach ($this->getRequest()->deficiencias as $id) {
-            if (!empty($id)) {
-                $deficiencia = new clsCadastroFisicaDeficiencia($servidorId, $id);
-                $deficiencia->cadastra();
-            }
+        $old = $individual->deficiency()->pluck('ref_cod_deficiencia')->toArray();
+        $news = array_values(array_filter((array) $this->getRequest()->deficiencias, 'is_numeric'));
+        $individual->deficiency()->sync($news);
+
+        $diff = array_merge(array_diff($old, $news), array_diff($news, $old));
+        if (!empty($diff)) {
+            LegacyDeficiency::whereIn('cod_deficiencia', $diff)->update(['updated_at' => now()]);
         }
     }
 
