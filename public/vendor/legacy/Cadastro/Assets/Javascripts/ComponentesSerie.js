@@ -577,6 +577,7 @@ function optionsAnoLetivo() {
 function htmlComponentesAreaConhecimento(id, componente_id, componente_nome, firstLine){
 
     var iconCloneCargaHoraria = '';
+    var iconCloneHoraFalta = '';
     var iconCloneTipoNota = '';
     var iconCloneAnosLetivos = '';
 
@@ -587,6 +588,10 @@ function htmlComponentesAreaConhecimento(id, componente_id, componente_nome, fir
                                  </a>`;
         iconCloneTipoNota = `<a class="clone-values"
                                 onclick="cloneValues(` + id + `,` + componente_id + `, 'tipo_nota')">
+                                <i class="fa fa-clone" aria-hidden="true"></i>
+                             </a>`;
+        iconCloneHoraFalta = `<a class="clone-values"
+                                onclick="cloneValues(${id}, ${componente_id}, 'hora_falta')">
                                 <i class="fa fa-clone" aria-hidden="true"></i>
                              </a>`;
         iconCloneAnosLetivos = `<a class="clone-values"
@@ -629,7 +634,7 @@ function htmlComponentesAreaConhecimento(id, componente_id, componente_nome, fir
                            id="hora_falta_` + componente_id + `"
                            value=""
                            disabled>
-
+                           ` + iconCloneHoraFalta + `
                 </td>
                 <td>
                     <select name="componentes[` + id + componente_id + `][tipo_nota]"
