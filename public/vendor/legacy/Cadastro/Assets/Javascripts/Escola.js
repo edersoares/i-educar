@@ -96,8 +96,32 @@ function validaEspacoEscolares() {
   return validacaoPassa;
 }
 
+function validaCursos() {
+  var tabela = document.getElementById('cursos');
+  if (!tabela) return true;
+
+  var linhas = tabela.querySelectorAll('tr[name="tr_cursos[]"]');
+  for (var i = 0; i < linhas.length; i++) {
+    var selectCurso = linhas[i].querySelector('select[id^="ref_cod_curso"]');
+    var selectAnos = linhas[i].querySelector('select.curso-anos-letivos-select');
+
+    if (!selectCurso) continue;
+
+    var temCurso = selectCurso.value && selectCurso.value !== '';
+    var temAnos = selectAnos && selectAnos.selectedOptions.length > 0;
+
+    // Se selecionou curso mas não selecionou anos, bloqueia
+    if (temCurso && !temAnos) {
+      alert('Preencha os anos letivos do curso "' + selectCurso.options[selectCurso.selectedIndex].text + '".');
+      return false;
+    }
+  }
+
+  return true;
+}
+
 var submitForm = function() {
-  var canSubmit = validationUtils.validatesFields(true) && validaEspacoEscolares();
+  var canSubmit = validationUtils.validatesFields(true) && validaEspacoEscolares() && validaCursos();
 
   // O campo escolaInepId somente é atualizado ao cadastrar escola,  uma vez que este
   // é atualizado via ajax, e durante o (novo) cadastro a escola ainda não possui id.
