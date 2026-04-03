@@ -102,7 +102,7 @@ function validaCursos() {
 
   var linhas = tabela.querySelectorAll('tr[name="tr_cursos[]"]');
   for (var i = 0; i < linhas.length; i++) {
-    var selectCurso = linhas[i].querySelector('select[id^="ref_cod_curso"]');
+    var selectCurso = linhas[i].querySelector('select[name$="[curso_id]"], select[id^="ref_cod_curso"]');
     var selectAnos = linhas[i].querySelector('select.curso-anos-letivos-select');
 
     if (!selectCurso) continue;
@@ -110,12 +110,7 @@ function validaCursos() {
     var temCurso = selectCurso.value && selectCurso.value !== '';
     var temAnos = selectAnos && selectAnos.selectedOptions.length > 0;
 
-    // Se preencheu um mas não o outro, bloqueia
-    if (temCurso && !temAnos) {
-      alert('Preencha os anos letivos do curso "' + selectCurso.options[selectCurso.selectedIndex].text + '".');
-      return false;
-    }
-
+    // Anos sem curso selecionado
     if (!temCurso && temAnos) {
       alert('Selecione o curso na linha ' + (i + 1) + ' ou remova a linha.');
       return false;
@@ -516,7 +511,8 @@ if (!$j('#pessoaj_idpes').is(':visible')) {
   $j('#espacos').closest('tr').attr('id','tespacos');
 
   // Pega o número dessa linha
-  linha_inicial_infra = $j('#tlocal_funcionamento').index()-2;
+  var offsetInfra = $j('#cursos').length ? 3 : 2;
+  linha_inicial_infra = $j('#tlocal_funcionamento').index() - offsetInfra;
   linha_inicial_dependencia = $j('#tr_possui_dependencias').index()-2;
   linha_inicial_equipamento = $j('#tr_equipamentos').index()-2;
   linha_inicial_recursos = $j('#tr_quantidade_profissionais').index()-3;
@@ -894,7 +890,7 @@ if (cnpj !== null) {
 
 function getCurso(cursos)
 {
-    var selects = document.querySelectorAll('select[id^="ref_cod_curso"]');
+    var selects = document.querySelectorAll('#cursos select[name$="[curso_id]"], select[id^="ref_cod_curso"]');
     selects.forEach(function(campoCurso) {
         var valorAtual = campoCurso.value;
         if (cursos.length) {
@@ -916,7 +912,7 @@ if ( document.getElementById('ref_cod_instituicao') )
     {
         const campoInstituicao = document.getElementById('ref_cod_instituicao').value;
 
-        var campoCurso = document.querySelector('select[id^="ref_cod_curso"]');
+        var campoCurso = document.querySelector('#cursos select[name$="[curso_id]"], select[id^="ref_cod_curso"]');
         if (campoCurso) {
             setAttributes(campoCurso,'Carregando curso',true);
         }
@@ -962,7 +958,6 @@ $j(document).ready(function() {
         var idx = match ? match[1] : '0';
 
         var select = document.createElement('select');
-        select.name = 'curso_anos_letivos[' + idx + '][]';
         select.multiple = true;
         select.className = 'curso-anos-letivos-select';
 
@@ -977,7 +972,6 @@ $j(document).ready(function() {
         });
 
         input.style.display = 'none';
-        input.removeAttribute('name');
         input.parentNode.appendChild(select);
 
         $j(select).chosen({
@@ -985,16 +979,21 @@ $j(document).ready(function() {
             width: '100%',
             placeholder_text_multiple: 'Selecione os anos'
         });
+
+        // Sincroniza Chosen com o hidden input do framework
+        $j(select).on('change', function() {
+            input.value = Array.from(this.selectedOptions).map(function(o) { return o.value; }).join(',');
+        });
     }
 
     // Valida curso duplicado ao trocar o select
-    $j(document).on('change', 'select[id^="ref_cod_curso"]', function() {
+    $j(document).on('change', '#cursos select[name$="[curso_id]"], #cursos select[id^="ref_cod_curso"]', function() {
         var valorSelecionado = this.value;
         if (!valorSelecionado) return;
 
         var duplicado = false;
         var selectAtual = this;
-        $j('select[id^="ref_cod_curso"]').each(function() {
+        $j('#cursos select[name$="[curso_id]"], #cursos select[id^="ref_cod_curso"]').each(function() {
             if (this !== selectAtual && this.value === valorSelecionado) {
                 duplicado = true;
                 return false;
@@ -1007,20 +1006,55 @@ $j(document).ready(function() {
         }
     });
 
-    // Re-indexa os names dos multi-selects de anos letivos conforme posição no DOM
-    function reindexAnosLetivos() {
+    // Renomeia campos para data[N][campo] e remove id pra setId não corromper
+    function renomeiaCamposCursos() {
         var rows = document.querySelectorAll('#cursos tr[name="tr_cursos[]"]');
         rows.forEach(function(row, idx) {
-            var select = row.querySelector('select.curso-anos-letivos-select');
-            if (select) {
-                select.name = 'curso_anos_letivos[' + idx + '][]';
-            }
+            var curso = row.querySelector('select[id^="ref_cod_curso"], select[name^="cursos["]');
+            var autorizacao = row.querySelector('input[id^="curso_autorizacao"], input[name^="cursos["][name$="[autorizacao]"]');
+            var anos = row.querySelector('input[id^="curso_anos_letivos"], input[name^="cursos["][name$="[anos_letivos]"]');
+            if (curso) { curso.name = 'cursos[' + idx + '][curso_id]'; curso.removeAttribute('id'); }
+            if (autorizacao) { autorizacao.name = 'cursos[' + idx + '][autorizacao]'; autorizacao.removeAttribute('id'); }
+            if (anos) { anos.name = 'cursos[' + idx + '][anos_letivos]'; anos.removeAttribute('id'); }
         });
+
+        // Marca que o JS renomeou os campos com sucesso
+        if (!document.getElementById('cursos_ready')) {
+            var h = document.createElement('input');
+            h.type = 'hidden'; h.id = 'cursos_ready'; h.name = 'cursos_ready'; h.value = '1';
+            document.formcadastro.appendChild(h);
+        }
     }
+
+    var inativosEl = document.getElementById('cursos_inativos');
+    var inativos = inativosEl && inativosEl.value ? inativosEl.value.split(',') : [];
 
     $j('input[id^="curso_anos_letivos"]').each(function() {
         initAnosLetivosSelect(this);
     });
+
+    renomeiaCamposCursos();
+
+    // Desabilita linhas de cursos inativos (mantém só o X)
+    // Adiciona hidden "manter" que vai junto quando X remove a linha
+    if (inativos.length) {
+        document.querySelectorAll('#cursos tr[name="tr_cursos[]"]').forEach(function(row) {
+            var curso = row.querySelector('select[name$="[curso_id]"]');
+            if (curso && inativos.indexOf(curso.value) !== -1) {
+                curso.disabled = true;
+                row.querySelectorAll('input').forEach(function(i) { i.disabled = true; });
+                var chosen = row.querySelector('.chosen-container');
+                if (chosen) { chosen.style.pointerEvents = 'none'; chosen.style.opacity = '0.6'; }
+
+                // Hidden dentro da linha — se X remover a linha, o hidden vai junto
+                var h = document.createElement('input');
+                h.type = 'hidden';
+                h.name = 'cursos_inativos_manter[]';
+                h.value = curso.value;
+                row.querySelector('td:last-child').appendChild(h);
+            }
+        });
+    }
 
     $j('#cursos').find('a[id^="btn_add_"]').click(function() {
         var rows = document.querySelectorAll('#cursos tr[name="tr_cursos[]"]');
@@ -1039,12 +1073,21 @@ $j(document).ready(function() {
             initAnosLetivosSelect(input);
         }
 
-        reindexAnosLetivos();
+        // Remove opções de cursos inativos do novo dropdown
+        var novoCurso = lastRow.querySelector('select[id^="ref_cod_curso"]');
+        if (novoCurso) {
+            inativos.forEach(function(id) {
+                var opt = novoCurso.querySelector('option[value="' + id + '"]');
+                if (opt) opt.remove();
+            });
+        }
+
+        renomeiaCamposCursos();
     });
 
-    // Observa cliques de excluir para re-indexar após remoção de linha
+    // Re-indexa após remover linha
     $j(document).on('click', '#cursos a[id^="link_remove"]', function() {
-        setTimeout(reindexAnosLetivos, 50);
+        setTimeout(renomeiaCamposCursos, 50);
     });
 });
 
