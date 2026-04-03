@@ -996,9 +996,9 @@ return new class extends clsCadastro
 
             $this->campoQuebra();
             $this->addSchoolManagersTable();
+            $this->campoQuebra();
 
             if ($nivel === 1) {
-                $this->campoQuebra();
                 $this->addSchoolCoursesTable();
             }
 
