@@ -42,4 +42,9 @@ class WebController extends Controller
 
         return abort(404);
     }
+
+    public function home()
+    {
+        return redirect(config('app.home'));
+    }
 }
