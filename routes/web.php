@@ -14,11 +14,11 @@ use Illuminate\Support\Facades\Route;
 
 Auth::routes(['register' => false]);
 
-Route::redirect('/', '/web');
+Route::redirect('/', config('app.home'));
 
 Route::view('/docs-api', 'docs/api/index');
 
-Route::redirect('intranet/index.php', '/web')
+Route::redirect('intranet/index.php', config('app.home'))
     ->name('home');
 
 Route::any('module/Api/{uri}', 'LegacyController@api')->where('uri', '.*');
