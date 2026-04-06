@@ -48,7 +48,7 @@ class DefaultCadastroDeficienciaTableSeeder extends Seeder
 
         foreach ($disorders as $id => $name) {
             LegacyDeficiency::updateOrCreate([
-                'deficiencia_educacenso' => $id,
+                'transtorno_educacenso' => $id,
             ], [
                 'nm_deficiencia' => Str::upper($name),
                 'deficiency_type_id' => DeficiencyType::DISORDER,
