@@ -1746,6 +1746,12 @@ return new class extends clsCadastro
             }
         }
 
+        if (empty($cursosForm) && empty($_POST['cursos_inativos_manter'])) {
+            $this->mensagem = "Preencha o campo 'Curso' corretamente";
+
+            return false;
+        }
+
         if ($excluirEscolaCursos) {
             $this->syncEscolaCursos($cod_escola, $cursosForm);
         } else {
@@ -2558,7 +2564,7 @@ return new class extends clsCadastro
         $this->campoTabelaInicio('cursos', 'Cursos', ['Curso', 'Autorização', 'Anos letivos'], $rows);
         $options = [
             'resources' => $opcoes,
-            'required' => false,
+            'required' => true,
         ];
         $this->inputsHelper()->select(attrName: 'ref_cod_curso', inputOptions: $options);
         $this->campoTexto('curso_autorizacao', 'Autorização', '', 20, 255);

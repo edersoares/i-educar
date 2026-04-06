@@ -1085,10 +1085,22 @@ $j(document).ready(function() {
         renomeiaCamposCursos();
     });
 
-    // Re-indexa após remover linha
-    $j(document).on('click', '#cursos a[id^="link_remove"]', function() {
+    // Impede remover a última linha (captura antes do onclick inline do framework)
+    document.getElementById('cursos').addEventListener('click', function(e) {
+        var link = e.target.closest('a[id^="link_remove"]');
+        if (!link) return;
+
+        var totalLinhas = document.querySelectorAll('#cursos tr[name="tr_cursos[]"]').length;
+        if (totalLinhas <= 1) {
+            e.stopPropagation();
+            e.preventDefault();
+            alert("É obrigatório manter pelo menos um curso");
+            return;
+        }
+
+        // Re-indexa após remoção
         setTimeout(renomeiaCamposCursos, 50);
-    });
+    }, true);
 });
 
 var search = function (request, response) {
