@@ -110,7 +110,6 @@ function validaCursos() {
     var temCurso = selectCurso.value && selectCurso.value !== '';
     var temAnos = selectAnos && selectAnos.selectedOptions.length > 0;
 
-    // Anos sem curso selecionado
     if (!temCurso && temAnos) {
       alert('Selecione o curso na linha ' + (i + 1) + ' ou remova a linha.');
       return false;
@@ -510,14 +509,13 @@ if (!$j('#pessoaj_idpes').is(':visible')) {
   $j('#atendimento_aee').closest('tr').attr('id','tatendimento_aee');
   $j('#espacos').closest('tr').attr('id','tespacos');
 
-  // Pega o número dessa linha
-  var offsetInfra = $j('#cursos').length ? 3 : 2;
-  linha_inicial_infra = $j('#tlocal_funcionamento').index() - offsetInfra;
-  linha_inicial_dependencia = $j('#tr_possui_dependencias').index()-2;
-  linha_inicial_equipamento = $j('#tr_equipamentos').index()-2;
-  linha_inicial_recursos = $j('#tr_quantidade_profissionais').index()-3;
-  linha_inicial_dados = $j('#tatendimento_aee').index()-2;
-  linha_inicial_espacos = $j('#tespacos').index()-2;
+  var allTrs = $j('.tablecadastro > tbody > tr');
+  linha_inicial_infra = allTrs.index($j('#tlocal_funcionamento'));
+  linha_inicial_dependencia = allTrs.index($j('#tr_possui_dependencias'));
+  linha_inicial_equipamento = allTrs.index($j('#tr_equipamentos'));
+  linha_inicial_recursos = allTrs.index($j('#tr_quantidade_profissionais')) - 1;
+  linha_inicial_dados = allTrs.index($j('#tatendimento_aee'));
+  linha_inicial_espacos = allTrs.index($j('#tespacos'));
 
   // Adiciona um ID à linha que termina o formulário para parar de esconder os campos
   $j('.tableDetalheLinhaSeparador').closest('tr').attr('id','stop');
@@ -931,20 +929,17 @@ if ( document.getElementById('ref_cod_instituicao') )
     }
 }
 
-// Ajustes na tabela de cursos
 $j(document).ready(function() {
     var sugestaoEl = document.getElementById('sugestao_anos_letivos');
     if (!sugestaoEl) return;
 
-    // Ajusta largura das colunas: Curso menor, Anos letivos maior
     var cabCursos = $j('#cursos tr[id="tr_cursos_cab"] td');
     if (cabCursos.length) {
-        cabCursos.eq(0).css('width', '30%');  // Curso
-        cabCursos.eq(1).css('width', '30%');  // Autorização
-        cabCursos.eq(2).css('width', '30%');  // Anos letivos
+        cabCursos.eq(0).css('width', '30%');
+        cabCursos.eq(1).css('width', '30%');
+        cabCursos.eq(2).css('width', '30%');
     }
 
-    // Centraliza ícone de excluir na coluna Ação (só linhas de dados)
     $j('<style>#cursos tr.tr_cursos td:last-child { text-align: center; }</style>').appendTo('head');
 
     var anos = JSON.parse(decodeURIComponent(sugestaoEl.value));
@@ -980,13 +975,11 @@ $j(document).ready(function() {
             placeholder_text_multiple: 'Selecione os anos'
         });
 
-        // Sincroniza Chosen com o hidden input do framework
         $j(select).on('change', function() {
             input.value = Array.from(this.selectedOptions).map(function(o) { return o.value; }).join(',');
         });
     }
 
-    // Valida curso duplicado ao trocar o select
     $j(document).on('change', '#cursos select[name$="[curso_id]"], #cursos select[id^="ref_cod_curso"]', function() {
         var valorSelecionado = this.value;
         if (!valorSelecionado) return;
@@ -1006,7 +999,6 @@ $j(document).ready(function() {
         }
     });
 
-    // Renomeia campos para data[N][campo] e remove id pra setId não corromper
     function renomeiaCamposCursos() {
         var rows = document.querySelectorAll('#cursos tr[name="tr_cursos[]"]');
         rows.forEach(function(row, idx) {
@@ -1018,7 +1010,6 @@ $j(document).ready(function() {
             if (anos) { anos.name = 'cursos[' + idx + '][anos_letivos]'; anos.removeAttribute('id'); }
         });
 
-        // Marca que o JS renomeou os campos com sucesso
         if (!document.getElementById('cursos_ready')) {
             var h = document.createElement('input');
             h.type = 'hidden'; h.id = 'cursos_ready'; h.name = 'cursos_ready'; h.value = '1';
@@ -1035,8 +1026,6 @@ $j(document).ready(function() {
 
     renomeiaCamposCursos();
 
-    // Desabilita linhas de cursos inativos (mantém só o X)
-    // Adiciona hidden "manter" que vai junto quando X remove a linha
     if (inativos.length) {
         document.querySelectorAll('#cursos tr[name="tr_cursos[]"]').forEach(function(row) {
             var curso = row.querySelector('select[name$="[curso_id]"]');
@@ -1046,7 +1035,6 @@ $j(document).ready(function() {
                 var chosen = row.querySelector('.chosen-container');
                 if (chosen) { chosen.style.pointerEvents = 'none'; chosen.style.opacity = '0.6'; }
 
-                // Hidden dentro da linha — se X remover a linha, o hidden vai junto
                 var h = document.createElement('input');
                 h.type = 'hidden';
                 h.name = 'cursos_inativos_manter[]';
@@ -1061,7 +1049,6 @@ $j(document).ready(function() {
         var lastRow = rows[rows.length - 1];
         if (!lastRow) return;
 
-        // Limpa Chosen e select clonados pelo addRow
         var chosenClone = lastRow.querySelector('.chosen-container');
         if (chosenClone) chosenClone.remove();
         var selectClone = lastRow.querySelector('select.curso-anos-letivos-select');
@@ -1073,7 +1060,6 @@ $j(document).ready(function() {
             initAnosLetivosSelect(input);
         }
 
-        // Remove opções de cursos inativos do novo dropdown
         var novoCurso = lastRow.querySelector('select[id^="ref_cod_curso"]');
         if (novoCurso) {
             inativos.forEach(function(id) {
@@ -1085,7 +1071,6 @@ $j(document).ready(function() {
         renomeiaCamposCursos();
     });
 
-    // Impede remover a última linha (captura antes do onclick inline do framework)
     document.getElementById('cursos').addEventListener('click', function(e) {
         var link = e.target.closest('a[id^="link_remove"]');
         if (!link) return;
@@ -1098,7 +1083,6 @@ $j(document).ready(function() {
             return;
         }
 
-        // Re-indexa após remoção
         setTimeout(renomeiaCamposCursos, 50);
     }, true);
 });

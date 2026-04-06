@@ -1710,7 +1710,6 @@ return new class extends clsCadastro
             return true;
         }
 
-        // Monta array do formulário a partir dos dados agrupados por linha
         $cursosForm = [];
         foreach ($_POST['cursos'] ?? [] as $linha) {
             $cursoId = $linha['curso_id'] ?? null;
@@ -1802,7 +1801,6 @@ return new class extends clsCadastro
             ];
         }
 
-        // Inserir novos e atualizar alterados
         foreach ($cursosForm as $cursoId => $dados) {
             if (!isset($cursosDb[$cursoId])) {
                 LegacySchoolCourse::create([
@@ -1829,7 +1827,6 @@ return new class extends clsCadastro
             }
         }
 
-        // Remover cursos que saíram do formulário
         foreach ($cursosDb as $cursoId => $dados) {
             if (!isset($cursosForm[$cursoId])) {
                 LegacySchoolCourse::where('ref_cod_escola', $cod_escola)
@@ -2545,7 +2542,6 @@ return new class extends clsCadastro
                 }
             }
 
-            // Identifica cursos inativos vinculados e adiciona ao dropdown
             $cursosInativos = [];
             foreach ($rows as $row) {
                 if (!empty($row[0]) && !isset($opcoes[$row[0]])) {
