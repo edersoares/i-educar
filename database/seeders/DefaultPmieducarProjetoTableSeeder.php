@@ -24,6 +24,8 @@ class DefaultPmieducarProjetoTableSeeder extends Seeder
         foreach ($projects as $project) {
             LegacyProject::updateOrCreate([
                 'nome' => $project,
+            ], [
+                'observacao' => '',
             ]);
         }
     }
