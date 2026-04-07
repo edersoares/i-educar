@@ -111,7 +111,7 @@ return new class extends clsListagem
         $this->ano_alocacao = Session::get(key: 'ano_alocacao');
         $this->lst_matriculas = Session::get(key: 'lst_matriculas');
 
-        Session::put(key: 'tipo', value: $_GET['tipo'] ?? Session::get(key: 'tipo'));
+        Session::put(key: 'tipo', value: $_GET['tipo'] ?? Session::get(key: 'tipo') ?? '');
 
         $this->titulo = 'Servidores P&uacute;blicos - Listagem';
         // Passa todos os valores obtidos no GET para atributos do objeto
@@ -210,7 +210,6 @@ return new class extends clsListagem
             bool_servidor_sem_alocacao: null,
             ano_alocacao: $this->ano_alocacao
         );
-
 
         // Se for uma listagem de professores, recupera as disciplinas dadas para
         // comparaÃ§Ã£o com a de outros professores (somente quando a busca Ã© para
