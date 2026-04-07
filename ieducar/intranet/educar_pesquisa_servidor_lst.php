@@ -164,7 +164,7 @@ return new class extends clsListagem
         $this->campoOculto(nome: 'tipo', valor: $_GET['tipo']);
         // Paginador
         $this->limite = 20;
-        $this->offset = ($_GET['pagina_{$this->nome}']) ? $_GET['pagina_{$this->nome}'] * $this->limite - $this->limite : 0;
+        $this->offset = ($_GET["pagina_{$this->nome}"]) ? $_GET["pagina_{$this->nome}"] * $this->limite - $this->limite : 0;
         $obj_servidor = new clsPmieducarServidor;
         $obj_servidor->setOrderby(strNomeCampo: 'carga_horaria ASC');
         $obj_servidor->setLimite(intLimiteQtd: $this->limite, intLimiteOffset: $this->offset);
