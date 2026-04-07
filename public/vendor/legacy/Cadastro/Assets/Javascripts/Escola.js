@@ -129,6 +129,7 @@ var submitForm = function() {
   // podendo então definir o código escolaInepId ao cadastrar a escola.
 
   if (canSubmit) {
+    if (typeof renomeiaCamposCursos === 'function') renomeiaCamposCursos();
     acao();
   }
 }
@@ -1002,9 +1003,10 @@ $j(document).ready(function() {
     function renomeiaCamposCursos() {
         var rows = document.querySelectorAll('#cursos tr[name="tr_cursos[]"]');
         rows.forEach(function(row, idx) {
-            var curso = row.querySelector('select[id^="ref_cod_curso"], select[name^="cursos["]');
-            var autorizacao = row.querySelector('input[id^="curso_autorizacao"], input[name^="cursos["][name$="[autorizacao]"]');
-            var anos = row.querySelector('input[id^="curso_anos_letivos"], input[name^="cursos["][name$="[anos_letivos]"]');
+            var cells = row.querySelectorAll('td');
+            var curso = cells[0] ? cells[0].querySelector('select') : null;
+            var autorizacao = cells[1] ? cells[1].querySelector('input') : null;
+            var anos = cells[2] ? cells[2].querySelector('input') : null;
             if (curso) { curso.name = 'cursos[' + idx + '][curso_id]'; curso.removeAttribute('id'); }
             if (autorizacao) { autorizacao.name = 'cursos[' + idx + '][autorizacao]'; autorizacao.removeAttribute('id'); }
             if (anos) { anos.name = 'cursos[' + idx + '][anos_letivos]'; anos.removeAttribute('id'); }
