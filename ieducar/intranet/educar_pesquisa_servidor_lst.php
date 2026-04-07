@@ -260,9 +260,9 @@ return new class extends clsListagem
                     }
                 } else {
                     if (is_string(value: $campo1) && is_string(value: $campo2)) {
-                        $script = " onclick=\"addVal1('{$campo1}','{$registro['cod_servidor']}','{$registro['nome']}'); addVal1('{$campo2}','{$registro['cod_servidor']}','{$registro['nome']}'); fecha();\"";
+                        $script = " onclick=\"addVal1('{$campo1}','{$registro['cod_servidor']}','{$registro['nome']}'); addVal1('{$campo2}','{$registro['nome']}','{$registro['cod_servidor']}'); fecha();\"";
                     } elseif (is_string(value: $campo2)) {
-                        $script = " onclick=\"addVal1('{$campo2}','{$registro['cod_servidor']}','{$registro['nome']}'); fecha();\"";
+                        $script = " onclick=\"addVal1('{$campo2}','{$registro['nome']}','{$registro['cod_servidor']}'); fecha();\"";
                     } elseif (is_string(value: $campo1)) {
                         $script = " onclick=\"addVal1('{$campo1}','{$registro['cod_servidor']}','{$registro['nome']}'); fecha();\"";
                     }
