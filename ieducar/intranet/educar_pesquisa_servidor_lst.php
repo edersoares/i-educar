@@ -211,6 +211,7 @@ return new class extends clsListagem
             ano_alocacao: $this->ano_alocacao
         );
 
+
         // Se for uma listagem de professores, recupera as disciplinas dadas para
         // comparaÃ§Ã£o com a de outros professores (somente quando a busca Ã© para
         // substituiÃ§Ã£o de servidores)

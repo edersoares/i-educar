@@ -219,7 +219,7 @@ return new class extends clsCadastro
             }
         }
 
-        $this->mensagem .= 'Cadastro efetuado com sucesso.<br>';
+        $this->mensagem = 'Cadastro efetuado com sucesso.<br>';
         $destination = 'educar_servidor_det.php?cod_servidor=%s&ref_cod_instituicao=%s';
         $destination = sprintf($destination, $this->ref_cod_servidor, $this->ref_ref_cod_instituicao);
         $this->simpleRedirect(url: $destination);
