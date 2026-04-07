@@ -237,7 +237,7 @@ return new class extends clsListagem
                 // disciplinas do servidor a ser substituido (este passo somente Ã©
                 // executado ao buscar um servidor substituto)
                 if ($this->professor == 'true') {
-                    $disciplinasSubstituto = clsPmieducarServidor::getServidorDisciplinas(
+                    $disciplinasSubstituto = $obj_servidor->getServidorDisciplinas(
                         codServidor: $registro['cod_servidor'],
                         codInstituicao: $this->ref_cod_instituicao
                     );
