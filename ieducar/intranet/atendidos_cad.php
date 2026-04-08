@@ -1425,6 +1425,10 @@ return new class extends clsCadastro
 
     protected function createOrUpdateDocumentos($pessoaId)
     {
+        if (!is_numeric($pessoaId)) {
+            return;
+        }
+
         // certidão civil
         //
         // o tipo certidão novo padrão é apenas para exibição ao usuário,
@@ -1452,26 +1456,26 @@ return new class extends clsCadastro
             [
                 'rg' => $_REQUEST['rg'] ?: null,
                 'data_exp_rg' => Portabilis_Date_Utils::brToPgSQL(date: $_REQUEST['data_emissao_rg']) ?: null,
-                'idorg_exp_rg' => $_REQUEST['orgao_emissao_rg'] ?: null,
+                'idorg_exp_rg' => is_numeric($_REQUEST['orgao_emissao_rg']) ? $_REQUEST['orgao_emissao_rg'] : null,
                 'sigla_uf_exp_rg' => $_REQUEST['uf_emissao_rg'] ?: null,
                 'tipo_cert_civil' => $tipoCertCivil ?: null,
                 'certidao_nascimento' => $certidaoNascimento,
                 'certidao_casamento' => $certidaoCasamento,
-                'num_termo' => $_REQUEST['termo_certidao_civil'] ?: null,
+                'num_termo' => is_numeric($_REQUEST['termo_certidao_civil']) ? $_REQUEST['termo_certidao_civil'] : null,
                 'num_livro' => $_REQUEST['livro_certidao_civil'] ?: null,
-                'num_folha' => $_REQUEST['folha_certidao_civil'] ?: null,
+                'num_folha' => is_numeric($_REQUEST['folha_certidao_civil']) ? $_REQUEST['folha_certidao_civil'] : null,
                 'data_emissao_cert_civil' => Portabilis_Date_Utils::brToPgSQL(date: $_REQUEST['data_emissao_certidao_civil']) ?: null,
                 'sigla_uf_cert_civil' => $_REQUEST['uf_emissao_certidao_civil'] ?: null,
                 'cartorio_cert_civil' => pg_escape_string(connection: $_REQUEST['cartorio_emissao_certidao_civil']) ?: null,
                 'cartorio_cert_civil_inep' => null,
                 'passaporte' => pg_escape_string(connection: $_REQUEST['passaporte']),
-                'num_cart_trabalho' => $_REQUEST['carteira_trabalho'] ?: null,
-                'serie_cart_trabalho' => $_REQUEST['serie_carteira_trabalho'] ?: null,
+                'num_cart_trabalho' => is_numeric($_REQUEST['carteira_trabalho']) ? $_REQUEST['carteira_trabalho'] : null,
+                'serie_cart_trabalho' => is_numeric($_REQUEST['serie_carteira_trabalho']) ? $_REQUEST['serie_carteira_trabalho'] : null,
                 'data_emissao_cart_trabalho' => Portabilis_Date_Utils::brToPgSQL(date: $_REQUEST['data_emissao_carteira_trabalho']) ?: null,
                 'sigla_uf_cart_trabalho' => $_REQUEST['uf_emissao_carteira_trabalho'] ?: null,
-                'num_tit_eleitor' => $_REQUEST['titulo_eleitor'] ?: null,
-                'zona_tit_eleitor' => $_REQUEST['zona_titulo_eleitor'] ?: null,
-                'secao_tit_eleitor' => $_REQUEST['secao_titulo_eleitor'] ?: null,
+                'num_tit_eleitor' => is_numeric($_REQUEST['titulo_eleitor']) ? $_REQUEST['titulo_eleitor'] : null,
+                'zona_tit_eleitor' => is_numeric($_REQUEST['zona_titulo_eleitor']) ? $_REQUEST['zona_titulo_eleitor'] : null,
+                'secao_tit_eleitor' => is_numeric($_REQUEST['secao_titulo_eleitor']) ? $_REQUEST['secao_titulo_eleitor'] : null,
             ]
         );
     }

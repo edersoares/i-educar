@@ -1851,6 +1851,10 @@ class AlunoController extends ApiCoreController
 
     protected function createOrUpdateDocumentos($pessoaId)
     {
+        if (!is_numeric($pessoaId)) {
+            return;
+        }
+
         // o tipo certidão novo padrão é apenas para exibição ao usuário,
         // não precisa ser gravado no banco
         //
@@ -1876,13 +1880,13 @@ class AlunoController extends ApiCoreController
                 'rg' => trim($this->getRequest()->rg) ?: null,
                 'data_exp_rg' => Portabilis_Date_Utils::brToPgSQL($this->getRequest()->data_emissao_rg) ?: null,
                 'sigla_uf_exp_rg' => $this->getRequest()->uf_emissao_rg ?: null,
-                'idorg_exp_rg' => $this->getRequest()->orgao_emissao_rg ?: null,
+                'idorg_exp_rg' => is_numeric($this->getRequest()->orgao_emissao_rg) ? $this->getRequest()->orgao_emissao_rg : null,
                 'tipo_cert_civil' => $tipoCertCivil ?: null,
                 'certidao_nascimento' => $certidaoNascimento,
                 'certidao_casamento' => $certidaoCasamento,
-                'num_termo' => $this->getRequest()->termo_certidao_civil ?: null,
+                'num_termo' => is_numeric($this->getRequest()->termo_certidao_civil) ? $this->getRequest()->termo_certidao_civil : null,
                 'num_livro' => $this->getRequest()->livro_certidao_civil ?: null,
-                'num_folha' => $this->getRequest()->folha_certidao_civil ?: null,
+                'num_folha' => is_numeric($this->getRequest()->folha_certidao_civil) ? $this->getRequest()->folha_certidao_civil : null,
                 'data_emissao_cert_civil' => Portabilis_Date_Utils::brToPgSQL($this->getRequest()->data_emissao_certidao_civil) ?: null,
                 'sigla_uf_cert_civil' => $this->getRequest()->uf_emissao_certidao_civil ?: null,
                 'cartorio_cert_civil' => addslashes($this->getRequest()->cartorio_emissao_certidao_civil) ?: null,
