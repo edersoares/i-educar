@@ -2486,8 +2486,9 @@ return new class extends clsCadastro
     {
         $rows = [];
 
-        if (old('cursos')) {
-            foreach (old('cursos') as $linha) {
+        $cursosPost = $this->cursos ?? old('cursos');
+        if (!empty($cursosPost) && is_array($cursosPost)) {
+            foreach ($cursosPost as $linha) {
                 $rows[] = [
                     $linha['curso_id'],
                     $linha['autorizacao'] ?? '',
