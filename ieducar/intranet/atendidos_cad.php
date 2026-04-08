@@ -4,6 +4,7 @@ use App\Events\UserDeleted;
 use App\Events\UserUpdated;
 use App\Facades\Asset;
 use App\Models\EducacensoIndigenousPeople;
+use App\Models\LegacyDocument;
 use App\Models\LegacyIndividual;
 use App\Models\LegacyInstitution;
 use App\Models\LegacyIssuingBody;
@@ -337,9 +338,9 @@ return new class extends clsCadastro
 
         // documentos
 
-        $documentos = new clsDocumento;
-        $documentos->idpes = $this->cod_pessoa_fj;
-        $documentos = $documentos->detalhe();
+        $documentos = is_numeric($this->cod_pessoa_fj)
+            ? LegacyDocument::find($this->cod_pessoa_fj)?->getAttributes()
+            : null;
 
         $options = [
             'required' => false,
@@ -1424,22 +1425,8 @@ return new class extends clsCadastro
 
     protected function createOrUpdateDocumentos($pessoaId)
     {
-        $documentos = new clsDocumento;
-        $documentos->idpes = $pessoaId;
-
-        // rg
-
-        $documentos->rg = $_REQUEST['rg'];
-
-        $documentos->data_exp_rg = Portabilis_Date_Utils::brToPgSQL(
-            date: $_REQUEST['data_emissao_rg']
-        );
-
-        $documentos->idorg_exp_rg = $_REQUEST['orgao_emissao_rg'];
-        $documentos->sigla_uf_exp_rg = $_REQUEST['uf_emissao_rg'];
-
         // certidão civil
-
+        //
         // o tipo certidão novo padrão é apenas para exibição ao usuário,
         // não precisa ser gravado no banco
         //
@@ -1447,60 +1434,46 @@ return new class extends clsCadastro
         // é removido o valor de certidao_nascimento.
         //
         if ($_REQUEST['tipo_certidao_civil'] == 'certidao_nascimento_novo_formato') {
-            $documentos->tipo_cert_civil = null;
-            $documentos->certidao_casamento = '';
-            $documentos->certidao_nascimento = $_REQUEST['certidao_nascimento'];
+            $tipoCertCivil = null;
+            $certidaoCasamento = '';
+            $certidaoNascimento = $_REQUEST['certidao_nascimento'];
         } elseif ($_REQUEST['tipo_certidao_civil'] == 'certidao_casamento_novo_formato') {
-            $documentos->tipo_cert_civil = null;
-            $documentos->certidao_nascimento = '';
-            $documentos->certidao_casamento = $_REQUEST['certidao_casamento'];
+            $tipoCertCivil = null;
+            $certidaoNascimento = '';
+            $certidaoCasamento = $_REQUEST['certidao_casamento'];
         } else {
-            $documentos->tipo_cert_civil = $_REQUEST['tipo_certidao_civil'];
-            $documentos->certidao_nascimento = '';
-            $documentos->certidao_casamento = '';
+            $tipoCertCivil = $_REQUEST['tipo_certidao_civil'];
+            $certidaoNascimento = '';
+            $certidaoCasamento = '';
         }
 
-        $documentos->num_termo = $_REQUEST['termo_certidao_civil'];
-        $documentos->num_livro = $_REQUEST['livro_certidao_civil'];
-        $documentos->num_folha = $_REQUEST['folha_certidao_civil'];
-
-        $documentos->data_emissao_cert_civil = Portabilis_Date_Utils::brToPgSQL(
-            date: $_REQUEST['data_emissao_certidao_civil']
+        LegacyDocument::updateOrCreate(
+            ['idpes' => $pessoaId],
+            [
+                'rg' => $_REQUEST['rg'] ?: null,
+                'data_exp_rg' => Portabilis_Date_Utils::brToPgSQL(date: $_REQUEST['data_emissao_rg']) ?: null,
+                'idorg_exp_rg' => $_REQUEST['orgao_emissao_rg'] ?: null,
+                'sigla_uf_exp_rg' => $_REQUEST['uf_emissao_rg'] ?: null,
+                'tipo_cert_civil' => $tipoCertCivil ?: null,
+                'certidao_nascimento' => $certidaoNascimento,
+                'certidao_casamento' => $certidaoCasamento,
+                'num_termo' => $_REQUEST['termo_certidao_civil'] ?: null,
+                'num_livro' => $_REQUEST['livro_certidao_civil'] ?: null,
+                'num_folha' => $_REQUEST['folha_certidao_civil'] ?: null,
+                'data_emissao_cert_civil' => Portabilis_Date_Utils::brToPgSQL(date: $_REQUEST['data_emissao_certidao_civil']) ?: null,
+                'sigla_uf_cert_civil' => $_REQUEST['uf_emissao_certidao_civil'] ?: null,
+                'cartorio_cert_civil' => pg_escape_string(connection: $_REQUEST['cartorio_emissao_certidao_civil']) ?: null,
+                'cartorio_cert_civil_inep' => null,
+                'passaporte' => pg_escape_string(connection: $_REQUEST['passaporte']),
+                'num_cart_trabalho' => $_REQUEST['carteira_trabalho'] ?: null,
+                'serie_cart_trabalho' => $_REQUEST['serie_carteira_trabalho'] ?: null,
+                'data_emissao_cart_trabalho' => Portabilis_Date_Utils::brToPgSQL(date: $_REQUEST['data_emissao_carteira_trabalho']) ?: null,
+                'sigla_uf_cart_trabalho' => $_REQUEST['uf_emissao_carteira_trabalho'] ?: null,
+                'num_tit_eleitor' => $_REQUEST['titulo_eleitor'] ?: null,
+                'zona_tit_eleitor' => $_REQUEST['zona_titulo_eleitor'] ?: null,
+                'secao_tit_eleitor' => $_REQUEST['secao_titulo_eleitor'] ?: null,
+            ]
         );
-
-        $documentos->sigla_uf_cert_civil = $_REQUEST['uf_emissao_certidao_civil'];
-        $documentos->cartorio_cert_civil = pg_escape_string(connection: $_REQUEST['cartorio_emissao_certidao_civil']);
-        $documentos->passaporte = pg_escape_string(connection: $_REQUEST['passaporte']);
-
-        // carteira de trabalho
-
-        $documentos->num_cart_trabalho = $_REQUEST['carteira_trabalho'];
-        $documentos->serie_cart_trabalho = $_REQUEST['serie_carteira_trabalho'];
-
-        $documentos->data_emissao_cart_trabalho = Portabilis_Date_Utils::brToPgSQL(
-            date: $_REQUEST['data_emissao_carteira_trabalho']
-        );
-
-        $documentos->sigla_uf_cart_trabalho = $_REQUEST['uf_emissao_carteira_trabalho'];
-
-        // titulo de eleitor
-
-        $documentos->num_tit_eleitor = $_REQUEST['titulo_eleitor'];
-        $documentos->zona_tit_eleitor = $_REQUEST['zona_titulo_eleitor'];
-        $documentos->secao_tit_eleitor = $_REQUEST['secao_titulo_eleitor'];
-
-        // Alteração de documentos compativel com a versão anterior do cadastro,
-        // onde era possivel criar uma pessoa, não informando os documentos,
-        // o que não criaria o registro do documento, sendo assim, ao editar uma pessoa,
-        // o registro do documento será criado, caso não exista.
-
-        $sql = 'select 1 from cadastro.documento WHERE idpes = $1 limit 1';
-
-        if (Portabilis_Utils_Database::selectField(sql: $sql, paramsOrOptions: $pessoaId) != 1) {
-            $documentos->cadastra();
-        } else {
-            $documentos->edita();
-        }
     }
 
     protected function createOrUpdateTelefones($pessoaId)
