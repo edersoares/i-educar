@@ -27,6 +27,7 @@ class DefaultPmieducarAlunoBeneficioTableSeeder extends Seeder
         foreach ($benefits as $benefit) {
             LegacyBenefit::updateOrCreate([
                 'nm_beneficio' => $benefit,
+            ], [
                 'ref_usuario_cad' => $user?->getKey(),
             ]);
         }
