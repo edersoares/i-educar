@@ -9,6 +9,7 @@ use App\Models\LegacyIndividualPicture;
 use App\Models\LegacyMaritalStatus;
 use App\Models\LegacyProject;
 use App\Models\LegacyRace;
+use App\Models\LegacyStudentMedicalRecord;
 use App\Models\PersonHasPlace;
 use App\Models\Religion;
 use App\Models\TransportationProvider;
@@ -17,6 +18,7 @@ use App\Services\UrlPresigner;
 use iEducar\Modules\Educacenso\Model\Nacionalidade;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\URL;
 
@@ -96,14 +98,7 @@ return new class extends clsDetalhe
             $obj_fisica = new clsFisica(idpes: $this->ref_idpes);
             $det_fisica = $obj_fisica->detalhe();
 
-            $obj_fisica_raca = new clsCadastroFisicaRaca;
-            $lst_fisica_raca = $obj_fisica_raca->lista(int_ref_idpes: $this->ref_idpes);
-
-            $nameRace = null;
-            if ($lst_fisica_raca) {
-                $det_fisica_raca = array_shift(array: $lst_fisica_raca);
-                $nameRace = LegacyRace::query()->whereKey(id: $det_fisica_raca['ref_cod_raca'])->value(column: 'nm_raca');
-            }
+            $nameRace = LegacyRace::query()->whereHas('individual', fn ($q) => $q->whereKey($this->ref_idpes))->value('nm_raca');
 
             $caminhoFoto = LegacyIndividualPicture::whereKey($this->ref_idpes)->value('caminho');
 
@@ -188,29 +183,28 @@ return new class extends clsDetalhe
             $registro['ddd_mov'] = $det_pessoa_fj['ddd_mov'] ?? null;
             $registro['fone_mov'] = $det_pessoa_fj['fone_mov'] ?? null;
 
-            $obj_deficiencia_pessoa = new clsCadastroFisicaDeficiencia;
-            $obj_deficiencia_pessoa_lista = $obj_deficiencia_pessoa->lista(int_ref_idpes: $this->ref_idpes);
+            $deficiencias = is_numeric($this->ref_idpes)
+                ? LegacyDeficiency::query()
+                    ->whereHas('individuals', fn ($q) => $q->whereKey($this->ref_idpes))
+                    ->get()
+                : collect();
 
             $obj_beneficios_lista = LegacyBenefit::query()
                 ->whereHas(relation: 'students', callback: fn ($q) => $q->where('cod_aluno', $this->cod_aluno))
                 ->get(columns: ['nm_beneficio']);
 
-            if ($obj_deficiencia_pessoa_lista) {
+            if ($deficiencias && $deficiencias->isNotEmpty()) {
                 $deficiencia_pessoa = [];
                 $transtorno_pessoa = [];
 
-                foreach ($obj_deficiencia_pessoa_lista as $deficiencia) {
-                    $deficiencia_pessoa[$deficiencia['ref_cod_deficiencia']] = LegacyDeficiency::where('cod_deficiencia', $deficiencia['ref_cod_deficiencia'])
-                        ->where('deficiency_type_id', DeficiencyType::DEFICIENCY)
-                        ->value('nm_deficiencia');
-
-                    $transtorno_pessoa[$deficiencia['ref_cod_deficiencia']] = LegacyDeficiency::where('cod_deficiencia', $deficiencia['ref_cod_deficiencia'])
-                        ->where('deficiency_type_id', DeficiencyType::DISORDER)
-                        ->value('nm_deficiencia');
+                foreach ($deficiencias as $deficiencia) {
+                    if ($deficiencia->deficiency_type_id == DeficiencyType::DEFICIENCY) {
+                        $deficiencia_pessoa[$deficiencia->cod_deficiencia] = $deficiencia->nm_deficiencia;
+                    }
+                    if ($deficiencia->deficiency_type_id == DeficiencyType::DISORDER) {
+                        $transtorno_pessoa[$deficiencia->cod_deficiencia] = $deficiencia->nm_deficiencia;
+                    }
                 }
-
-                $deficiencia_pessoa = array_filter($deficiencia_pessoa, fn ($v) => !is_null($v));
-                $transtorno_pessoa = array_filter($transtorno_pessoa, fn ($v) => !is_null($v));
             }
 
             $ObjDocumento = new clsDocumento(int_idpes: $this->ref_idpes);
@@ -664,8 +658,7 @@ return new class extends clsDetalhe
             }
         }
 
-        $objFichaMedica = new clsModulesFichaMedicaAluno(ref_cod_aluno: $this->cod_aluno);
-        $reg = $objFichaMedica->detalhe();
+        $reg = LegacyStudentMedicalRecord::whereKey($this->cod_aluno)->first()?->toArray();
 
         if ($reg) {
             $this->addHtml('<span id="fmedica"></span>');
@@ -821,8 +814,8 @@ return new class extends clsDetalhe
             }
         }
 
-        $objMoradia = new clsModulesMoradiaAluno(ref_cod_aluno: $this->cod_aluno);
-        $reg = $objMoradia->detalhe();
+        $reg = DB::table('modules.moradia_aluno')->where('ref_cod_aluno', $this->cod_aluno)->first();
+        $reg = $reg ? (array) $reg : null;
 
         if ($reg) {
             $moradia = '';
