@@ -1727,25 +1727,7 @@ return new class extends clsCadastro
             ];
         }
 
-        // Cursos inativos mantidos (hidden dentro da linha — se X removeu, não vem)
-        foreach ($_POST['cursos_inativos_manter'] ?? [] as $cursoInativoId) {
-            if (is_numeric($cursoInativoId) && !isset($cursosForm[(int) $cursoInativoId])) {
-                $reg = LegacySchoolCourse::where('ref_cod_escola', $cod_escola)
-                    ->where('ref_cod_curso', $cursoInativoId)
-                    ->first();
-
-                if ($reg) {
-                    $anosDb = array_map('intval', array_filter(explode(',', trim($reg->anos_letivos, '{}'))));
-                    sort($anosDb);
-                    $cursosForm[(int) $cursoInativoId] = [
-                        'autorizacao' => trim($reg->autorizacao ?? ''),
-                        'anos_letivos' => $anosDb,
-                    ];
-                }
-            }
-        }
-
-        if (empty($cursosForm) && empty($_POST['cursos_inativos_manter'])) {
+        if (empty($cursosForm)) {
             $this->mensagem = "Preencha o campo 'Curso' corretamente";
 
             return false;

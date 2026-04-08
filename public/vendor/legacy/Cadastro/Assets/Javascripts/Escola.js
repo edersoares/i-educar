@@ -1005,9 +1005,11 @@ $j(document).ready(function() {
         rows.forEach(function(row, idx) {
             var cells = row.querySelectorAll('td');
             var curso = cells[0] ? cells[0].querySelector('select') : null;
+            var cursoHidden = cells[0] ? cells[0].querySelector('input[type="hidden"]') : null;
             var autorizacao = cells[1] ? cells[1].querySelector('input') : null;
             var anos = cells[2] ? cells[2].querySelector('input') : null;
             if (curso) { curso.name = 'cursos[' + idx + '][curso_id]'; curso.removeAttribute('id'); }
+            if (cursoHidden) { cursoHidden.name = 'cursos[' + idx + '][curso_id]'; }
             if (autorizacao) { autorizacao.name = 'cursos[' + idx + '][autorizacao]'; autorizacao.removeAttribute('id'); }
             if (anos) { anos.name = 'cursos[' + idx + '][anos_letivos]'; anos.removeAttribute('id'); }
         });
@@ -1033,15 +1035,17 @@ $j(document).ready(function() {
             var curso = row.querySelector('select[name$="[curso_id]"]');
             if (curso && inativos.indexOf(curso.value) !== -1) {
                 curso.disabled = true;
-                row.querySelectorAll('input').forEach(function(i) { i.disabled = true; });
-                var chosen = row.querySelector('.chosen-container');
-                if (chosen) { chosen.style.pointerEvents = 'none'; chosen.style.opacity = '0.6'; }
-
                 var h = document.createElement('input');
                 h.type = 'hidden';
-                h.name = 'cursos_inativos_manter[]';
+                h.name = curso.name;
                 h.value = curso.value;
-                row.querySelector('td:last-child').appendChild(h);
+                curso.parentNode.appendChild(h);
+
+                var autorizacao = row.querySelectorAll('td')[1] ? row.querySelectorAll('td')[1].querySelector('input') : null;
+                if (autorizacao) autorizacao.readOnly = true;
+
+                var chosen = row.querySelector('.chosen-container');
+                if (chosen) { chosen.style.pointerEvents = 'none'; chosen.style.opacity = '0.6'; }
             }
         });
     }
