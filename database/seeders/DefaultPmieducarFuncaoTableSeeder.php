@@ -48,7 +48,7 @@ class DefaultPmieducarFuncaoTableSeeder extends Seeder
             LegacyRole::updateOrCreate([
                 'abreviatura' => $sg,
             ], [
-                'nm_funcao' => $role,
+                'nm_funcao' => $teacher,
                 'professor' => 1,
                 'ativo' => 1,
                 'ref_usuario_cad' => $user?->getKey(),
