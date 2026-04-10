@@ -122,6 +122,7 @@ class PessoaController extends ApiCoreController
             (select num_folha from cadastro.documento where documento.idpes = fisica.idpes) as num_folha,
             (select certidao_nascimento from cadastro.documento where documento.idpes = fisica.idpes) as certidao_nascimento,
             (select certidao_casamento from cadastro.documento where documento.idpes = fisica.idpes) as certidao_casamento,
+            (select passaporte from cadastro.documento where documento.idpes = fisica.idpes) as passaporte,
               idmun_nascimento,
              fisica.idpais_estrangeiro as pais_origem_id,
            fisica.nacionalidade as tipo_nacionalidade,
