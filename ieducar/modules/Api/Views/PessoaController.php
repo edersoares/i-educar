@@ -172,6 +172,7 @@ class PessoaController extends ApiCoreController
             'num_folha',
             'certidao_nascimento',
             'certidao_casamento',
+            'passaporte',
             'idmun_nascimento',
             'possui_documento',
             'ddd_fone_fixo',
