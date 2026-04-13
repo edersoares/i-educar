@@ -15,15 +15,15 @@ class DefaultPmieducarTurmaTipoTableSeeder extends Seeder
             ->first();
 
         $types = [
-            'REG' => 'REGULAR',
-            'ESP' => 'ESPECIAL',
+            'REG' => 'Regular',
+            'ESP' => 'Especial',
         ];
 
         foreach ($types as $sg => $type) {
             LegacySchoolClassType::updateOrCreate([
                 'sgl_tipo' => $sg,
-                'nm_tipo' => $type,
             ], [
+                'nm_tipo' => $type,
                 'ativo' => 1,
                 'ref_usuario_cad' => $user?->getKey(),
                 'ref_cod_instituicao' => 1,

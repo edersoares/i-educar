@@ -11,10 +11,10 @@ class DefaultCadastroEscolaridadeTableSeeder extends Seeder
     public function run()
     {
         $schoolings = [
-            Escolaridade::ENSINO_MEDIO => 'ENSINO MÉDIO',
-            Escolaridade::ENSINO_FUNDAMENTAL => 'ENSINO FUNDAMENTAL COMPLETO',
-            Escolaridade::NAO_CONCLUIU_ENSINO_FUNDAMENTAL => 'ENSINO FUNDAMENTAL INCOMPLETO',
-            Escolaridade::EDUCACAO_SUPERIOR => 'SUPERIOR COMPLETO',
+            Escolaridade::ENSINO_MEDIO => 'Ensino Médio',
+            Escolaridade::ENSINO_FUNDAMENTAL => 'Ensino Fundamental Completo',
+            Escolaridade::NAO_CONCLUIU_ENSINO_FUNDAMENTAL => 'Ensino Fundamental Incompleto',
+            Escolaridade::EDUCACAO_SUPERIOR => 'Superior Completo',
         ];
 
         foreach ($schoolings as $id => $name) {

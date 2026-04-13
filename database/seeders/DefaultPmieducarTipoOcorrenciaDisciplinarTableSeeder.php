@@ -15,14 +15,14 @@ class DefaultPmieducarTipoOcorrenciaDisciplinarTableSeeder extends Seeder
             ->first();
 
         $types = [
-            'INDISCIPLINA EM SALA DE AULA',
-            'DESRESPEITO',
-            'AGRESSÃO FÍSICA OU VERBAL',
-            'DANO AO PATRIMÔNIO PÚBLICO',
-            'BULLYING OU PRÁTICA DISCRIMINATÓRIA',
-            'USO INDEVIDO DE CELULAR',
-            'EVASÃO DE SALA DE AULA (SAÍDA SEM AUTORIZAÇÃO)',
-            'OUTRO(A)',
+            'Indisciplina em Sala de Aula',
+            'Desrespeito',
+            'Agressão Física ou Verbal',
+            'Dano ao Patrimônio Público',
+            'Bullying ou Prática Discriminatória',
+            'Uso Indevido de Celular',
+            'Evasão de Sala de Aula (Saída sem Autorização)',
+            'Outro(a)',
         ];
 
         foreach ($types as $type) {

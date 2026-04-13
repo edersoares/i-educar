@@ -15,16 +15,16 @@ class DefaultPmieducarFuncaoTableSeeder extends Seeder
             ->first();
 
         $roles = [
-            'CP' => 'COORDENADOR(A) PEDAGÓGICO',
-            'DIR' => 'DIRETOR(A) ESCOLAR',
-            'SEC' => 'SECRETÁRIO(A) ESCOLAR',
-            'SERV' => 'SERVENTE ESCOLAR',
-            'ZEL' => 'ZELADOR(A)',
-            'OE' => 'ORIENTADOR(A) EDUCACIONAL',
-            'AUX' => 'AUXILIAR ADMINISTRATIVO',
-            'BIB' => 'BIBLIOTECÁRIO(A)',
-            'TEC-INF' => 'TÉCNICO DE INFORMÁTICA / MONITOR DE LABORATÓRIO',
-            'ASG' => 'AUXILIAR DE SERVIÇOS GERAIS',
+            'CP' => 'Coordenador(a) Pedagógico',
+            'DIR' => 'Diretor(a) Escolar',
+            'SEC' => 'Secretário(a) Escolar',
+            'SERV' => 'Servente Escolar',
+            'ZEL' => 'Zelador(a)',
+            'OE' => 'Orientador(a) Educacional',
+            'AUX' => 'Auxiliar Administrativo',
+            'BIB' => 'Bibliotecário(a)',
+            'TEC-INF' => 'Técnico de Informática / Monitor de Laboratório',
+            'ASG' => 'Auxiliar de Serviços Gerais',
         ];
 
         foreach ($roles as $sg => $role) {
@@ -40,8 +40,8 @@ class DefaultPmieducarFuncaoTableSeeder extends Seeder
         }
 
         $teachers = [
-            'PROF' => 'PROFESSOR(A)',
-            'PROF-AEE' => 'PROFESSOR(A) DE AEE',
+            'PROF' => 'Professor(a)',
+            'PROF-AEE' => 'Professor(a) de AEE',
         ];
 
         foreach ($teachers as $sg => $teacher) {

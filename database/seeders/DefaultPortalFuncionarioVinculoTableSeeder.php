@@ -10,10 +10,10 @@ class DefaultPortalFuncionarioVinculoTableSeeder extends Seeder
     public function run()
     {
         $types = [
-            'COM' => 'COMISSIONADO',
-            'CONT' => 'CONTRATADO',
-            'EFET' => 'EFETIVO',
-            'EST' => 'ESTAGIÁRIO',
+            'COM' => 'Comissionado',
+            'CONT' => 'Contratado',
+            'EFET' => 'Efetivo',
+            'EST' => 'Estagiário',
         ];
 
         foreach ($types as $sg => $type) {

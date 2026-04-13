@@ -14,17 +14,17 @@ class DefaultCadastroDeficienciaTableSeeder extends Seeder
     public function run()
     {
         $deficiencies = [
-            Deficiencias::CEGUEIRA => 'CEGUEIRA',
-            Deficiencias::ALTAS_HABILIDADES_SUPERDOTACAO => 'ALTAS HABILIDADES / SUPERDOTAÇÃO',
-            Deficiencias::TRANSTORNO_ESPECTRO_AUTISTA => 'TRANSTORNO DO ESPECTRO AUTISTA',
-            Deficiencias::BAIXA_VISAO => 'BAIXA VISÃO',
-            Deficiencias::DEFICIENCIA_AUDITIVA => 'DEFICIÊNCIA AUDITIVA',
-            Deficiencias::DEFICIENCIA_FISICA => 'DEFICIÊNCIA FÍSICA',
-            Deficiencias::DEFICIENCIA_INTELECTUAL => 'DEFICIÊNCIA INTELECTUAL',
-            Deficiencias::SURDEZ => 'SURDEZ',
-            Deficiencias::SURDOCEGUEIRA => 'SURDOCEGUEIRA',
-            Deficiencias::VISAO_MONOCULAR => 'DEFICIÊNCIA VISUAL',
-            Deficiencias::OUTRAS => 'OUTRAS',
+            Deficiencias::CEGUEIRA => 'Cegueira',
+            Deficiencias::ALTAS_HABILIDADES_SUPERDOTACAO => 'Altas Habilidades / Superdotação',
+            Deficiencias::TRANSTORNO_ESPECTRO_AUTISTA => 'Transtorno do Espectro Autista',
+            Deficiencias::BAIXA_VISAO => 'Baixa Visão',
+            Deficiencias::DEFICIENCIA_AUDITIVA => 'Deficiência Auditiva',
+            Deficiencias::DEFICIENCIA_FISICA => 'Deficiência Física',
+            Deficiencias::DEFICIENCIA_INTELECTUAL => 'Deficiência Intelectual',
+            Deficiencias::SURDEZ => 'Surdez',
+            Deficiencias::SURDOCEGUEIRA => 'Surdocegueira',
+            Deficiencias::VISAO_MONOCULAR => 'Deficiência Visual',
+            Deficiencias::OUTRAS => 'Outras',
         ];
 
         foreach ($deficiencies as $id => $name) {
@@ -37,13 +37,13 @@ class DefaultCadastroDeficienciaTableSeeder extends Seeder
         }
 
         $disorders = [
-            Transtornos::DISCALCULIA => 'DISCALCULIA',
-            Transtornos::DISGRAFIA => 'DISGRAFIA / DISORTOGRAFIA',
-            Transtornos::DISLALIA => 'DISLALIA',
-            Transtornos::DISLEXIA => 'DISLEXIA',
+            Transtornos::DISCALCULIA => 'Discalculia',
+            Transtornos::DISGRAFIA => 'Disgrafia / Disortografia',
+            Transtornos::DISLALIA => 'Dislalia',
+            Transtornos::DISLEXIA => 'Dislexia',
             Transtornos::TDAH => 'TDAH',
             Transtornos::TPAC => 'TPAC',
-            Transtornos::OUTROS => 'OUTROS',
+            Transtornos::OUTROS => 'Outros',
         ];
 
         foreach ($disorders as $id => $name) {

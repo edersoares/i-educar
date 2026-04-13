@@ -17,9 +17,9 @@ class DefaultPmieducarTipoEnsinoTableSeeder extends Seeder
         $levels = [
             'AEE',
             'EJA',
-            'EDUCAÇÃO INFANTIL',
-            'ENSINO FUNDAMENTAL',
-            'ATIVIDADE COMPLEMENTAR',
+            'Educação Infantil',
+            'Ensino Fundamental',
+            'Atividade Complementar',
         ];
 
         foreach ($levels as $level) {

@@ -15,10 +15,10 @@ class DefaultPmieducarTipoRegimeTableSeeder extends Seeder
             ->first();
 
         $types = [
-            'SERIADO',
-            'ETAPAS',
-            'MODULAR',
-            'CÍCLICO',
+            'Seriado',
+            'Etapas',
+            'Modular',
+            'Cíclico',
         ];
 
         foreach ($types as $type) {

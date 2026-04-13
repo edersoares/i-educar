@@ -15,7 +15,7 @@ class DefaultPmieducarNivelEnsinoTableSeeder extends Seeder
             ->first();
 
         $levels = [
-            'ANO',
+            'Ano',
         ];
 
         foreach ($levels as $level) {

@@ -15,10 +15,10 @@ class DefaultPmieducarTipoDispensaTableSeeder extends Seeder
             ->first();
 
         $types = [
-            'PRÁTICA DE EDUCAÇÃO FÍSICA (LEI FEDERAL 10.793/2003)',
-            'ESCUSA DE CONSCIÊNCIA (LEI 13.796/2019)',
-            'ADAPTAÇÃO CURRICULAR (PDI) - EDUCAÇÃO ESPECIAL',
-            'OUTRO(A)',
+            'Prática de Educação Física (Lei Federal 10.793/2003)',
+            'Escusa de Consciência (Lei 13.796/2019)',
+            'Adaptação Curricular (PDI) - Educação Especial',
+            'Outro(a)',
         ];
 
         foreach ($types as $type) {

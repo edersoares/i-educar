@@ -15,10 +15,10 @@ class DefaultPmieducarModuloTableSeeder extends Seeder
             ->first();
 
         $modules = [
-            1 => 'ANO',
-            2 => 'SEMESTRE',
-            3 => 'TRIMESTRE',
-            4 => 'BIMESTRE',
+            1 => 'Ano',
+            2 => 'Semestre',
+            3 => 'Trimestre',
+            4 => 'Bimestre',
         ];
 
         foreach ($modules as $stage => $name) {

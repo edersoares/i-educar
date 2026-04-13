@@ -15,13 +15,13 @@ class DefaultPmieducarTransferenciaTipoTableSeeder extends Seeder
             ->first();
 
         $types = [
-            'MUDANÇA DE ENDEREÇO',
-            'INTERESSE DA FAMÍLIA',
-            'ADAPTAÇÃO ESCOLAR',
-            'TRANSPORTE ESCOLAR',
-            'DECISÃO JUDICIAL / CONSELHO TUTELAR',
-            'OCORRÊNCIA DISCIPLINAR GRAVE',
-            'OUTRO(A)',
+            'Mudança de Endereço',
+            'Interesse da Família',
+            'Adaptação Escolar',
+            'Transporte Escolar',
+            'Decisão Judicial / Conselho Tutelar',
+            'Ocorrência Disciplinar Grave',
+            'Outro(a)',
         ];
 
         foreach ($types as $type) {

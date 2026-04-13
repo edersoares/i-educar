@@ -10,15 +10,15 @@ class DefaultPmieducarProjetoTableSeeder extends Seeder
     public function run()
     {
         $projects = [
-            'REFORÇO ESCOLAR',
-            'ALFABETIZAÇÃO E LETRAMENTO',
-            'PREPARATÓRIO (SAEB)',
-            'FANFARRA',
-            'TEATRO',
-            'XADREZ',
-            'ESCOLINHA DE ESPORTES',
-            'DANÇA',
-            'ARTES MARCIAIS',
+            'Reforço Escolar',
+            'Alfabetização e Letramento',
+            'Preparatório (Saeb)',
+            'Fanfarra',
+            'Teatro',
+            'Xadrez',
+            'Escolinha de Esportes',
+            'Dança',
+            'Artes Marciais',
         ];
 
         foreach ($projects as $project) {

@@ -10,15 +10,15 @@ class DefaultPmieducarAbandonoTipoTableSeeder extends Seeder
     public function run()
     {
         $types = [
-            'EVASÃO ESCOLAR',
-            'VULNERABILIDADE SOCIAL EXTREMA',
-            'VIOLÊNCIA NO TRAJETO OU NA ESCOLA',
-            'CONFLITO FAMILIAR',
-            'GRAVIDEZ NA ADOLESCÊNCIA',
-            'MUDANÇA DE RESIDÊNCIA SEM COMUNICAÇÃO PRÉVIA',
-            'INSERÇÃO NO MERCADO DE TRABALHO',
-            'DOENÇA / TRATAMENTO DE SAÚDE',
-            'OUTRO(A)',
+            'Evasão Escolar',
+            'Vulnerabilidade Social Extrema',
+            'Violência no Trajeto ou na Escola',
+            'Conflito Familiar',
+            'Gravidez na Adolescência',
+            'Mudança de Residência sem Comunicação Prévia',
+            'Inserção no Mercado de Trabalho',
+            'Doença / Tratamento de Saúde',
+            'Outro(a)',
         ];
 
         foreach ($types as $type) {

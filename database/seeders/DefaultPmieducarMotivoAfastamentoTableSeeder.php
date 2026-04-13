@@ -15,13 +15,13 @@ class DefaultPmieducarMotivoAfastamentoTableSeeder extends Seeder
             ->first();
 
         $reasons = [
-            'LICENÇA SAÚDE',
-            'LICENÇA MATERNIDADE',
-            'LICENÇA PATERNIDADE',
-            'LICENÇA POR ACIDENTE DE TRABALHO',
-            'LICENÇA PRÊMIO',
-            'LICENÇA PARA ATIVIDADE POLÍTICA',
-            'LICENÇA NÃO REMUNERADA',
+            'Licença Saúde',
+            'Licença Maternidade',
+            'Licença Paternidade',
+            'Licença por Acidente de Trabalho',
+            'Licença Prêmio',
+            'Licença para Atividade Política',
+            'Licença não Remunerada',
         ];
 
         foreach ($reasons as $reason) {

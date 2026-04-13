@@ -15,12 +15,12 @@ class DefaultCadastroRacaTableSeeder extends Seeder
             ->first();
 
         $races = [
-            0 => 'NÃO DECLARADA',
-            1 => 'BRANCA',
-            2 => 'PRETA',
-            3 => 'PARDA',
-            4 => 'AMARELA',
-            5 => 'INDÍGENA',
+            0 => 'Não Declarada',
+            1 => 'Branca',
+            2 => 'Preta',
+            3 => 'Parda',
+            4 => 'Amarela',
+            5 => 'Indígena',
         ];
 
         foreach ($races as $id => $name) {

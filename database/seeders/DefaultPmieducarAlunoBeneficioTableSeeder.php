@@ -15,13 +15,13 @@ class DefaultPmieducarAlunoBeneficioTableSeeder extends Seeder
             ->first();
 
         $benefits = [
-            'BOLSA FAMÍLIA',
-            'AUXÍLIO MUNICIPAL',
-            'BOLSA ESTUDANTIL',
-            'PASSE/ VALE TRANSPORTE',
-            'AUXÍLIO UNIFORME ESCOLAR',
-            'AUXÍLIO MATERIAL ESCOLAR',
-            'OUTRO(A)',
+            'Bolsa Família',
+            'Auxílio Municipal',
+            'Bolsa Estudantil',
+            'Passe/ Vale Transporte',
+            'Auxílio Uniforme Escolar',
+            'Auxílio Material Escolar',
+            'Outro(a)',
         ];
 
         foreach ($benefits as $benefit) {
