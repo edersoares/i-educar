@@ -643,7 +643,9 @@ class ProcessamentoApiController extends Core_Controller_Page_EditController
             'nota' => $fields['nota'],
             'faltas' => $fields['falta'] ?? null,
             'ordenamento' => $fields['ordenamento'] ?? null,
-            'carga_horaria_disciplina' => $fields['carga_horaria_disciplina'] ?? null,
+            'carga_horaria_disciplina' => isset($fields['carga_horaria_disciplina']) && is_numeric($fields['carga_horaria_disciplina'])
+                ? (int) $fields['carga_horaria_disciplina']
+                : null,
             'dependencia' => $fields['dependencia'] ?? false,
             'tipo_base' => $fields['tipo_base'] ?? 1,
         ]);

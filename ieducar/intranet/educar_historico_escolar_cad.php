@@ -400,7 +400,9 @@ return new class extends clsCadastro
             'ref_cod_instituicao' => $this->ref_cod_instituicao ?: $instituicao?->cod_instituicao,
             'origem' => 1,
             'extra_curricular' => is_null($this->extra_curricular) ? 0 : 1,
-            'frequencia' => $this->frequencia,
+            'frequencia' => str_contains($this->frequencia ?? '', ',')
+                ? str_replace(',', '.', str_replace('.', '', $this->frequencia))
+                : $this->frequencia,
             'registro' => $this->registro,
             'livro' => $this->livro,
             'folha' => $this->folha,
@@ -433,7 +435,7 @@ return new class extends clsCadastro
                 'nota' => $this->nota[$key] ?? '',
                 'faltas' => is_numeric($faltas) ? $faltas : null,
                 'ordenamento' => is_numeric($ordenamento) ? $ordenamento : null,
-                'carga_horaria_disciplina' => is_numeric($cargaHoraria) ? $cargaHoraria : null,
+                'carga_horaria_disciplina' => is_numeric($cargaHoraria) ? (int) $cargaHoraria : null,
                 'dependencia' => ($this->disciplinaDependencia[$key] ?? '') == 'on',
                 'tipo_base' => $this->tipo_base[$key] ?? 1,
             ]);
