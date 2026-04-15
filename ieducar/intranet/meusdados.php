@@ -2,7 +2,10 @@
 
 use App\Facades\Asset;
 use App\Models\LegacyEmployee;
+use App\Models\LegacyIndividualPicture;
+use App\Models\LegacyPhone;
 use App\Services\ChangeUserPasswordService;
+use App\Services\PhoneService;
 use App\Services\UrlPresigner;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Validation\ValidationException;
@@ -86,12 +89,7 @@ return new class extends clsCadastro
         $foto = false;
 
         if (is_numeric($this->pessoa_logada)) {
-            $objFoto = new clsCadastroFisicaFoto($this->pessoa_logada);
-            $detalheFoto = $objFoto->detalhe();
-
-            if ($detalheFoto !== false) {
-                $foto = $detalheFoto['caminho'];
-            }
+            $foto = LegacyIndividualPicture::whereKey($this->pessoa_logada)->value('caminho') ?? false;
         }
 
         if ($foto) {
@@ -185,11 +183,19 @@ return new class extends clsCadastro
 
         $this->savePhoto($this->pessoa_logada);
 
-        $telefone = new clsPessoaTelefone($this->pessoa_logada, 1, str_replace('-', '', $this->telefone), $this->ddd_telefone);
-        $telefone->cadastra();
+        app(PhoneService::class)->save(
+            personId: $this->pessoa_logada,
+            type: LegacyPhone::TYPE_LANDLINE,
+            ddd: $this->ddd_telefone,
+            phone: $this->telefone
+        );
 
-        $celular = new clsPessoaTelefone($this->pessoa_logada, 3, str_replace('-', '', $this->celular), $this->ddd_celular);
-        $celular->cadastra();
+        app(PhoneService::class)->save(
+            personId: $this->pessoa_logada,
+            type: LegacyPhone::TYPE_MOBILE_ALT,
+            ddd: $this->ddd_celular,
+            phone: $this->celular
+        );
 
         $pessoa = new clsPessoa_($this->pessoa_logada);
         $pessoa->nome = $this->nome;
@@ -325,12 +331,8 @@ return new class extends clsCadastro
         if ($this->objPhoto != null) {
             $caminhoFoto = $this->objPhoto->sendPicture();
             if ($caminhoFoto != '') {
-                $obj = new clsCadastroFisicaFoto($id, $caminhoFoto);
-                $detalheFoto = $obj->detalhe();
-                if (is_array($detalheFoto) && count($detalheFoto) > 0) {
-                    $obj->edita();
-                } else {
-                    $obj->cadastra();
+                if (is_numeric($id) && is_string($caminhoFoto)) {
+                    LegacyIndividualPicture::updateOrCreate(['idpes' => $id], ['caminho' => $caminhoFoto]);
                 }
             } else {
                 echo '<script>alert(\'Foto não salva.\')</script>';
@@ -339,8 +341,7 @@ return new class extends clsCadastro
             }
             $caminhoFoto = (new UrlPresigner)->getPresignedUrl($caminhoFoto);
         } elseif ($this->file_delete == 'on') {
-            $obj = new clsCadastroFisicaFoto($id);
-            $obj->excluir();
+            LegacyIndividualPicture::whereKey($id)->delete();
         }
 
         Session::put('logged_user_picture', $caminhoFoto);
