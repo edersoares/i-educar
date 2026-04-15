@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Events\SystemSettingsUpdated;
+use App\Events\SystemSettingsUpdatedEvent;
 use App\Process;
 use App\Setting;
 use App\SettingCategory;
@@ -39,7 +39,7 @@ class SettingController extends Controller
             Setting::where('id', $key)->update(['value' => $value]);
         }
 
-        SystemSettingsUpdated::dispatch();
+        SystemSettingsUpdatedEvent::dispatch();
 
         return redirect()->route('settings.index')->with('success', 'Configurações de sistema salvas com sucesso.');
     }

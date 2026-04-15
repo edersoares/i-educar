@@ -2,7 +2,7 @@
 
 namespace Tests\Unit\Http\Controllers;
 
-use App\Events\SystemSettingsUpdated;
+use App\Events\SystemSettingsUpdatedEvent;
 use App\Http\Controllers\SettingController;
 use Database\Factories\SettingFactory;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -25,6 +25,6 @@ class SettingControllerTest extends TestCase
         ]);
         app(SettingController::class)->saveInputs($request);
 
-        Event::assertDispatched(SystemSettingsUpdated::class);
+        Event::assertDispatched(SystemSettingsUpdatedEvent::class);
     }
 }
