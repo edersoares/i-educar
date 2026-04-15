@@ -205,7 +205,7 @@ return new class extends clsCadastro
                 ->exists();
 
             if ($existeMatricula) {
-                $this->mensagem = 'A matrícula informada já perdence a outro usuário.';
+                $this->mensagem = 'A matrícula informada já pertence a outro usuário.';
 
                 return false;
             }
