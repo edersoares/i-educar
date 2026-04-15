@@ -79,7 +79,7 @@ return new class extends clsCadastro
                 $this->fexcluir = $obj_permissoes->permissao_excluir(int_processo_ap: 555, int_idpes_usuario: $this->pessoa_logada, int_soma_nivel_acesso: 7);
             }
 
-            if ($det_funcionario !== false) {
+            if ($det_funcionario) {
                 $retorno = 'Editar';
             }
         }
