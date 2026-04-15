@@ -255,11 +255,19 @@ return new class extends clsCadastro
         $senha = Hash::make($this->_senha);
 
         $dadosFuncionario = $this->montaDadosFuncionario($senha);
+        if (is_numeric($this->ref_pessoa)) {
+            $dadosFuncionario['ref_cod_pessoa_fj'] = $this->ref_pessoa;
+        }
         $dadosFuncionario['ativo'] = 1;
         $dadosFuncionario['data_troca_senha'] = now();
         $dadosFuncionario['data_reativa_conta'] = now();
         $dadosFuncionario['tipo_menu'] = 1;
-        $dadosFuncionario['force_reset_password'] = !is_null($this->force_reset_password);
+
+        // Na antiga clsPortalFuncionario o campo só era incluído no INSERT
+        // quando truthy — assim o default da coluna era respeitado.
+        if ($this->force_reset_password) {
+            $dadosFuncionario['force_reset_password'] = true;
+        }
 
         if (LegacyEmployee::create($dadosFuncionario)) {
             if ($this->ref_cod_instituicao) {
@@ -347,7 +355,9 @@ return new class extends clsCadastro
         }
 
         $dadosFuncionario = $this->montaDadosFuncionario();
-        $dadosFuncionario['ativo'] = $this->ativo;
+        if (is_numeric($this->ativo)) {
+            $dadosFuncionario['ativo'] = $this->ativo;
+        }
 
         if ($this->hasChangeStatusUser() && $this->ativo == '1') {
             $dadosFuncionario['data_reativa_conta'] = now();
@@ -529,27 +539,49 @@ return new class extends clsCadastro
 
     private function montaDadosFuncionario(?string $senha = null): array
     {
-        $dataExpiracao = Portabilis_Date_Utils::brToPgSQL($this->data_expiracao);
-        $dataInicial = Portabilis_Date_Utils::brToPgSQL($this->data_inicial);
+        // Replica os guards da antiga clsPortalFuncionario: só inclui a chave
+        // no array quando o valor passa is_numeric/is_string. Em UPDATE isso
+        // evita sobrescrever colunas com NULL quando o form não envia o campo.
+        $dados = [];
 
-        $dados = [
-            'ref_cod_pessoa_fj' => $this->ref_pessoa,
-            'matricula' => $this->matricula,
-            'matricula_interna' => $this->matricula_interna,
-            'ref_cod_funcionario_vinculo' => is_numeric($this->ref_cod_funcionario_vinculo) ? $this->ref_cod_funcionario_vinculo : null,
-            'tempo_expira_senha' => is_numeric($this->tempo_expira_senha) ? $this->tempo_expira_senha : null,
-            'ref_ref_cod_pessoa_fj' => $this->pessoa_logada,
-            'ref_cod_setor_new' => 0,
-            'email' => $this->email,
-            'motivo' => $this->motivo,
-        ];
-
-        if ($senha) {
+        if (is_string($this->matricula)) {
+            $dados['matricula'] = $this->matricula;
+        }
+        if (is_string($this->matricula_interna)) {
+            $dados['matricula_interna'] = $this->matricula_interna;
+        }
+        if (is_string($senha)) {
             $dados['senha'] = $senha;
         }
+        if (is_numeric($this->ref_cod_funcionario_vinculo)) {
+            $dados['ref_cod_funcionario_vinculo'] = $this->ref_cod_funcionario_vinculo;
+        }
+        if (is_numeric($this->tempo_expira_senha)) {
+            $dados['tempo_expira_senha'] = $this->tempo_expira_senha;
+        }
+        if (is_numeric($this->pessoa_logada)) {
+            $dados['ref_ref_cod_pessoa_fj'] = $this->pessoa_logada;
+        }
+        if (is_string($this->email)) {
+            $dados['email'] = $this->email;
+        }
+        if (is_string($this->motivo)) {
+            $dados['motivo'] = $this->motivo;
+        }
 
-        $dados['data_expiracao'] = $dataExpiracao ?: null;
-        $dados['data_inicial'] = $dataInicial ?: null;
+        $dataExpiracao = Portabilis_Date_Utils::brToPgSQL($this->data_expiracao);
+        if ($dataExpiracao) {
+            $dados['data_expiracao'] = $dataExpiracao;
+        } elseif ($dataExpiracao === null || $dataExpiracao === '') {
+            $dados['data_expiracao'] = null;
+        }
+
+        $dataInicial = Portabilis_Date_Utils::brToPgSQL($this->data_inicial);
+        if ($dataInicial) {
+            $dados['data_inicial'] = $dataInicial;
+        } elseif ($dataInicial === null || $dataInicial === '') {
+            $dados['data_inicial'] = null;
+        }
 
         return $dados;
     }

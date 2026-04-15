@@ -233,10 +233,13 @@ return new class extends clsCadastro
         $dadosAtualizar = [
             'receber_novidades' => $this->receber_novidades ? 1 : 0,
             'atualizou_cadastro' => 1,
-            'email' => $this->email,
         ];
 
-        if ($this->matricula != $this->matricula_old) {
+        if (is_string($this->email)) {
+            $dadosAtualizar['email'] = $this->email;
+        }
+
+        if ($this->matricula != $this->matricula_old && is_string($this->matricula)) {
             $dadosAtualizar['matricula'] = $this->matricula;
         }
 
