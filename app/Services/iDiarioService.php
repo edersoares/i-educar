@@ -235,7 +235,7 @@ class iDiarioService
             ->select('url_novo_educacao', 'token_novo_educacao')
             ->first();
 
-        return !empty($config->url_novo_educacao) && !empty($config->token_novo_educacao);
+        return $config->url_novo_educacao && $config->token_novo_educacao;
     }
 
     /**
