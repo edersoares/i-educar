@@ -407,7 +407,7 @@ return new class extends clsCadastro
             'livro' => $this->livro,
             'folha' => $this->folha,
             'nm_curso' => $this->nm_curso,
-            'historico_grade_curso_id' => $this->historico_grade_curso_id,
+            'historico_grade_curso_id' => is_numeric($this->historico_grade_curso_id) ? $this->historico_grade_curso_id : null,
             'aceleracao' => is_null($this->aceleracao) ? 0 : 1,
             'ref_cod_escola' => is_numeric($this->ref_cod_escola) ? $this->ref_cod_escola : null,
             'dependencia' => !is_null($this->dependencia),
