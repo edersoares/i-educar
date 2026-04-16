@@ -225,7 +225,7 @@ class iDiarioService
 
     public static function hasIdiarioConfigurations()
     {
-        if (!empty(config('legacy.config.url_novo_educacao')) && !empty(config('legacy.config.token_novo_educacao'))) {
+        if (config('legacy.config.url_novo_educacao') && config('legacy.config.token_novo_educacao')) {
             return true;
         }
 
