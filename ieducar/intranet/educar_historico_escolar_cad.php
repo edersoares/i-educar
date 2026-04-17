@@ -341,7 +341,7 @@ return new class extends clsCadastro
         $service = app(SchoolHistoryService::class);
         $instituicao = LegacyInstitution::active()->first();
         $schoolName = is_numeric($this->ref_cod_escola) ? $service->getSchoolName($this->ref_cod_escola) : null;
-        $faltasGlobalizadas = $this->cb_faltas_globalizadas === 'on' ? $this->faltas_globalizadas : null;
+        $faltasGlobalizadas = $this->cb_faltas_globalizadas === 'on' && is_numeric($this->faltas_globalizadas) ? $this->faltas_globalizadas : null;
 
         DB::transaction(function () use ($instituicao, $faltasGlobalizadas, $schoolName) {
             $attributes = $this->buildHistoricoAttributes($instituicao, $schoolName, $faltasGlobalizadas);
