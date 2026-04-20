@@ -702,6 +702,7 @@ class DiarioController extends ApiCoreController
 
         if (!$operationId) {
             $this->messenger->append('Parâmetro operation_id é obrigatório.', 'error');
+
             return;
         }
 
@@ -709,11 +710,13 @@ class DiarioController extends ApiCoreController
 
         if (!$operation) {
             $this->messenger->append('Operação não encontrada.', 'error');
+
             return;
         }
 
         if ($operation->status_id !== ComponentBatchStatus::RUNNING->value) {
             $this->appendResponse('message', 'Operação não está em execução. Status atual: ' . ComponentBatchStatus::from($operation->status_id)->label());
+
             return;
         }
 
