@@ -1818,19 +1818,22 @@ class DiarioApiController extends ApiCoreController
 
     private function sqlAuditoriaNotas(): string
     {
+        // COALESCE em cada campo replica o comportamento do PHP antigo, que
+        // tratava NULL como string vazia ao concatenar. Sem isso, no PostgreSQL
+        // qualquer campo NULL anularia a string inteira.
         $contexto = "
-            '{instituicao:' || i.nm_instituicao ||
-            ',instituicao_id:' || i.cod_instituicao ||
-            ',escola:' || j.fantasia ||
-            ',escola_id:' || e.cod_escola ||
-            ',curso:' || c.nm_curso ||
-            ',curso_id:' || c.cod_curso ||
-            ',serie:' || s.nm_serie ||
-            ',serie_id:' || s.cod_serie ||
-            ',turma:' || t.nm_turma ||
-            ',turma_id:' || t.cod_turma ||
-            ',aluno:' || pa.nome ||
-            ',aluno_id:' || a.cod_aluno";
+            '{instituicao:' || COALESCE(i.nm_instituicao, '') ||
+            ',instituicao_id:' || COALESCE(i.cod_instituicao::text, '') ||
+            ',escola:' || COALESCE(j.fantasia, ec.nm_escola, '') ||
+            ',escola_id:' || COALESCE(e.cod_escola::text, '') ||
+            ',curso:' || COALESCE(c.nm_curso, '') ||
+            ',curso_id:' || COALESCE(c.cod_curso::text, '') ||
+            ',serie:' || COALESCE(s.nm_serie, '') ||
+            ',serie_id:' || COALESCE(s.cod_serie::text, '') ||
+            ',turma:' || COALESCE(t.nm_turma, '') ||
+            ',turma_id:' || COALESCE(t.cod_turma::text, '') ||
+            ',aluno:' || COALESCE(pa.nome, '') ||
+            ',aluno_id:' || COALESCE(a.cod_aluno::text, '')";
 
         return "
             INSERT INTO modules.auditoria (usuario, operacao, rotina, valor_antigo, valor_novo, data_hora)
@@ -1839,10 +1842,10 @@ class DiarioApiController extends ApiCoreController
                 p.operacao,
                 'notas',
                 CASE WHEN p.nota_antiga IS NOT NULL THEN
-                    {$contexto} || ',nota:' || p.nota_antiga || ',etapa:' || p.etapa || ',componenteCurricular:' || cc.nome || '}'
+                    {$contexto} || ',nota:' || p.nota_antiga || ',etapa:' || COALESCE(p.etapa, '') || ',componenteCurricular:' || COALESCE(cc.nome, '') || '}'
                 END,
                 CASE WHEN p.nota_nova IS NOT NULL THEN
-                    {$contexto} || ',nota:' || p.nota_nova || ',etapa:' || p.etapa || ',componenteCurricular:' || cc.nome || '}'
+                    {$contexto} || ',nota:' || p.nota_nova || ',etapa:' || COALESCE(p.etapa, '') || ',componenteCurricular:' || COALESCE(cc.nome, '') || '}'
                 END,
                 NOW()
             FROM (VALUES (?::integer, ?::integer, ?::integer, ?::text, ?::smallint, ?::text, ?::text, ?::text))
@@ -1850,7 +1853,8 @@ class DiarioApiController extends ApiCoreController
             JOIN pmieducar.matricula m ON m.cod_matricula = p.matricula_id
             JOIN pmieducar.escola e ON e.cod_escola = m.ref_ref_cod_escola
             JOIN pmieducar.instituicao i ON i.cod_instituicao = e.ref_cod_instituicao
-            JOIN cadastro.juridica j ON j.idpes = e.ref_idpes
+            LEFT JOIN cadastro.juridica j ON j.idpes = e.ref_idpes
+            LEFT JOIN pmieducar.escola_complemento ec ON ec.ref_cod_escola = e.cod_escola
             JOIN pmieducar.curso c ON c.cod_curso = m.ref_cod_curso
             JOIN pmieducar.serie s ON s.cod_serie = m.ref_ref_cod_serie
             JOIN pmieducar.turma t ON t.cod_turma = p.turma_id
